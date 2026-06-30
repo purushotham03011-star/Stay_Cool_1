@@ -255,11 +255,11 @@ export default function LandingPromo({
                   </span>
                   <span className="txt-box">
                     <span className="txt">Book Now</span>
-                    <span className="txt">Sign Up Now</span>
+                    <span className="txt">Click to Book</span>
                   </span>
                 </button>
-                <div className="txt-secondary" id="hint1">Hover to reveal portal</div>
-                <div className="txt-secondary" id="hint2">Click to Book</div>
+                <div className="txt-secondary" id="hint1">Hover to reveal</div>
+                <div className="txt-secondary" id="hint2">Click to book</div>
               </div>
             </div>
 
@@ -480,7 +480,7 @@ export default function LandingPromo({
                   <img src={customerPortalImg} alt="Customer Portal" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 </div>
                 <div>
-                  <h3 className="font-display" style={{ fontSize: '16px', color: 'var(--dark-brown)', margin: 0 }}>Customer Portal</h3>
+                  <h3 className="font-display" style={{ fontSize: '16px', color: 'var(--dark-brown)', margin: 0, textTransform: 'none' }}>Stay cool Customer portal</h3>
                 </div>
               </div>
               <div style={{ padding: '16px 24px', borderTop: '2px solid rgba(43, 24, 20, 0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', fontWeight: 'bold' }}>
@@ -503,7 +503,7 @@ export default function LandingPromo({
                   <img src={adminPortalImg} alt="Admin Portal" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 </div>
                 <div>
-                  <h3 className="font-display" style={{ fontSize: '16px', color: 'var(--dark-brown)', margin: 0 }}>Admin Portal</h3>
+                  <h3 className="font-display" style={{ fontSize: '16px', color: 'var(--dark-brown)', margin: 0, textTransform: 'none' }}>Stay cool Admin Portal</h3>
                 </div>
               </div>
               <div style={{ padding: '16px 24px', borderTop: '2px solid rgba(43, 24, 20, 0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', fontWeight: 'bold' }}>
@@ -526,7 +526,7 @@ export default function LandingPromo({
                   <img src={superAdminImg} alt="Super Admin Portal" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 </div>
                 <div>
-                  <h3 className="font-display" style={{ fontSize: '16px', color: 'var(--dark-brown)', margin: 0 }}>Super Admin</h3>
+                  <h3 className="font-display" style={{ fontSize: '16px', color: 'var(--dark-brown)', margin: 0, textTransform: 'none' }}>Stay cool Super Admin</h3>
                 </div>
               </div>
               <div style={{ padding: '16px 24px', borderTop: '2px solid rgba(43, 24, 20, 0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', fontWeight: 'bold' }}>

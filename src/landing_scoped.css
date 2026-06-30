@@ -806,7 +806,7 @@
 /* Dark center title band */
 .landing-promo-canvas-scoped .testimonials-ribbon {
   background-color: var(--dark-brown) !important;
-  padding: calc(4vw + 10px) 16px 12px 16px !important;
+  padding: 30px 16px 12px 16px !important;
   text-align: center !important;
   border-top: 2px solid rgba(255, 255, 255, 0.05) !important;
   border-bottom: 2px solid rgba(0, 0, 0, 0.1) !important;
@@ -815,7 +815,7 @@
 
 @media (min-width: 768px) {
   .landing-promo-canvas-scoped .testimonials-ribbon {
-    padding: calc(4vw + 15px) 24px 15px 24px !important;
+    padding: 38px 24px 16px 24px !important;
   }
 }
 
@@ -1661,41 +1661,41 @@
   inset: -145% !important;
   background: transparent !important;
   background-image: 
-    radial-gradient(1.8px 45px at 25px 235px, #ff4081, rgba(255, 255, 255, 0)),
-    radial-gradient(1.8px 45px at 325px 235px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 25px 235px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 325px 235px, #ff4081, rgba(255, 255, 255, 0)),
     radial-gradient(1.5px 1.5px at 175px 117.5px, #ff4081 100%, rgba(255, 255, 255, 0) 150%),
-    radial-gradient(1.8px 45px at 250px 252px, #00b0ff, rgba(255, 255, 255, 0)),
-    radial-gradient(1.8px 45px at 550px 252px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 250px 252px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 550px 252px, #00b0ff, rgba(255, 255, 255, 0)),
     radial-gradient(1.5px 1.5px at 100px 126px, #00b0ff 100%, rgba(255, 255, 255, 0) 150%),
-    radial-gradient(1.8px 45px at 75px 150px, #ff4081, rgba(255, 255, 255, 0)),
-    radial-gradient(1.8px 45px at 375px 150px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 75px 150px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 375px 150px, #ff4081, rgba(255, 255, 255, 0)),
     radial-gradient(1.5px 1.5px at 225px 75px, #ff4081 100%, rgba(255, 255, 255, 0) 150%),
-    radial-gradient(1.8px 45px at 200px 253px, #00b0ff, rgba(255, 255, 255, 0)),
-    radial-gradient(1.8px 45px at 500px 253px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 200px 253px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 500px 253px, #00b0ff, rgba(255, 255, 255, 0)),
     radial-gradient(1.5px 1.5px at 50px 126.5px, #00b0ff 100%, rgba(255, 255, 255, 0) 150%),
-    radial-gradient(1.8px 45px at 120px 204px, #ff4081, rgba(255, 255, 255, 0)),
-    radial-gradient(1.8px 45px at 420px 204px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 120px 204px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 420px 204px, #ff4081, rgba(255, 255, 255, 0)),
     radial-gradient(1.5px 1.5px at 270px 102px, #ff4081 100%, rgba(255, 255, 255, 0) 150%),
-    radial-gradient(1.8px 45px at 275px 134px, #00b0ff, rgba(255, 255, 255, 0)),
-    radial-gradient(1.8px 45px at 575px 134px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 275px 134px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 575px 134px, #00b0ff, rgba(255, 255, 255, 0)),
     radial-gradient(1.5px 1.5px at 125px 67px, #00b0ff 100%, rgba(255, 255, 255, 0) 150%),
-    radial-gradient(1.8px 45px at 45px 179px, #ff4081, rgba(255, 255, 255, 0)),
-    radial-gradient(1.8px 45px at 345px 179px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 45px 179px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 345px 179px, #ff4081, rgba(255, 255, 255, 0)),
     radial-gradient(1.5px 1.5px at 195px 89.5px, #ff4081 100%, rgba(255, 255, 255, 0) 150%),
-    radial-gradient(1.8px 45px at 165px 299px, #00b0ff, rgba(255, 255, 255, 0)),
-    radial-gradient(1.8px 45px at 465px 299px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 165px 299px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 465px 299px, #00b0ff, rgba(255, 255, 255, 0)),
     radial-gradient(1.5px 1.5px at 15px 149.5px, #00b0ff 100%, rgba(255, 255, 255, 0) 150%),
-    radial-gradient(1.8px 45px at 225px 215px, #ff4081, rgba(255, 255, 255, 0)),
-    radial-gradient(1.8px 45px at 525px 215px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 225px 215px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 525px 215px, #ff4081, rgba(255, 255, 255, 0)),
     radial-gradient(1.5px 1.5px at 75px 107.5px, #ff4081 100%, rgba(255, 255, 255, 0) 150%),
-    radial-gradient(1.8px 45px at 140px 281px, #00b0ff, rgba(255, 255, 255, 0)),
-    radial-gradient(1.8px 45px at 440px 281px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 140px 281px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 440px 281px, #00b0ff, rgba(255, 255, 255, 0)),
     radial-gradient(1.5px 1.5px at 290px 140.5px, #00b0ff 100%, rgba(255, 255, 255, 0) 150%),
-    radial-gradient(1.8px 45px at 90px 158px, #ff4081, rgba(255, 255, 255, 0)),
-    radial-gradient(1.8px 45px at 390px 158px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 90px 158px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 390px 158px, #ff4081, rgba(255, 255, 255, 0)),
     radial-gradient(1.5px 1.5px at 240px 79px, #ff4081 100%, rgba(255, 255, 255, 0) 150%),
-    radial-gradient(1.8px 45px at 260px 210px, #00b0ff, rgba(255, 255, 255, 0)),
-    radial-gradient(1.8px 45px at 560px 210px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 260px 210px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(2.5px 65px at 560px 210px, #00b0ff, rgba(255, 255, 255, 0)),
     radial-gradient(1.5px 1.5px at 110px 105px, #00b0ff 100%, rgba(255, 255, 255, 0) 150%) !important;
   background-size:
     300px 235px,
@@ -1735,7 +1735,7 @@
     300px 210px,
     300px 210px !important;
   background-repeat: repeat !important;
-  animation: cssRainFall 9s linear infinite !important;
+  animation: cssRainFall 8s linear infinite !important;
   opacity: 0.85 !important;
   transform: rotate(-45deg) translateY(0);
 }
@@ -1817,6 +1817,7 @@
   will-change: inset, filter !important;
   transition: filter 0.25s ease !important;
   animation: frame-half calc(var(--anim-speed, 1s) * 0.5) forwards !important;
+  z-index: 2 !important;
 }
 
 .landing-promo-canvas-scoped .txt-box::after {
@@ -1828,14 +1829,17 @@
   background-size: 440% !important;
   transition: background-size 0.4s ease-in !important;
   filter: blur(1px) !important;
-  z-index: 3 !important;
+  z-index: 4 !important;
   opacity: 0.15 !important;
 }
 
 .landing-promo-canvas-scoped .txt {
   position: absolute !important;
-  padding: 1rem 2rem !important;
-  z-index: 2 !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 3 !important;
   font-family: var(--font-display), sans-serif !important;
   font-weight: 900 !important;
   font-size: 1.3em !important;
@@ -1936,6 +1940,70 @@
   animation: appear calc(var(--anim-speed, 1s) * 1.5) cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
 }
 
+@keyframes frame {
+  0% {
+    inset: 0 0%;
+  }
+  50% {
+    inset: 0 50%;
+  }
+  100% {
+    inset: 0 0%;
+  }
+}
+
+@keyframes frame-half {
+  0% {
+    inset: 0 50%;
+  }
+  100% {
+    inset: 0 0%;
+  }
+}
+
+@keyframes txt-out {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+    filter: blur(0);
+  }
+  50% {
+    transform: translateY(-50%);
+    opacity: 0;
+    filter: blur(4px);
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes txt-in {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(50%);
+    opacity: 0;
+    filter: blur(4px);
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes appear {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 /* Double the size of the "Customers Shared Memories" text */
 .landing-promo-canvas-scoped .memories-section-title {
   font-size: 52px !important;
@@ -1975,11 +2043,11 @@
 }
 
 .landing-promo-canvas-scoped .form-wrapper {
-  background-color: rgba(255, 255, 255, 0.45) !important;
-  border: 1px solid rgba(255, 255, 255, 0.6) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  border: 3px solid rgba(127, 50, 205, 0.65) !important;
+  box-shadow: 0 15px 35px rgba(127, 50, 205, 0.18), 0 5px 15px rgba(0, 0, 0, 0.03) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
 }
 
 .landing-promo-canvas-scoped .form-header {
@@ -2034,6 +2102,753 @@
   color: #ff4081 !important;
 }
 
+/* HQ Steam glowing button */
+.hq-steam-button {
+  --black: #000000;
+  --ch-black: #141414;
+  --eer-black: #1b1b1b;
+  --night-rider: #2e2e2e;
+  --white: #ffffff;
+  --af-white: #f3f3f3;
+  --ch-white: #e1e1e1;
+  border-radius: 20px !important;
+  width: 220px !important;
+  height: 39px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  padding: 0px 15px !important;
+  border: none !important;
+  color: white !important;
+  position: relative !important;
+  cursor: pointer !important;
+  font-weight: 500 !important;
+  transition-duration: 0.2s !important;
+  background-color: var(--ch-black) !important;
+  margin: 12px auto 0 auto !important;
+  outline: none !important;
+  z-index: 10 !important;
+}
+
+.hq-steam-button:before,
+.hq-steam-button:after {
+  content: "" !important;
+  position: absolute !important;
+  left: -1px !important;
+  top: -1px !important;
+  border-radius: 22px !important;
+  background: linear-gradient(
+    45deg,
+    var(--ch-black),
+    var(--eer-black),
+    var(--night-rider),
+    var(--ch-white),
+    var(--night-rider),
+    var(--eer-black),
+    var(--ch-black),
+    var(--ch-black)
+  ) !important;
+  background-size: 400% !important;
+  width: calc(100% + 2px) !important;
+  height: calc(100% + 2px) !important;
+  z-index: -1 !important;
+  animation: hq-steam 20s linear infinite !important;
+}
+
+@keyframes hq-steam {
+  0% {
+    background-position: 0 0;
+  }
+
+  50% {
+    background-position: 400% 0;
+  }
+
+  100% {
+    background-position: 0 0;
+  }
+}
+
+.hq-steam-button:after {
+  filter: blur(40px) !important;
+}
 
 
 
+
+
+
+/* HQ Static Blue Button (Clean, rounded, solid color with drop shadow, no hover animations) */
+.hq-static-blue-btn {
+  background-color: hsl(218, 68%, 52%) !important;
+  color: #ffffff !important;
+  border-radius: 0.5em !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  height: 3em !important;
+  width: 14em !important;
+  border: none !important;
+  cursor: pointer !important;
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.4) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  outline: none !important;
+  transition: background-color 0.2s ease, transform 0.1s ease !important;
+  position: relative !important;
+  text-decoration: none !important;
+}
+
+.hq-static-blue-btn:hover {
+  background-color: hsl(218, 68%, 46%) !important;
+}
+
+.hq-static-blue-btn:active {
+  transform: scale(0.98) !important;
+}
+
+/* Explicit class for centering the submit button at the bottom middle of the card */
+.hq-submit-btn-static {
+  margin: 16px auto 0 auto !important;
+  display: flex !important;
+}
+
+/* Explicit class for the floating back button in the top right corner */
+.hq-back-btn-static {
+  position: fixed !important;
+  top: 24px !important;
+  right: 24px !important;
+  margin: 0 !important;
+  z-index: 50 !important;
+  font-size: 11px !important;
+  width: 13em !important;
+  height: 2.8em !important;
+}
+
+/* HQ Super Admin Peach Card Theme Overrides */
+.super-hq-peach-theme {
+  --peach-bg: #ffffff;
+  --peach-border: #cbd5e1;
+  --peach-accent: #3b82f6;
+  --peach-header: #1e293b;
+  --peach-dark: #0f172a;
+}
+
+/* Card Containers & Panels */
+.super-hq-peach-theme .bg-white,
+.super-hq-peach-theme .bg-slate-50,
+.super-hq-peach-theme .bg-slate-100/50,
+.super-hq-peach-theme .bg-slate-100 {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Rounded Cards */
+.super-hq-peach-theme .rounded-2xl,
+.super-hq-peach-theme .rounded-3xl,
+.super-hq-peach-theme .rounded-xl {
+  border-radius: 12px !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Headers & Labels */
+.super-hq-peach-theme h1,
+.super-hq-peach-theme h2,
+.super-hq-peach-theme h3,
+.super-hq-peach-theme h4,
+.super-hq-peach-theme h5,
+.super-hq-peach-theme p,
+.super-hq-peach-theme span,
+.super-hq-peach-theme label,
+.super-hq-peach-theme th,
+.super-hq-peach-theme td {
+  color: #0f172a !important;
+}
+
+/* Titles styled specifically */
+.super-hq-peach-theme .font-bold,
+.super-hq-peach-theme .font-black,
+.super-hq-peach-theme .font-semibold {
+  color: #0f172a !important;
+}
+
+/* Specific styling for section titles */
+.super-hq-peach-theme h2.font-black,
+.super-hq-peach-theme h3.font-bold {
+  border-bottom: 1px solid #e2e8f0 !important;
+  padding-bottom: 8px !important;
+  margin-bottom: 12px !important;
+  font-size: 13px !important;
+  text-transform: uppercase !important;
+}
+
+/* Divider lines & border channels */
+.super-hq-peach-theme hr,
+.super-hq-peach-theme .border-r,
+.super-hq-peach-theme .border-b,
+.super-hq-peach-theme .border-t,
+.super-hq-peach-theme .border-l,
+.super-hq-peach-theme .border {
+  border-color: #e2e8f0 !important;
+}
+
+.super-hq-peach-theme hr {
+  height: 1px !important;
+  background-color: #e2e8f0 !important;
+  border: none !important;
+  margin: 12px 0 !important;
+}
+
+/* Form Inputs */
+.super-hq-peach-theme input[type="text"],
+.super-hq-peach-theme input[type="email"],
+.super-hq-peach-theme input[type="password"],
+.super-hq-peach-theme input[type="number"],
+.super-hq-peach-theme input[type="tel"],
+.super-hq-peach-theme input[type="date"],
+.super-hq-peach-theme select,
+.super-hq-peach-theme textarea {
+  background-color: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+  color: #0f172a !important;
+  outline: none !important;
+  padding: 8px 12px !important;
+  transition: all 0.2s ease !important;
+}
+
+.super-hq-peach-theme select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+.super-hq-peach-theme input:focus,
+.super-hq-peach-theme select:focus,
+.super-hq-peach-theme textarea:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0px 0px 0px 2px rgba(59, 130, 246, 0.15) !important;
+  background-color: #ffffff !important;
+}
+
+/* Form Buttons */
+.super-hq-peach-theme button:not(.hq-static-blue-btn):not(.bg-red-600):not(.bg-rose-600):not(.hq-submit-btn-purple),
+.super-hq-peach-theme .checkout-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 8px 16px !important;
+  background-color: #3b82f6 !important;
+  background: #3b82f6 !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  border-radius: 6px !important;
+  border: none !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  color: #ffffff !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.super-hq-peach-theme button:not(.hq-static-blue-btn):not(.bg-red-600):not(.bg-rose-600):not(.hq-submit-btn-purple):hover,
+.super-hq-peach-theme .checkout-btn:hover {
+  background-color: #2563eb !important;
+  background: #2563eb !important;
+}
+
+/* Delete / Destructive buttons stay red for safety, but with rounded borders */
+.super-hq-peach-theme .bg-red-600,
+.super-hq-peach-theme .bg-rose-600,
+.super-hq-peach-theme .bg-rose-950/40 {
+  border-radius: 6px !important;
+  color: #ffffff !important;
+}
+
+/* Tables styling */
+.super-hq-peach-theme .overflow-x-auto,
+.super-hq-peach-theme .overflow-hidden {
+  border-radius: 12px !important;
+  border: 1px solid #e2e8f0 !important;
+  background-color: #ffffff !important;
+}
+
+.super-hq-peach-theme table {
+  border-collapse: collapse !important;
+  width: 100% !important;
+  background-color: #ffffff !important;
+}
+
+.super-hq-peach-theme th {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  padding: 12px 16px !important;
+  text-align: left !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+.super-hq-peach-theme td {
+  color: #0f172a !important;
+  font-size: 12px !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  padding: 12px 16px !important;
+  background-color: #ffffff !important;
+}
+
+.super-hq-peach-theme tr:hover td {
+  background-color: #f8fafc !important;
+}
+
+.super-hq-peach-theme tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* Status Badges */
+.super-hq-peach-theme .bg-green-100,
+.super-hq-peach-theme .text-green-800,
+.super-hq-peach-theme .text-emerald-800,
+.super-hq-peach-theme .bg-emerald-100/50,
+.super-hq-peach-theme .bg-emerald-100 {
+  background-color: #d1fae5 !important;
+  color: #065f46 !important;
+  border: 1px solid #a7f3d0 !important;
+  border-radius: 9999px !important;
+  padding: 2px 8px !important;
+  font-weight: 700 !important;
+}
+
+.super-hq-peach-theme .bg-red-100,
+.super-hq-peach-theme .text-red-800,
+.super-hq-peach-theme .text-rose-800,
+.super-hq-peach-theme .bg-rose-100/50,
+.super-hq-peach-theme .bg-rose-100 {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
+  border: 1px solid #fecaca !important;
+  border-radius: 9999px !important;
+  padding: 2px 8px !important;
+  font-weight: 700 !important;
+}
+
+/* Sidebar navigation */
+.super-hq-peach-theme aside {
+  background-color: #1e293b !important;
+  border-right: 1px solid #334155 !important;
+}
+
+/* Change color of HQ brand seal */
+.super-hq-peach-theme .hq-brand-seal {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+.super-hq-peach-theme aside button {
+  background-color: transparent !important;
+  color: #94a3b8 !important;
+  margin-bottom: 6px !important;
+  border: none !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+}
+
+.super-hq-peach-theme aside button.bg-slate-900,
+.super-hq-peach-theme aside button.bg-slate-800,
+.super-hq-peach-theme aside button.bg-indigo-600 {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border-left: none !important;
+}
+
+.super-hq-peach-theme aside button:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+/* Outer layout backdrop */
+.super-hq-peach-theme.bg-slate-50 {
+  background-color: #f8fafc !important;
+}
+
+/* Custom White-Purple themed cards for Property and Customer Cards */
+.super-hq-peach-theme .hq-property-card,
+.super-hq-peach-theme .hq-customer-card {
+  background-color: rgb(255, 255, 255) !important;
+  box-shadow: 0px 0px 40px rgba(0, 0, 0, 0.062) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.super-hq-peach-theme .hq-property-card::before,
+.super-hq-peach-theme .hq-customer-card::before {
+  position: absolute !important;
+  content: "" !important;
+  width: 150px !important;
+  height: 150px !important;
+  background-color: #f1f5f9 !important;
+  transform: rotate(45deg) !important;
+  left: -90px !important;
+  bottom: -90px !important;
+  z-index: 1 !important;
+  border-radius: 15px !important;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Ensure contents are layered above background shape */
+.super-hq-peach-theme .hq-property-card > *,
+.super-hq-peach-theme .hq-customer-card > * {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.super-hq-peach-theme .hq-property-card:hover,
+.super-hq-peach-theme .hq-customer-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Titles and labels inside the property/customer cards */
+.super-hq-peach-theme .hq-property-card .text-slate-900,
+.super-hq-peach-theme .hq-customer-card .text-slate-900,
+.super-hq-peach-theme .hq-property-card .font-bold,
+.super-hq-peach-theme .hq-customer-card .font-bold,
+.super-hq-peach-theme .hq-property-card h3,
+.super-hq-peach-theme .hq-customer-card h3,
+.super-hq-peach-theme .hq-property-card h4,
+.super-hq-peach-theme .hq-customer-card h4,
+.super-hq-peach-theme .hq-customer-card .font-black {
+  color: #2e2e2e !important;
+  font-weight: 700 !important;
+  font-size: 1.15em !important;
+}
+
+.super-hq-peach-theme .hq-property-card .text-slate-500,
+.super-hq-peach-theme .hq-customer-card .text-slate-500,
+.super-hq-peach-theme .hq-property-card .text-slate-600,
+.super-hq-peach-theme .hq-customer-card .text-slate-600,
+.super-hq-peach-theme .hq-property-card p,
+.super-hq-peach-theme .hq-customer-card p {
+  color: rgb(80, 80, 80) !important;
+  font-weight: 500 !important;
+}
+
+.super-hq-peach-theme .hq-property-card span,
+.super-hq-peach-theme .hq-customer-card span {
+  color: rgb(80, 80, 80) !important;
+}
+
+/* Edit / Delete Buttons inside these cards should match the style as well */
+.super-hq-peach-theme .hq-property-card button,
+.super-hq-peach-theme .hq-customer-card button {
+  border: none !important;
+  background-color: rgb(162, 104, 255) !important;
+  color: white !important;
+  font-size: 0.85em !important;
+  font-weight: 500 !important;
+  padding: 6px 12px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s ease !important;
+  box-shadow: none !important;
+}
+
+.super-hq-peach-theme .hq-property-card button:hover,
+.super-hq-peach-theme .hq-customer-card button:hover {
+  background-color: rgb(126, 84, 255) !important;
+  color: white !important;
+}
+
+/* HQ Security Check - Purple Login Card Theme */
+.hq-security-login-card {
+  background-color: rgb(255, 255, 255) !important;
+  box-shadow: 0px 0px 40px rgba(0, 0, 0, 0.062) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  z-index: 10 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.hq-security-login-card::before {
+  position: absolute !important;
+  content: "" !important;
+  width: 300px !important;
+  height: 300px !important;
+  background-color: rgb(209, 193, 255) !important;
+  transform: rotate(45deg) !important;
+  left: -180px !important;
+  bottom: 30px !important;
+  z-index: 1 !important;
+  border-radius: 30px !important;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.082) !important;
+}
+
+.hq-security-login-card .heading {
+  font-size: 2em !important;
+  color: #2e2e2e !important;
+  font-weight: 700 !important;
+  margin: 5px 0 10px 0 !important;
+  z-index: 2 !important;
+  position: relative !important;
+  text-align: center !important;
+  line-height: 1.2 !important;
+}
+
+.hq-security-login-card .sub-text {
+  font-size: 0.85em !important;
+  color: #555555 !important;
+  z-index: 2 !important;
+  position: relative !important;
+  text-align: center !important;
+  margin-bottom: 20px !important;
+  line-height: 1.4 !important;
+}
+
+.hq-input-container {
+  width: 100% !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 2 !important;
+  margin: 15px 0 !important;
+}
+
+.hq-input-icon {
+  position: absolute !important;
+  left: 8px !important;
+  color: #2e2e2e !important;
+  pointer-events: none !important;
+  z-index: 3 !important;
+}
+
+.hq-input-field {
+  width: 100% !important;
+  height: 38px !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-bottom: 2px solid rgb(173, 173, 173) !important;
+  color: black !important;
+  font-size: 0.9em !important;
+  font-weight: 500 !important;
+  box-sizing: border-box !important;
+  padding-left: 32px !important;
+  outline: none !important;
+  transition: border-bottom 0.3s ease-in-out !important;
+}
+
+.hq-input-field:focus {
+  outline: none !important;
+  border-bottom: 2px solid rgb(199, 114, 255) !important;
+}
+
+.hq-input-field::placeholder {
+  color: rgb(110, 110, 110) !important;
+  font-size: 1em !important;
+  font-weight: 500 !important;
+}
+
+.hq-submit-btn-purple {
+  z-index: 2 !important;
+  position: relative !important;
+  width: 100% !important;
+  border: none !important;
+  background-color: rgb(162, 104, 255) !important;
+  height: 38px !important;
+  color: white !important;
+  font-size: 0.9em !important;
+  font-weight: 600 !important;
+  letter-spacing: 1px !important;
+  margin: 15px 0 5px 0 !important;
+  cursor: pointer !important;
+  border-radius: 6px !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.hq-submit-btn-purple:hover {
+  background-color: rgb(126, 84, 255) !important;
+}
+
+.hq-forgot-link {
+  z-index: 2 !important;
+  position: relative !important;
+  font-size: 0.8em !important;
+  font-weight: 600 !important;
+  color: rgb(44, 24, 128) !important;
+  text-decoration: none !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  padding: 8px 15px !important;
+  transition: opacity 0.2s ease !important;
+}
+
+.hq-forgot-link:hover {
+  opacity: 0.8 !important;
+}
+
+/* HQ Super Admin Dark Mode Overrides */
+.super-hq-peach-theme.dark {
+  background-color: #000000 !important; /* Entire body backdrop to black */
+}
+
+/* Sidebar and Main Layout Dark Background */
+.super-hq-peach-theme.dark aside {
+  background-color: #000000 !important;
+  border-right: 1px solid #222222 !important;
+}
+
+/* Card Containers & Panels to Black */
+.super-hq-peach-theme.dark .bg-white,
+.super-hq-peach-theme.dark .bg-slate-50,
+.super-hq-peach-theme.dark .bg-slate-100/50,
+.super-hq-peach-theme.dark .bg-slate-100,
+.super-hq-peach-theme.dark .overflow-x-auto,
+.super-hq-peach-theme.dark .overflow-hidden,
+.super-hq-peach-theme.dark table,
+.super-hq-peach-theme.dark thead,
+.super-hq-peach-theme.dark tbody,
+.super-hq-peach-theme.dark tr,
+.super-hq-peach-theme.dark th,
+.super-hq-peach-theme.dark td,
+.super-hq-peach-theme.dark tr td,
+.super-hq-peach-theme.dark tbody tr td,
+.super-hq-peach-theme.dark tr:hover td,
+.super-hq-peach-theme.dark .hq-property-card,
+.super-hq-peach-theme.dark .hq-customer-card {
+  background-color: #000000 !important;
+  background: #000000 !important;
+  border-color: #333333 !important;
+}
+
+/* Pseudo-elements on cards to dark gray/charcoal instead of lavender in dark mode */
+.super-hq-peach-theme.dark .hq-property-card::before,
+.super-hq-peach-theme.dark .hq-customer-card::before {
+  background-color: #222222 !important;
+  box-shadow: none !important;
+}
+
+/* Headers & Labels to White */
+.super-hq-peach-theme.dark h1,
+.super-hq-peach-theme.dark h2,
+.super-hq-peach-theme.dark h3,
+.super-hq-peach-theme.dark h4,
+.super-hq-peach-theme.dark h5,
+.super-hq-peach-theme.dark p,
+.super-hq-peach-theme.dark span,
+.super-hq-peach-theme.dark label,
+.super-hq-peach-theme.dark th,
+.super-hq-peach-theme.dark td,
+.super-hq-peach-theme.dark strong,
+.super-hq-peach-theme.dark select,
+.super-hq-peach-theme.dark option {
+  color: #ffffff !important;
+}
+
+/* Specific section title headers to white/gray */
+.super-hq-peach-theme.dark h2.font-black,
+.super-hq-peach-theme.dark h3.font-bold,
+.super-hq-peach-theme.dark th {
+  border-bottom: 2px solid #333333 !important;
+}
+
+.super-hq-peach-theme.dark th {
+  background-color: #222222 !important;
+}
+
+/* Buttons background colors to gray */
+.super-hq-peach-theme.dark button,
+.super-hq-peach-theme.dark .checkout-btn {
+  background-color: #333333 !important;
+  background: #333333 !important;
+  color: #ffffff !important;
+  border: 1px solid #444444 !important;
+  box-shadow: none !important;
+}
+
+.super-hq-peach-theme.dark button:hover,
+.super-hq-peach-theme.dark .checkout-btn:hover {
+  background-color: #555555 !important;
+  background: #555555 !important;
+}
+
+/* Active tab highlight color in dark mode (slightly lighter gray to denote active state) */
+.super-hq-peach-theme.dark aside button.bg-slate-900,
+.super-hq-peach-theme.dark aside button.bg-slate-800,
+.super-hq-peach-theme.dark aside button.bg-indigo-600 {
+  background-color: #555555 !important;
+  background: #555555 !important;
+  border-left: 3px solid #ffffff !important;
+}
+
+/* Text inputs, selects, and textareas in dark mode */
+.super-hq-peach-theme.dark input[type="text"],
+.super-hq-peach-theme.dark input[type="email"],
+.super-hq-peach-theme.dark input[type="password"],
+.super-hq-peach-theme.dark input[type="number"],
+.super-hq-peach-theme.dark input[type="tel"],
+.super-hq-peach-theme.dark input[type="date"],
+.super-hq-peach-theme.dark select,
+.super-hq-peach-theme.dark textarea {
+  background-color: #111111 !important;
+  border: 1px solid #333333 !important;
+  color: #ffffff !important;
+}
+
+.super-hq-peach-theme.dark input:focus,
+.super-hq-peach-theme.dark select:focus,
+.super-hq-peach-theme.dark textarea:focus {
+  border-color: #555555 !important;
+  box-shadow: 0px 0px 0px 2px #333333 !important;
+}
+
+/* In dark mode, customer and admin cards turn grey and text to white */
+.super-hq-peach-theme.dark .hq-property-card,
+.super-hq-peach-theme.dark .hq-customer-card {
+  background-color: #2e2e2e !important;
+  background: #2e2e2e !important;
+  border: 1px solid #444444 !important;
+  box-shadow: 0px 8px 30px rgba(0, 0, 0, 0.25) !important;
+}
+
+.super-hq-peach-theme.dark .hq-property-card::before,
+.super-hq-peach-theme.dark .hq-customer-card::before {
+  background-color: #444444 !important;
+  box-shadow: none !important;
+}
+
+.super-hq-peach-theme.dark .hq-property-card h3,
+.super-hq-peach-theme.dark .hq-customer-card h3,
+.super-hq-peach-theme.dark .hq-property-card h4,
+.super-hq-peach-theme.dark .hq-customer-card h4,
+.super-hq-peach-theme.dark .hq-property-card p,
+.super-hq-peach-theme.dark .hq-customer-card p,
+.super-hq-peach-theme.dark .hq-property-card span,
+.super-hq-peach-theme.dark .hq-customer-card span,
+.super-hq-peach-theme.dark .hq-property-card strong,
+.super-hq-peach-theme.dark .hq-customer-card strong {
+  color: #ffffff !important;
+}
+
+/* In dark mode, edit/delete buttons inside cards are gray */
+.super-hq-peach-theme.dark .hq-property-card button,
+.super-hq-peach-theme.dark .hq-customer-card button {
+  background-color: #444444 !important;
+  color: #ffffff !important;
+  border: 1px solid #555555 !important;
+}
+
+.super-hq-peach-theme.dark .hq-property-card button:hover,
+.super-hq-peach-theme.dark .hq-customer-card button:hover {
+  background-color: #555555 !important;
+}

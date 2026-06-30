@@ -2312,7 +2312,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
 
 
-    <div id="super-admin-interface" className={`grid grid-cols-1 lg:grid-cols-12 min-h-[640px] bg-slate-50 text-slate-800 font-sans ${isDarkMode ? 'dark' : ''}`}>
+    <div id="super-admin-interface" className={`grid grid-cols-1 lg:grid-cols-12 min-h-[640px] bg-slate-50 text-slate-800 font-sans super-hq-peach-theme ${isDarkMode ? 'dark' : ''}`}>
 
       
 
@@ -2330,7 +2330,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
             <div className="flex items-center space-x-3">
 
-              <div className="bg-gradient-to-tr from-purple-500 to-indigo-700 text-white p-2.5 rounded-xl font-display font-black text-sm shadow">
+              <div className="hq-brand-seal bg-gradient-to-tr from-purple-500 to-indigo-700 text-white p-2.5 rounded-xl font-display font-black text-sm shadow">
 
                 HQ
 
@@ -3449,7 +3449,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
                     <div 
                       key={prop.id} 
                       onClick={() => setSelectedPropertyInsightId(prop.id)}
-                      className={`cursor-pointer hover:shadow-md hover:border-indigo-400 bg-white border text-xs rounded-xl sm:rounded-2xl p-2 sm:p-4 shadow-sm space-y-1.5 sm:space-y-3.5 transition flex flex-col justify-between ${
+                      className={`hq-property-card cursor-pointer hover:shadow-md hover:border-indigo-400 bg-white border text-xs rounded-xl sm:rounded-2xl p-2 sm:p-4 shadow-sm space-y-1.5 sm:space-y-3.5 transition flex flex-col justify-between ${
                         isDeactivated ? 'border-dashed border-rose-200 bg-slate-50/50 opacity-90' : 'hover:border-slate-350'
                       }`}
                     >
@@ -3663,7 +3663,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                     onClick={() => setSelectedCustomerDetailId(tenant.id)}
 
-                    className="cursor-pointer hover:shadow-md hover:border-indigo-400 bg-white border text-xs rounded-xl sm:rounded-2xl p-2 sm:p-4 shadow-sm space-y-1.5 sm:space-y-3.5 transition flex flex-col justify-between"
+                    className="hq-customer-card cursor-pointer hover:shadow-md hover:border-indigo-400 bg-white border text-xs rounded-xl sm:rounded-2xl p-2 sm:p-4 shadow-sm space-y-1.5 sm:space-y-3.5 transition flex flex-col justify-between"
 
                   >
 

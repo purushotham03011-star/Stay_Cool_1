@@ -24,7 +24,8 @@ import {
   Layers,
   CheckCircle2,
   Lock,
-  ArrowRight
+  ArrowRight,
+  Mail
 } from 'lucide-react';
 
 const SUPER_ADMINS = [
@@ -61,11 +62,11 @@ const MatrixRain: React.FC = () => {
 
     const drops = Array.from({ length: columns }, () => ({
       y: Math.random() * -100,
-      speed: 0.5 + Math.random() * 1.5,
+      speed: 0.08 + Math.random() * 0.22,
     }));
 
     const draw = () => {
-      ctx.fillStyle = 'rgba(5, 5, 10, 0.12)';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       ctx.font = 'bold ' + fontSize + 'px monospace';
@@ -82,17 +83,17 @@ const MatrixRain: React.FC = () => {
           const isHead = Math.random() > 0.96;
 
           if (isHead) {
-            ctx.fillStyle = '#ffffff';
+            ctx.fillStyle = '#0f172a';
             ctx.shadowBlur = 8;
-            ctx.shadowColor = '#ffffff';
+            ctx.shadowColor = '#0f172a';
           } else if (isPink) {
-            ctx.fillStyle = '#f43f5e';
+            ctx.fillStyle = '#db2777';
             ctx.shadowBlur = 6;
-            ctx.shadowColor = '#f43f5e';
+            ctx.shadowColor = '#db2777';
           } else {
-            ctx.fillStyle = '#06b6d4';
+            ctx.fillStyle = '#0891b2';
             ctx.shadowBlur = 6;
-            ctx.shadowColor = '#06b6d4';
+            ctx.shadowColor = '#0891b2';
           }
 
           ctx.fillText(text, x, y);
@@ -103,12 +104,12 @@ const MatrixRain: React.FC = () => {
 
         if (y > canvas.height && Math.random() > 0.98) {
           drop.y = -10;
-          drop.speed = 0.5 + Math.random() * 1.5;
+          drop.speed = 0.08 + Math.random() * 0.22;
         }
       }
     };
 
-    const interval = setInterval(draw, 33);
+    const interval = setInterval(draw, 45);
 
     return () => {
       clearInterval(interval);
@@ -120,7 +121,7 @@ const MatrixRain: React.FC = () => {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 w-full h-full z-0 pointer-events-none"
-      style={{ background: '#05050a' }}
+      style={{ background: '#ffffff' }}
     />
   );
 };
@@ -240,7 +241,7 @@ export default function App() {
             activePortal === null 
               ? 'bg-[#fcd2e2]' 
               : activePortal === 'superadmin' && !superAdminSession
-                ? 'bg-[#05050a]'
+                ? 'bg-[#ffffff]'
                 : 'bg-gradient-to-b from-slate-50 via-slate-100 to-indigo-50/40'
           } text-slate-900 flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative overflow-hidden ${activePortal === 'customer' || activePortal === null ? '' : 'pb-3'}`}>
             
@@ -444,27 +445,25 @@ export default function App() {
                 />
               </div>
             ) : (
-              <div className="flex-1 flex items-center justify-center p-4 z-10">
-                {/* Login card container (transparent glassmorphism) */}
-                <div 
-                  className="relative w-full max-w-md p-8 backdrop-blur-md rounded-3xl shadow-2xl space-y-6 animate-scale-up text-slate-100"
-                  style={{
-                    backgroundColor: 'rgba(9, 11, 22, 0.65)',
-                    backdropFilter: 'blur(16px)',
-                    WebkitBackdropFilter: 'blur(16px)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)'
-                  }}
+              <div className="flex-1 flex flex-col justify-center items-center p-4 z-10 relative">
+                {/* Floating Back Button in the top right corner (Static) */}
+                <button 
+                  type="button"
+                  onClick={() => setActivePortal(null)}
+                  className="hq-static-blue-btn hq-back-btn-static"
                 >
-                  <div className="text-center space-y-1.5">
-                    <div className="w-12 h-12 rounded-2xl bg-fuchsia-950/50 border border-fuchsia-500/30 flex items-center justify-center text-fuchsia-400 mx-auto">
-                      <ShieldCheck className="w-6 h-6" />
-                    </div>
-                    <h3 className="text-base font-black font-display text-white uppercase tracking-tight">HQ Security Check</h3>
-                    <p className="text-xs text-slate-400 font-normal">Access organization setup, property scopes, audit logs, and global parameters.</p>
-                  </div>
+                  ← Back to Selection
+                </button>
+
+                {/* Login card container (Purple login theme) */}
+                <div 
+                  className="hq-security-login-card w-full max-w-md p-8 shadow-2xl space-y-6 animate-scale-up relative overflow-hidden"
+                >
+                  <p className="heading">HQ Security Check</p>
+                  <p className="sub-text">Access organization setup, property scopes, audit logs, and global parameters.</p>
 
                   {superLoginError && (
-                    <div className="p-2.5 bg-rose-950/40 border border-rose-800/30 rounded-xl text-[10.5px] font-semibold text-rose-300">
+                    <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-[10.5px] font-semibold text-rose-600 relative z-10">
                       {superLoginError}
                     </div>
                   )}
@@ -493,47 +492,49 @@ export default function App() {
                     } else {
                       setSuperLoginError('Invalid corporate email address or access PIN password.');
                     }
-                  }} className="space-y-3.5 text-xs font-sans">
+                  }} className="space-y-4 font-sans text-slate-800 relative z-10">
                     
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Corporate Email</label>
+                    <div className="hq-input-container">
+                      <Mail className="hq-input-icon w-4 h-4 text-slate-600" />
                       <input 
                         type="email"
                         value={superLoginEmail}
                         onChange={(e) => setSuperLoginEmail(e.target.value)}
-                        placeholder="sunny.diploma033@gmail.com"
-                        className="w-full bg-slate-900/60 border border-slate-800 rounded-xl py-2 pl-3.5 pr-3 text-xs outline-none focus:ring-1 focus:ring-fuchsia-500 focus:bg-slate-900 text-white font-semibold"
+                        placeholder="Corporate Email"
+                        className="hq-input-field"
                         required
                       />
                     </div>
 
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Access PIN / Password</label>
+                    <div className="hq-input-container">
+                      <Lock className="hq-input-icon w-4 h-4 text-slate-600" />
                       <input 
                         type="password"
                         value={superLoginPassword}
                         onChange={(e) => setSuperLoginPassword(e.target.value)}
-                        placeholder="Enter password"
-                        className="w-full bg-slate-900/60 border border-slate-800 rounded-xl py-2 pl-3.5 pr-3 text-xs outline-none focus:ring-1 focus:ring-fuchsia-500 focus:bg-slate-900 text-white"
+                        placeholder="Access PIN"
+                        className="hq-input-field"
                         required
                       />
                     </div>
 
                     <button 
                       type="submit"
-                      className="w-full bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-bold py-2.5 rounded-xl text-xs transition active:scale-98 cursor-pointer mt-1 border-0"
+                      className="hq-submit-btn-purple"
                     >
-                      Enter HQ Console
+                      Submit
                     </button>
-                  </form>
 
-                  <button 
-                    type="button"
-                    onClick={() => setActivePortal(null)}
-                    className="w-full bg-slate-900/40 hover:bg-slate-900/80 text-slate-300 font-bold py-2.5 rounded-xl text-xs transition active:scale-98 cursor-pointer text-center block border border-slate-800"
-                  >
-                    ← Back to System Portal Selection
-                  </button>
+                    <div className="text-center pt-2">
+                      <button 
+                        type="button" 
+                        onClick={() => setActivePortal(null)}
+                        className="hq-forgot-link"
+                      >
+                        Forgot your password?
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </div>
             )}
