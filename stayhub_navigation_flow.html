@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StayHub Navigation Flowchart</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 50;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .title-area h1 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      background: linear-gradient(to right, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .title-area p {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-top: 0.15rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #e2e8f0;
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background: #4f46e5;
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background: #4338ca;
+    }
+
+    #viewport-container {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      background: rgba(15, 23, 42, 0.2);
+      cursor: grab;
+      overflow: hidden;
+    }
+
+    #viewport-container:active {
+      cursor: grabbing;
+    }
+
+    #diagram-wrapper {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    /* Mermaid custom styles overlay to match dark theme aesthetic */
+    .node rect {
+      rx: 12px !important;
+      ry: 12px !important;
+      stroke-width: 2px !important;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+    }
+
+    .edgePath .path {
+      stroke: #64748b !important;
+      stroke-width: 2.5px !important;
+    }
+
+    .edgeLabel rect {
+      fill: #1e293b !important;
+      rx: 6px !important;
+      ry: 6px !important;
+    }
+
+    .edgeLabel span {
+      color: #94a3b8 !important;
+      font-weight: bold !important;
+      font-size: 10px !important;
+    }
+
+    .cluster rect {
+      fill: rgba(255, 255, 255, 0.02) !important;
+      stroke: rgba(255, 255, 255, 0.08) !important;
+      rx: 20px !important;
+      ry: 20px !important;
+      stroke-dasharray: 4 !important;
+    }
+
+    .cluster-label span {
+      color: #cbd5e1 !important;
+      font-size: 12px !important;
+      font-weight: 800 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.05em !important;
+    }
+  </style>
+
+  <!-- CDNs for diagram execution -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="title-area">
+      <h1>StayHub Interactive Navigation Flowchart</h1>
+      <p>Click and drag to pan. Use your mouse scrollwheel or trackpad pitch to zoom.</p>
+    </div>
+    <div class="controls">
+      <button class="btn" id="btn-zoom-in">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span>Zoom In</span>
+      </button>
+      <button class="btn" id="btn-zoom-out">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span>Zoom Out</span>
+      </button>
+      <button class="btn btn-primary" id="btn-reset">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+        <span>Reset View</span>
+      </button>
+    </div>
+  </header>
+
+  <div id="viewport-container">
+    <div id="diagram-wrapper"></div>
+  </div>
+
+  <script>
+    // 1. Define mermaid configuration
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'loose',
+      theme: 'base',
+      themeVariables: {
+        background: 'transparent',
+        primaryColor: '#1e1b4b',
+        primaryTextColor: '#f8fafc',
+        primaryBorderColor: '#4f46e5',
+        lineColor: '#64748b',
+        secondaryColor: '#0f172a',
+        tertiaryColor: '#1e293b'
+      }
+    });
+
+    // 2. Mermaid flowchart definition syntax
+    const diagramCode = `
+    flowchart TD
+        %% Global Styling Definition
+        classDef main fill:#334155,stroke:#64748b,stroke-width:2px,color:#fff;
+        classDef portal fill:#1e1b4b,stroke:#818cf8,stroke-width:2.5px,color:#fff,font-weight:bold;
+        classDef page fill:#064e3b,stroke:#10b981,stroke-width:1.5px,color:#fff;
+        classDef modal fill:#78350f,stroke:#fbbf24,stroke-width:1.5px,color:#fff;
+
+        %% Node Shapes & Text Definitions
+        StartNode(["StayHub App Entry"])
+        SelectPortal["Universal Landing Menu"]
+        CustomerApp["Customer Companion App"]
+        AdminPanel["Property Operator Admin Console"]
+        SuperAdminPanel["Enterprise Super HQ Admin Panel"]
+
+        %% Entry Gate Links
+        StartNode --> SelectPortal
+        SelectPortal --> |"Option 1"| CustomerApp
+        SelectPortal --> |"Option 2"| AdminPanel
+        SelectPortal --> |"Option 3"| SuperAdminPanel
+
+        %% Portal 1: Customer Companion App
+        subgraph CustomerAppPortal ["1. Customer App Portal"]
+            CustSessionCheck{"Has Session?"}
+            CustAuthSelect["Signup / Login Selector"]
+            CustMainDashboard["Main Search Hub"]
+            CustOnboarding["4-Card Onboarding Wizard"]
+            CustLoginWizard["Auth Login Card"]
+            CustTabHome["Search & Filter Hub"]
+            CustTabStays["Your Stays / Bookings"]
+            CustTabKyc["KYC & Biometrics"]
+            CustTabProfile["User Profile Settings"]
+            CustPropDetailModal["Property Details Modal"]
+            MapsLink["View on Google Maps"]
+            ReviewSubForm["Feedback Review Form"]
+            BookingWizard["Stay Register Wizard"]
+            CustInvoiceModal["UPI QR Code Invoicing"]
+            EditProfileModal["Edit Profile Info"]
+
+            CustomerApp --> CustSessionCheck
+            CustSessionCheck --> |"No"| CustAuthSelect
+            CustSessionCheck --> |"Yes"| CustMainDashboard
+
+            CustAuthSelect --> |"Click Signup"| CustOnboarding
+            CustAuthSelect --> |"Click Login"| CustLoginWizard
+            
+            CustLoginWizard --> |"Login Success"| CustMainDashboard
+            CustOnboarding --> |"Onboarding Complete"| CustMainDashboard
+
+            %% Dashboard Navigation Tabs
+            CustMainDashboard --> CustTabHome
+            CustMainDashboard --> CustTabStays
+            CustMainDashboard --> CustTabKyc
+            CustMainDashboard --> CustTabProfile
+
+            %% Contextual Overlays & Wizards
+            CustTabHome --> CustPropDetailModal
+            CustPropDetailModal --> |"Map Redirect"| MapsLink
+            CustPropDetailModal --> |"Submit Feedback"| ReviewSubForm
+            CustPropDetailModal --> |"Click Book Now"| BookingWizard
+
+            CustTabStays --> CustInvoiceModal
+            CustTabProfile --> EditProfileModal
+        end
+
+        %% Portal 2: Property Operator Admin Console
+        subgraph AdminPortalFlow ["2. Property Admin Portal"]
+            AdminSessionCheck{"Has Session?"}
+            AdminVerification["Operator Verification Login"]
+            AdminDashboard["Operator Console Dashboard"]
+            AdminOnboardWizard["Property Onboarding Wizard"]
+            AdminTabRooms["Rooms & Beds Grid"]
+            AdminTabTenants["Active Tenants Sheet"]
+            AdminTabBilling["Invoices & Collections"]
+            AdminTabHousekeeping["Housekeeping Scheduler"]
+            AdminTabFood["Food Menu Planner"]
+            AdminTabStaff["Staff Logs & Task Sheets"]
+            AdminTabSettings["Property Settings Console"]
+            AdminLockWarning{"Is Field Locked by HQ?"}
+            LockBanner["Settings Alert Warning Banner"]
+
+            AdminPanel --> AdminSessionCheck
+            AdminSessionCheck --> |"No"| AdminVerification
+            AdminSessionCheck --> |"Yes"| AdminDashboard
+
+            AdminVerification --> |"Autofill / Type Credentials"| AdminDashboard
+            AdminVerification --> |"Click Register Property"| AdminOnboardWizard
+            AdminOnboardWizard --> |"Seeding Completed"| AdminDashboard
+
+            %% Admin Dashboard Sub-views
+            AdminDashboard --> AdminTabRooms
+            AdminDashboard --> AdminTabTenants
+            AdminDashboard --> AdminTabBilling
+            AdminDashboard --> AdminTabHousekeeping
+            AdminDashboard --> AdminTabFood
+            AdminDashboard --> AdminTabStaff
+            AdminDashboard --> AdminTabSettings
+
+            %% Settings Locking Enforcement
+            AdminTabSettings --> AdminLockWarning
+            AdminLockWarning --> |"Click Locked Input"| LockBanner
+        end
+
+        %% Portal 3: Enterprise Super HQ Admin Panel
+        subgraph SuperAdminPortalFlow ["3. Super Corporate HQ Portal"]
+            SuperDashboard["HQ Corporate Setup Dashboard"]
+            SuperTabOverview["HQ Analytics Indicators"]
+            SuperTabAssets["Property Assets Registry"]
+            SuperTabOrgs["Global Organizations Setup"]
+            SuperTabLogs["Audit Logs & Tracker"]
+            SuperEditModal["Asset Specifications & Locks Editor"]
+            AdminLocksConsole["Admin Lock Toggles Console"]
+
+            SuperAdminPanel --> SuperDashboard
+
+            %% Super Admin Tabs
+            SuperDashboard --> SuperTabOverview
+            SuperDashboard --> SuperTabAssets
+            SuperDashboard --> SuperTabOrgs
+            SuperDashboard --> SuperTabLogs
+
+            %% Edit Details and Locks
+            SuperTabAssets --> SuperEditModal
+            SuperEditModal --> |"Toggle Lock"| AdminLocksConsole
+        end
+
+        %% Apply Stylings
+        class StartNode main;
+        class SelectPortal,CustomerApp,AdminPanel,SuperAdminPanel portal;
+        class CustAuthSelect,CustOnboarding,CustLoginWizard,CustMainDashboard,CustTabHome,CustTabStays,CustTabKyc,CustTabProfile,AdminVerification,AdminDashboard,AdminTabRooms,AdminTabTenants,AdminTabBilling,AdminTabHousekeeping,AdminTabFood,AdminTabStaff,AdminTabSettings,SuperDashboard,SuperTabOverview,SuperTabAssets,SuperTabOrgs,SuperTabLogs,AdminOnboardWizard page;
+        class CustPropDetailModal,BookingWizard,CustInvoiceModal,SuperEditModal,AdminLocksConsole,LockBanner,ReviewSubForm,EditProfileModal modal;
+    `;
+
+    // 3. Render and bind svg-pan-zoom
+    const wrapper = document.getElementById('diagram-wrapper');
+    
+    mermaid.render('mermaid-svg-element', diagramCode).then(({ svg }) => {
+      wrapper.innerHTML = svg;
+      
+      const svgEl = wrapper.querySelector('svg');
+      svgEl.style.width = '100%';
+      svgEl.style.height = '100%';
+      svgEl.style.maxWidth = 'none';
+      svgEl.style.maxHeight = 'none';
+
+      // Initialize svg-pan-zoom
+      const panZoom = svgPanZoom(svgEl, {
+        zoomEnabled: true,
+        controlIconsEnabled: false,
+        fit: true,
+        center: true,
+        minZoom: 0.1,
+        maxZoom: 10,
+        zoomScaleSensitivity: 0.3
+      });
+
+      // Bind actions to UI controls
+      document.getElementById('btn-zoom-in').addEventListener('click', () => {
+        panZoom.zoomIn();
+      });
+
+      document.getElementById('btn-zoom-out').addEventListener('click', () => {
+        panZoom.zoomOut();
+      });
+
+      document.getElementById('btn-reset').addEventListener('click', () => {
+        panZoom.reset();
+        panZoom.fit();
+        panZoom.center();
+      });
+
+      // Handle window resizing
+      window.addEventListener('resize', () => {
+        panZoom.resize();
+        panZoom.fit();
+        panZoom.center();
+      });
+    }).catch(err => {
+      wrapper.innerHTML = `<div style="padding: 2rem; color: #f87171;">Failed to render diagram: ${err.message}</div>`;
+    });
+  </script>
+</body>
+</html>

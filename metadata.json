@@ -1,0 +1,6 @@
+{
+  "name": "Hostel Management System",
+  "description": "An integrated Hotel and PG Co-Living management platform featuring robust isolated interfaces for Customers, Property Managers, and Super Corporate Admins.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

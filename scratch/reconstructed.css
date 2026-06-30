@@ -1,0 +1,1336 @@
+import re
+scratch\change_connect_theme.py:3:css_path = r"c:\Users\milaa\Desktop\Sunny\hostel-management-system (2)\src\index.css"
+css_path = r"c:\Users\milaa\Desktop\Sunny\hostel-management-system (2)\src\index.css"
+   CSS VARIABLES & CORE CONFIG
+with open(css_path, "r", encoding="utf-8") as f:
+    content = f.read()
+  --bg-pink: #fcd2e2;
+# 1. Update the connect-section background color
+content = content.replace(
+    ".landing-promo-canvas-scoped .connect-section {\n  background-color: #000000;",
+    ".landing-promo-canvas-scoped .connect-section {\n  background-color: #ffffff;"
+)
+  --font-display: 'Space Grotesk', sans-serif;
+# 2. Update connect-stars-container background color
+content = re.sub(
+    r"\.landing-promo-canvas-scoped \.connect-stars-container \{(.*?)\n\s*background-color:\s*#000000;\n\}",
+    r".landing-promo-canvas-scoped .connect-stars-container {\1\n  background-color: #ffffff;\n}",
+    content,
+    flags=re.DOTALL
+)
+   IONIC COMPONENTS OVERRIDES & RESETS
+# 3. Update connect-stars-container::before background-color
+content = content.replace(
+    "background: #000000;\n  background-image: radial-gradient",
+    "background: #ffffff;\n  background-image: radial-gradient"
+)
+  padding: 0;
+# 4. Remove the text color overrides that made text white on black background
+overrides_pattern = r"/\* Light text color overrides for readability on black background \*/\s*\.landing-promo-canvas-scoped \.connect-title \{(.*?)\}\s*\.landing-promo-canvas-scoped \.connect-subtitle \{(.*?)\}\s*\.landing-promo-canvas-scoped \.form-label \{(.*?)\}\s*\.landing-promo-canvas-scoped \.copyright-label \{(.*?)\}\s*\.landing-promo-canvas-scoped \.footer-nav-links a \{(.*?)\}\s*\.landing-promo-canvas-scoped \.nav-separator \{(.*?)\}"
+content = re.sub(overrides_pattern, "", content, flags=re.DOTALL)
+ion-app {
+# 5. Let's adjust form wrapper and inputs for light background
+# Update form-wrapper background and border
+content = content.replace(
+    ".landing-promo-canvas-scoped .form-wrapper {\n  background-color: rgba(255, 255, 255, 0.4);\n  border: 1px solid rgba(255, 255, 255, 0.35);",
+    ".landing-promo-canvas-scoped .form-wrapper {\n  background-color: rgba(255, 255, 255, 0.75);\n  border: 1px solid rgba(43, 24, 20, 0.1);"
+)
+.dark .bg-slate-100,
+# Update form-input and form-textarea borders
+content = content.replace(
+    ".landing-promo-canvas-scoped .form-input, .landing-promo-canvas-scoped .form-textarea {\nbackground-color: #ffffff;\n  border: none;",
+    ".landing-promo-canvas-scoped .form-input, .landing-promo-canvas-scoped .form-textarea {\nbackground-color: #ffffff;\n  border: 1.5px solid rgba(43, 24, 20, 0.12);"
+)
+  border-color: #334155 !important;
+# 6. Now let's change the radial gradients colors to blue and pink falling stars
+# Let's extract the radial-gradient block inside connect-stars-container::before
+# We can find all radial-gradient(...) calls.
+# Let's define the blue and pink color lists.
+blue_shades = [
+    "rgb(59, 130, 246)",  # Blue-500
+    "rgb(37, 99, 235)",  # Blue-600
+    "rgb(14, 165, 233)",  # Sky-500
+    "rgb(6, 182, 212)",   # Cyan-500
+    "rgb(79, 70, 229)"    # Indigo-600
+]
+}
+pink_shades = [
+    "rgb(236, 72, 153)",  # Pink-500
+    "rgb(219, 39, 119)",  # Pink-600
+    "rgb(244, 63, 94)",   # Rose-500
+    "rgb(192, 38, 211)",  # Fuchsia-600
+    "rgb(168, 85, 247)"   # Purple-500
+]
+.text-outline-pink {
+# We will alternate colors.
+# Let's search for the gradients inside the connect-stars-container::before rule
+match = re.search(r"(\.landing-promo-canvas-scoped \.connect-stars-container::before \{.*?background-image:)(.*?)(;\s*background-size:)", content, re.DOTALL)
+if match:
+    prefix = match.group(1)
+    gradients_block = match.group(2)
+    suffix = match.group(3)
+    -webkit-text-stroke: 1.5px var(--light-cream);
+    # Split gradients by individual radial-gradient lines
+    # Gradients look like: radial-gradient(...) followed by a comma
+    individual_gradients = re.findall(r"radial-gradient\([^\)]+\)", gradients_block)
+  }
+    new_gradients = []
+    for idx, grad in enumerate(individual_gradients):
+        # Determine target color: alternate between blue and pink
+        new_color = blue_shades[idx % len(blue_shades)] if idx % 2 == 0 else pink_shades[idx % len(pink_shades)]
+   ========================================== */
+        # Replace rgb(...) or rgb(...) color in the gradient
+        # Let's find any rgb(r, g, b) or similar pattern
+        # The color is before the transparency '#0000' or '#884e2800' or similar
+        # E.g.: rgb(255, 140, 17) or rgb(255, 119, 0)
+        grad_mod = re.sub(r"rgb\(\d+,\s*\d+,\s*\d+\)", new_color, grad)
+  z-index: 10;
+        # Replace the transparent colors `#0000` or `#884e2800` or `transparent 150%` with `rgba(255, 255, 255, 0)`
+        grad_mod = grad_mod.replace("#0000", "rgba(255, 255, 255, 0)")
+        grad_mod = grad_mod.replace("#884e2800", "rgba(255, 255, 255, 0)")
+.background-blob-1 {
+        new_gradients.append(grad_mod)
+  top: -150px;
+    # Reassemble gradients block
+    new_gradients_block = "\n    " + ",\n    ".join(new_gradients)
+    content = content.replace(gradients_block, new_gradients_block)
+    print("Successfully replaced colors and gradients!")
+else:
+    print("Could not match connect-stars-container::before rules!")
+  opacity: 0.25;
+  pointer-events: none;
+}
+  background-color: #1e293b !important;
+.background-blob-2 {
+  position: absolute;
+  bottom: 0px;
+  left: -100px;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  background-color: var(--brand-green);
+  filter: blur(80px);
+  opacity: 0.3;
+  pointer-events: none;
+}
+}
+.header-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  position: relative;
+}
+  border-color: rgba(16, 185, 129, 0.25) !important;
+/* Floating Banner container */
+.now-open-banner {
+  position: relative;
+  width: 100%;
+  border-radius: 40px;
+  padding: 64px 24px 84px 24px;
+  text-align: center;
+  border: 3px solid rgba(255, 255, 255, 0.7);
+  background: var(--gradient-banner);
+  box-shadow: 0 20px 45px rgba(255, 64, 129, 0.3);
+  overflow: visible; /* Need overflow visible to allow sticker and search bar to pop out */
+  transition: var(--transition-smooth);
+}
+  border-color: rgba(244, 63, 94, 0.25) !important;
+.now-open-banner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 25px 55px rgba(255, 64, 129, 0.35);
+}
+	--primary: oklch(60% 0.15 290);
+/* Radial Halftone Pattern Overlay */
+.banner-overlay-halftone {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(#ffffff 1.3px, transparent 1.3px);
+  background-size: 16px 16px;
+  opacity: 0.16;
+  border-radius: 37px;
+  pointer-events: none;
+}
+	--primary-90: oklch(from var(--primary) 87.5% c h);
+.banner-content {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+	flex-wrap: wrap;
+/* Bubbly 3D Sticker Badge on the Left */
+.brand-logo-badge-sticker {
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-10deg);
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle at 30% 30%, #ff7ea5 0%, #db2777 60%, #7c3aed 100%);
+  border: 5px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 12px 28px rgba(43, 24, 20, 0.28), inset 0 2px 10px rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  user-select: none;
+  transition: var(--transition-smooth);
+}
+@media (min-width: 640px) {
+.brand-logo-badge-sticker:hover {
+  transform: translateY(-52%) rotate(-2deg) scale(1.08);
+}
+}
+.sticker-halftone {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 1px);
+  background-size: 6px 6px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+	text-transform: uppercase;
+.sticker-text-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(2px);
+	cursor: pointer;
+}
+.button:hover {
+	background: oklch(from var(--primary-10) l c h / 0.2);
+	box-shadow: 0 1px 1px 0 oklch(from var(--primary-20) l c h / 0.0);
+	backdrop-filter: blur(5px);
+	transition:180ms ease-in;
+}
+@media (min-width: 640px) {
+  .button {
+    font: 700 30px/30px sans-serif;
+    padding: 20px 40px;
+  }
+}
+.btn1 {
+	corner-shape: round;
+}
+.btn2 {
+	corner-shape: round;
+}
+.btn3 {
+	corner-shape: bevel;
+}
+.btn4 {
+	corner-shape: notch;
+}
+.btn5 {
+	corner-shape: square;
+}
+.btn6 {
+	corner-shape: squircle;
+}
+/* LIGHT WIZARD FLOW FOR REGISTERED CUSTOMERS */
+.light-wizard-flow {
+  --strokeDashoffset: 0;
+  box-sizing: border-box;
+  background-color: #f8fafc;
+  background-image:
+    radial-gradient(at top left, rgba(99, 102, 241, 0.1) 0px, transparent 50%),
+    radial-gradient(at bottom right, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
+  color: #1e293b;
+  font-family: 'Inter', sans-serif;
+  overflow-y: auto;
+  overflow-x: hidden !important;
+  height: 100vh;
+  width: 100%;
+  scroll-behavior: smooth;
+  position: relative;
+}
+.light-wizard-flow cards,
+.light-wizard-flow .cards {
+  display: block;
+  width: 300px;
+  position: relative;
+  margin: 60px auto 120px auto;
+  z-index: 10;
+}
+@media (min-width: 576px) {
+  .light-wizard-flow cards,
+  .light-wizard-flow .cards {
+    transform: translateX(4vw);
+  }
+}
+.light-wizard-flow cardWrapper,
+.light-wizard-flow .cardWrapper {
+  display: block;
+  position: relative;
+  width: 300px;
+  height: 450px;
+  border-radius: 20px;
+  margin-top: 25px;
+  margin-bottom: 25px;
+  overflow: visible;
+  opacity: 0.15;
+  transform: translateY(60px) scale(0.93);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.light-wizard-flow cardWrapper.is-visible,
+.light-wizard-flow .cardWrapper.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+@media (min-width: 576px) {
+  .light-wizard-flow cardWrapper.is-visible:nth-child(odd),
+  .light-wizard-flow .cardWrapper.is-visible:nth-child(odd) {
+    transform: translateX(6vw) translateY(0) scale(1);
+  }
+  .light-wizard-flow cardWrapper.is-visible:nth-child(even),
+  .light-wizard-flow .cardWrapper.is-visible:nth-child(even) {
+    transform: translateX(-3vw) translateY(0) scale(1);
+  }
+}
+.light-wizard-flow cardWrapper:hover,
+.light-wizard-flow .cardWrapper:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.08), 0 12px 14px -8px rgba(0, 0, 0, 0.04);
+}
+@media (min-width: 576px) {
+  .light-wizard-flow cardWrapper.is-visible:nth-child(odd):hover,
+  .light-wizard-flow .cardWrapper.is-visible:nth-child(odd):hover {
+    transform: translateY(-4px) translateX(6vw) scale(1.02);
+  }
+  .light-wizard-flow cardWrapper.is-visible:nth-child(even):hover,
+  .light-wizard-flow .cardWrapper.is-visible:nth-child(even):hover {
+    transform: translateY(-4px) translateX(-3vw) scale(1.02);
+  }
+}
+.light-wizard-flow cardWrapper::before,
+.light-wizard-flow .cardWrapper::before {
+  position: absolute;
+  content: " ";
+  display: block;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.04), inset 0 0 10px rgba(255, 255, 255, 0.15);
+}
+.light-wizard-flow cardWrapper::after,
+.light-wizard-flow .cardWrapper::after {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  z-index: 0;
+  content: " ";
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  background-image: url('data:image/svg+xml,<svg width="300" height="450" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="cl2" gradientUnits="objectBoundingBox" x1="0" y1="0" x2="1" y2="1" gradientTransform="rotate(45)"><stop offset="20%" stop-color="%23b169db"/><stop offset="45%" stop-color="%23f7d152"/><stop offset="65%" stop-color="%2346cf71"/><stop offset="85%" stop-color="%230fbffa"/></linearGradient></defs><path fill="url(%23cl2)" stroke="none" d="M 20,0C 9,0 0,9 0,20v 410c 0,11 9,20 20,20h 130 130c 11,0 20,-9 20,-20V 20C 300,9 291,0 280,0Zm 1,1h 161l 95,2c 12,1 19,10 19,20L 299,175v 254c 0,11 -9,20 -20,20H 118l -95,-3c -10,0 -20,-8 -20,-20L 1,275V 22C 1,11 10,1 21,1Z" /></svg>');
+  filter: blur(0.6px) saturate(1.3) brightness(1.15);
+  opacity: 0.75;
+  pointer-events: none;
+}
+.light-wizard-flow card,
+.light-wizard-flow .card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  color: #1e293b;
+  position: relative;
+  padding: 22px 20px 20px 20px;
+  z-index: 10;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+/* Specific card backgrounds and mask cutouts removed as requested */
+.light-wizard-flow #codepen,
+.light-wizard-flow #html,
+.light-wizard-flow #css,
+.light-wizard-flow #js {
+  background: transparent !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+.light-wizard-flow #codepen::before,
+.light-wizard-flow #html::before,
+.light-wizard-flow #css::before,
+.light-wizard-flow #js::before {
+  display: none !important;
+  content: none !important;
+}
+/* Glowing outline gradient for the masked icons removed */
+.light-wizard-flow .card::before {
+  display: none !important;
+}
+.light-wizard-flow card header,
+.light-wizard-flow .card header {
+  font-family: 'Inter', sans-serif;
+  font-size: 19px;
+  font-weight: 850;
+  color: #0f172a;
+  margin-bottom: 8px;
+  line-height: 1.25;
+}
+/* Light theme elements & input styles */
+.light-input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(148, 163, 184, 0.25);
+  background-color: rgba(255, 255, 255, 0.25);
+  color: #0f172a;
+  font-size: 13.5px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+.light-input:focus {
+  border-color: #6366f1;
+  background-color: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+.light-select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(148, 163, 184, 0.25);
+  background-color: rgba(255, 255, 255, 0.25);
+  color: #0f172a;
+  font-size: 13.5px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+.light-select:focus {
+  border-color: #6366f1;
+  background-color: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+.light-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #475569;
+  margin-bottom: 3px;
+}
+.light-submit-btn {
+  background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
+  color: #ffffff;
+  font-weight: 750;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 15px -3px rgba(79, 70, 229, 0.25);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+  width: 100%;
+}
+/* ==========================================
+   SECTION 2: CHOOSE A BETTER STAY (Lime Green)
+   ========================================== */
+.hero-green-section {
+  background-color: var(--brand-green);
+  padding: 180px 24px 80px 24px;
+}
+  transform: translateY(0);
+@media (min-width: 768px) {
+  .hero-green-section {
+    padding: 230px 48px 112px 48px;
+  }
+}
+  }
+.section-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+  100% {
+.grid-two-cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+.light-wizard-flow #svgPaths {
+@media (min-width: 768px) {
+  .grid-two-cols {
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 64px;
+  }
+}
+  width: 740px;
+/* Left Hero: Outlined titles & Campfire card */
+.hero-left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.outlined-hero-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+}
+.outlined-hero-titles h2 {
+  font-size: 42px;
+  margin: 0;
+  line-height: 0.95;
+}
+}
+@media (min-width: 768px) {
+  .outlined-hero-titles h2 {
+    font-size: 72px;
+  }
+}
+.light-wizard-flow #svgPaths use[href="#linePath03"] {
+/* Campfire Card with embedded text elements */
+  stroke-width: var(--dot);
+  stroke-dasharray: var(--dot) var(--gap) 120px var(--gap) var(--dot) var(--gap) 250px var(--gap) var(--dot) var(--gap) 150px var(--gap) var(--dot) 20000px;
+}
+.light-wizard-flow #svgPaths use[href="#linePath04"] {
+  --dot: 40px; --gap: 70px;
+  stroke-width: var(--dot);
+  stroke-dasharray: var(--dot) var(--gap) 100px var(--gap) var(--dot) var(--gap) 200px var(--gap) var(--dot) 20000px;
+}
+/* Hide all scrollbars across all pages in mobile view to keep the layout native-feeling and clean */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+  * {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+  body, html, #root {
+    overflow-x: hidden !important;
+  }
+}
+/* ==========================================
+   SECTION 3: WINS I'M PROUD OF
+   ========================================== */
+.wins-section {
+  background-color: var(--bg-pink);
+  padding: 80px 24px;
+  border-top: 2px solid rgba(43, 24, 20, 0.05);
+}
+@media (min-width: 768px) {
+  .wins-section {
+    padding: 112px 48px;
+  }
+}
+.wins-section-title {
+  font-size: 34px;
+  text-align: center;
+  color: var(--dark-brown);
+  margin: 0 0 48px 0;
+  letter-spacing: -0.5px;
+  word-spacing: 1.5px;
+}
+@media (min-width: 768px) {
+  .wins-section-title {
+    font-size: 54px;
+    margin: 0 0 64px 0;
+  }
+}
+/* Three-Column Bento Cards */
+.grid-three-cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 28px;
+}
+@media (min-width: 768px) {
+  position: relative !important;
+  display: inline-flex !important;    /* Uses flex layout to align icon and text horizontally */
+  align-items: center !important;     /* Centers contents vertically */
+  justify-content: center !important;  /* Centers contents horizontally */
+  gap: 8px !important;                /* Spacing between icon and text */
+  width: 230px !important;            /* Fixed width so all buttons are identical size */
+  height: 42px !important;            /* Fixed height so all buttons are identical size */
+  margin: 6px !important;            /* Reasonable spacing */
+  padding: 0 12px !important;         /* Horizontal padding (vertical is handled by fixed height) */
+  text-align: center !important;
+  font-size: 11.5px !important;       /* Matches standard dashboard labels */
+  font-weight: 800 !important;
+  letter-spacing: 0.5px !important;
+  text-decoration: none !important;
+  color: #725AC1 !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  transition: ease-out 0.4s !important;
+  border: 2px solid #725AC1 !important;
+  border-radius: 8px !important;
+  box-shadow: inset 0 0 0 0 #725AC1 !important;
+  transform: none !important;
+}
+button:not(.no-uiverse):not(.no-uiverse *):not([class*="rounded-full"]):not([class*="p-0.5"]):not([class*="p-1"]):not([class*="p-1.5"]):hover {
+  color: white !important;
+  box-shadow: inset 0 -60px 0 0 #725AC1 !important; /* Perfect transition height for 42px buttons */
+}
+button:not(.no-uiverse):not(.no-uiverse *):not([class*="rounded-full"]):not([class*="p-0.5"]):not([class*="p-1"]):not([class*="p-1.5"]):active {
+  transform: scale(0.95) !important;
+}
+/* ============================================================
+   ADMIN PORTALS (SUPER ADMIN & PROPERTY OPERATOR) THEME OVERRIDES
+   Custom dark-slate navy, charcoal black, and neon emerald green
+   ============================================================ */
+#super-admin-interface.dark,
+#operator-admin-interface.dark {
+  background-color: #0f111a !important;
+  color: #8c9ab8 !important;
+}
+/* Sidebars background and borders */
+#super-admin-interface.dark aside,
+#operator-admin-interface.dark aside {
+  background-color: #0d0e12 !important;
+  border-color: #1e2230 !important;
+  color: #8c9ab8 !important;
+}
+/* Modals, cards, dropdowns and detail wrappers */
+#super-admin-interface.dark .bg-white,
+#operator-admin-interface.dark .bg-white,
+#super-admin-interface.dark [class*="bg-white"],
+#operator-admin-interface.dark [class*="bg-white"] {
+  background-color: #161925 !important;
+  border-color: #222638 !important;
+}
+/* Input, textarea, select element styling overrides */
+#super-admin-interface select,
+#operator-admin-interface select,
+#super-admin-interface input,
+#operator-admin-interface input,
+#super-admin-interface textarea,
+#operator-admin-interface textarea {
+  background-color: #0f111a !important;
+  border-color: #222638 !important;
+  color: #ffffff !important;
+}
+#super-admin-interface select option,
+#operator-admin-interface select option {
+  background-color: #161925 !important;
+  color: #ffffff !important;
+}
+/* Border styles mapping to dark border */
+#super-admin-interface .border-slate-100,
+#operator-admin-interface .border-slate-100,
+#super-admin-interface .border-slate-150,
+#operator-admin-interface .border-slate-150,
+#super-admin-interface .border-slate-150\/80,
+#operator-admin-interface .border-slate-150\/80,
+#super-admin-interface .border-slate-200,
+#operator-admin-interface .border-slate-200 {
+  border-color: #222638 !important;
+}
+/* Default slate backgrounds override to dark background */
+#super-admin-interface .bg-slate-50,
+#operator-admin-interface .bg-slate-50,
+#super-admin-interface .bg-slate-50\/50,
+#operator-admin-interface .bg-slate-50\/50,
+#super-admin-interface .bg-slate-50\/20,
+#operator-admin-interface .bg-slate-50\/20,
+#super-admin-interface .bg-slate-100,
+#operator-admin-interface .bg-slate-100 {
+  background-color: #0f111a !important;
+  border-color: #222638 !important;
+}
+/* Text styles mapping to white / slate gray */
+#super-admin-interface .text-slate-900,
+#operator-admin-interface .text-slate-900,
+#super-admin-interface .text-slate-950,
+#operator-admin-interface .text-slate-950,
+#super-admin-interface .text-slate-1000,
+#operator-admin-interface .text-slate-1000,
+#super-admin-interface .text-slate-800,
+#operator-admin-interface .text-slate-800,
+#super-admin-interface h1,
+#operator-admin-interface h1,
+#super-admin-interface h2,
+#operator-admin-interface h2,
+#super-admin-interface h3,
+#operator-admin-interface h3,
+#super-admin-interface h4,
+#operator-admin-interface h4 {
+  color: #ffffff !important;
+}
+#operator-admin-interface .text-slate-400,
+#operator-admin-interface .text-slate-405,
+#operator-admin-interface .text-slate-500,
+#operator-admin-interface .text-slate-600,
+#operator-admin-interface .text-slate-700 {
+  color: #8c9ab8 !important;
+}
+#super-admin-interface .text-slate-300,
+#super-admin-interface .text-slate-350,
+#super-admin-interface .text-slate-400,
+#super-admin-interface .text-slate-405,
+#super-admin-interface .text-slate-450,
+#super-admin-interface .text-slate-500,
+#super-admin-interface .text-slate-550,
+#super-admin-interface .text-slate-600,
+#super-admin-interface .text-slate-650,
+#super-admin-interface .text-slate-655,
+#super-admin-interface .text-slate-700 {
+  color: #ffffff !important;
+}
+/* Neon emerald green accents for Super Admin */
+#super-admin-interface .text-indigo-500,
+#super-admin-interface .text-indigo-600,
+#super-admin-interface .text-indigo-700,
+#super-admin-interface .text-indigo-750,
+#super-admin-interface .text-cyan-400,
+#super-admin-interface .text-cyan-500,
+#super-admin-interface .text-cyan-600 {
+  color: #10b981 !important;
+}
+/* Neon blue accents for Operator Admin */
+#operator-admin-interface .text-indigo-500,
+#operator-admin-interface .text-indigo-600,
+#operator-admin-interface .text-indigo-700,
+#operator-admin-interface .text-indigo-750,
+#operator-admin-interface .text-cyan-400,
+#operator-admin-interface .text-cyan-500,
+#operator-admin-interface .text-cyan-600 {
+  color: #0055ff !important;
+}
+#super-admin-interface .bg-indigo-50,
+#super-admin-interface .bg-indigo-600,
+#super-admin-interface .bg-indigo-650,
+#super-admin-interface .bg-cyan-600,
+#super-admin-interface .bg-emerald-600 {
+  background-color: #10b981 !important;
+  color: #0d0e12 !important;
+}
+#operator-admin-interface .bg-indigo-50,
+#operator-admin-interface .bg-indigo-600,
+#operator-admin-interface .bg-indigo-650,
+#operator-admin-interface .bg-cyan-600,
+#operator-admin-interface .bg-emerald-600 {
+  background-color: #0055ff !important;
+  color: #ffffff !important;
+}
+#super-admin-interface .border-indigo-150,
+#super-admin-interface .border-indigo-200,
+#super-admin-interface .border-indigo-600 {
+  border-color: #10b981 !important;
+}
+#operator-admin-interface .border-indigo-150,
+#operator-admin-interface .border-indigo-200,
+#operator-admin-interface .border-indigo-600 {
+  border-color: #0055ff !important;
+}
+/* Sidebar navigation button custom styling */
+#super-admin-interface aside nav button.no-uiverse,
+#operator-admin-interface aside nav button.no-uiverse {
+  background-color: transparent !important;
+  border: 2px solid transparent !important;
+  color: #ffffff !important;
+  transition: all 0.2s ease-in-out !important;
+}
+#super-admin-interface div[class*="bg-white"] button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]) *,
+#super-admin-interface .bg-white button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]) *,
+#super-admin-interface div[class*="bg-slate-100"] button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]) *,
+#super-admin-interface .bg-slate-100 button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]) *,
+#operator-admin-interface div[class*="bg-white"] button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]) *,
+#operator-admin-interface .bg-white button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]) *,
+#operator-admin-interface div[class*="bg-slate-100"] button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]) *,
+#operator-admin-interface .bg-slate-100 button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]) * {
+  color: #ffffff !important;
+}
+/* Hover: glowing border green (#10b981), transparent background, white text for Super Admin */
+#super-admin-interface div[class*="bg-white"] button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]):hover,
+#super-admin-interface .bg-white button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]):hover,
+#super-admin-interface div[class*="bg-slate-100"] button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]):hover,
+#super-admin-interface .bg-slate-100 button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]):hover {
+  border-color: #10b981 !important;
+  background-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4) !important;
+}
+#super-admin-interface div[class*="bg-white"] button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]):hover *,
+#super-admin-interface .bg-white button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]):hover *,
+#super-admin-interface div[class*="bg-slate-100"] button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]):hover *,
+#super-admin-interface .bg-slate-100 button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]):hover * {
+  color: #ffffff !important;
+}
+/* Hover: glowing border blue (#0055ff), transparent background, white text for Operator Admin */
+#operator-admin-interface div[class*="bg-white"] button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]):hover,
+#operator-admin-interface .bg-white button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]):hover,
+#operator-admin-interface div[class*="bg-slate-100"] button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]):hover,
+#operator-admin-interface .bg-slate-100 button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]):hover {
+  border-color: #0055ff !important;
+  background-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 8px rgba(0, 85, 255, 0.4) !important;
+}
+#operator-admin-interface div[class*="bg-white"] button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]):hover *,
+#operator-admin-interface .bg-white button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]):hover *,
+#operator-admin-interface div[class*="bg-slate-100"] button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]):hover *,
+#operator-admin-interface .bg-slate-100 button.no-uiverse:not(.bg-indigo-600):not(.bg-indigo-650):not(.bg-indigo-50):not(.bg-\[\#10b981\]):hover * {
+  color: #ffffff !important;
+}
+/* Active: green background (#10b981), dark text (#0d0e12) for Super Admin */
+#super-admin-interface div[class*="bg-white"] button.no-uiverse.bg-indigo-600,
+#super-admin-interface .bg-white button.no-uiverse.bg-indigo-600,
+#super-admin-interface div[class*="bg-slate-100"] button.no-uiverse.bg-indigo-650,
+#super-admin-interface .bg-slate-100 button.no-uiverse.bg-indigo-650,
+#super-admin-interface div[class*="bg-white"] button.no-uiverse.bg-\[\#10b981\],
+#super-admin-interface .bg-white button.no-uiverse.bg-\[\#10b981\],
+#super-admin-interface div[class*="bg-slate-100"] button.no-uiverse.bg-\[\#10b981\],
+#super-admin-interface .bg-slate-100 button.no-uiverse.bg-\[\#10b981\] {
+  background-color: #10b981 !important;
+  border-color: #10b981 !important;
+  color: #0d0e12 !important;
+  box-shadow: none !important;
+}
+#super-admin-interface div[class*="bg-white"] button.no-uiverse.bg-indigo-600 *,
+#super-admin-interface .bg-white button.no-uiverse.bg-indigo-600 *,
+#super-admin-interface div[class*="bg-slate-100"] button.no-uiverse.bg-indigo-650 *,
+#super-admin-interface .bg-slate-100 button.no-uiverse.bg-indigo-650 *,
+#super-admin-interface div[class*="bg-white"] button.no-uiverse.bg-\[\#10b981\] *,
+#super-admin-interface .bg-white button.no-uiverse.bg-\[\#10b981\] *,
+#super-admin-interface div[class*="bg-slate-100"] button.no-uiverse.bg-\[\#10b981\] *,
+#super-admin-interface .bg-slate-100 button.no-uiverse.bg-\[\#10b981\] * {
+  color: #0d0e12 !important;
+}
+/* Active: blue background (#0055ff), white text for Operator Admin */
+#operator-admin-interface div[class*="bg-white"] button.no-uiverse.bg-indigo-600,
+#operator-admin-interface .bg-white button.no-uiverse.bg-indigo-600,
+#operator-admin-interface div[class*="bg-slate-100"] button.no-uiverse.bg-indigo-650,
+#operator-admin-interface .bg-slate-100 button.no-uiverse.bg-indigo-650,
+#operator-admin-interface div[class*="bg-white"] button.no-uiverse.bg-\[\#10b981\],
+#operator-admin-interface .bg-white button.no-uiverse.bg-\[\#10b981\],
+#operator-admin-interface div[class*="bg-slate-100"] button.no-uiverse.bg-\[\#10b981\],
+#operator-admin-interface .bg-slate-100 button.no-uiverse.bg-\[\#10b981\] {
+  background-color: #0055ff !important;
+  border-color: #0055ff !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+#operator-admin-interface div[class*="bg-white"] button.no-uiverse.bg-indigo-600 *,
+#operator-admin-interface .bg-white button.no-uiverse.bg-indigo-600 *,
+#operator-admin-interface div[class*="bg-slate-100"] button.no-uiverse.bg-indigo-650 *,
+#operator-admin-interface .bg-slate-100 button.no-uiverse.bg-indigo-650 *,
+#operator-admin-interface div[class*="bg-white"] button.no-uiverse.bg-\[\#10b981\] *,
+#operator-admin-interface .bg-white button.no-uiverse.bg-\[\#10b981\] *,
+#operator-admin-interface div[class*="bg-slate-100"] button.no-uiverse.bg-\[\#10b981\] *,
+#operator-admin-interface .bg-slate-100 button.no-uiverse.bg-\[\#10b981\] * {
+  color: #ffffff !important;
+}
+/* Uiverse.io Folder Card Navigation Styles */
+.folder-card {
+  width: 170px;
+  height: 130px;
+  perspective: 1200px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  transform: scale(0.45);
+  transform-origin: right center;
+  margin-top: -35px;
+  margin-bottom: -35px;
+}
+.folder-toggle {
+  display: none;
+}
+/* hint text */
+.hint-wrapper {
+  position: absolute;
+  top: -40px;
+  right: -50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+  pointer-events: none;
+  z-index: 100;
+  animation: floatHint 2.5s ease-in-out infinite;
+}
+.hint-text {
+  font-family:
+    "Inter",
+    -apple-system,
+    sans-serif;
+  color: #60a5fa;
+  font-size: 10px;
+  font-weight: 900;
+  text-decoration: underline;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  position: relative;
+  right: -25px;
+  top: 10px;
+  transform: rotate(45deg);
+}
+.hint-arrow {
+  height: 35px;
+  width: 35px;
+}
+@keyframes floatHint {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+.folder-toggle:checked ~ .hint-wrapper {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+/* folder card logics are here */
+.folder-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+.folder-toggle:checked ~ .folder-container {
+  transform: rotateX(10deg) rotateY(-5deg);
+}
+.folder-back {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.4));
+}
+  }
+  .landing-promo-canvas-scoped .header-section {
+    padding: 32px 16px 48px 16px;
+  }
+}
+.landing-promo-canvas-scoped .hero-green-section {
+  background-color: var(--brand-green);
+  padding: 100px 24px 100px 24px;
+  margin-top: -4vw;
+  clip-path: polygon(0 4vw, 100% 0, 100% calc(100% - 4vw), 0 100%);
+}
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .hero-green-section {
+    padding: 140px 48px 140px 48px;
+  }
+}
+.landing-promo-canvas-scoped .section-container {
+max-width: 1000px;
+  margin: 0 auto;
+}
+.landing-promo-canvas-scoped .grid-two-cols {
+display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .grid-two-cols {
+grid-template-columns: 1.2fr 0.8fr;
+    gap: 64px;
+  }
+}
+  .landing-promo-canvas-scoped 0% {
+transform: rotate(0deg) scale(1); }
+  .landing-promo-canvas-scoped 50% {
+transform: rotate(180deg) scale(1.15); }
+  .landing-promo-canvas-scoped 100% {
+transform: rotate(360deg) scale(1); }
+}
+.landing-promo-canvas-scoped .wins-section {
+  background-color: #7f32cd;
+  padding: 100px 24px 100px 24px;
+  border-top: none;
+  margin-top: -4vw;
+  clip-path: polygon(0 4vw, 100% 0, 100% calc(100% - 4vw), 0 100%);
+}
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .wins-section {
+    padding: 140px 48px 140px 48px;
+  }
+}
+.landing-promo-canvas-scoped .portals-switcher-section {
+  background-color: var(--light-cream) !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  margin-top: -4vw;
+  clip-path: polygon(0 4vw, 100% 0, 100% calc(100% - 4vw), 0 100%);
+  padding: 120px 24px 100px 24px;
+}
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .portals-switcher-section {
+    padding: 160px 48px 130px 48px;
+  }
+}
+.landing-promo-canvas-scoped .wins-section-title {
+  font-size: 34px;
+  text-align: center;
+  color: var(--light-cream);
+  margin: 0 0 48px 0;
+  letter-spacing: -0.5px;
+  word-spacing: 1.5px;
+}
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .wins-section-title {
+font-size: 54px;
+    margin: 0 0 64px 0;
+  }
+}
+.landing-promo-canvas-scoped .grid-three-cols {
+display: grid;
+  grid-template-columns: 1fr;
+  gap: 28px;
+}
+  outline: none;
+  padding: 10px 20px;
+  border-radius: 9999px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: var(--transition-smooth);
+}
+.landing-promo-canvas-scoped .win-card:hover .view-project-btn {
+background-color: #ff4081;
+  color: #ffffff;
+}
+.landing-promo-canvas-scoped .view-project-btn:active {
+transform: scale(0.96);
+}
+.landing-promo-canvas-scoped .testimonials-section {
+  width: 100%;
+  margin-top: -4vw;
+  clip-path: polygon(0 4vw, 100% 0, 100% calc(100% - 4vw), 0 100%);
+}
+.landing-promo-canvas-scoped .testimonials-ribbon {
+  background-color: var(--dark-brown);
+  padding: 48px 16px 24px 16px;
+  text-align: center;
+  border-top: none;
+  border-bottom: none;
+  user-select: none;
+}
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .testimonials-ribbon {
+    padding: 64px 24px 24px 24px;
+  }
+}
+.landing-promo-canvas-scoped .ribbon-text {
+font-size: 26px;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 0.22em;
+  font-weight: 900;
+  text-indent: 0.22em;
+}
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .ribbon-text {
+font-size: 36px;
+  }
+}
+.landing-promo-canvas-scoped .testimonials-split-grid {
+display: grid;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .testimonials-split-grid {
+grid-template-columns: 1fr 1fr;
+  }
+}
+.landing-promo-canvas-scoped .testimonial-panel {
+  padding: 64px 24px 84px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+}
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .testimonial-panel {
+    padding: 96px 48px 120px 48px;
+  }
+}
+.landing-promo-canvas-scoped .panel-white {
+background-color: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .panel-white {
+border-bottom: none;
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
+  }
+}
+.landing-promo-canvas-scoped .panel-green {
+background-color: var(--brand-green);
+}
+.landing-promo-canvas-scoped .testimonial-image-box {
+  width: 100%;
+  max-width: 380px;
+  aspect-ratio: 16/10;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  margin-bottom: 28px;
+  background-color: #e5e7eb;
+  transition: var(--transition-smooth);
+  transform-style: preserve-3d;
+}
+.landing-promo-canvas-scoped .testimonial-image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+}
+.landing-promo-canvas-scoped .testimonial-author {
+display: block;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--dark-brown);
+  font-style: normal;
+  text-transform: none;
+}
+.landing-promo-canvas-scoped .connect-section {
+  background-color: #ffffff;
+  margin-top: -4vw;
+  clip-path: polygon(0 4vw, 100% 0, 100% 100%, 0 100%);
+  padding: 120px 24px 80px 24px;
+  position: relative;
+  overflow: hidden;
+}
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .connect-section {
+    padding: 160px 48px 112px 48px;
+  }
+}
+.landing-promo-canvas-scoped .connect-left-column {
+display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.landing-promo-canvas-scoped .connect-headings {
+display: flex;
+  flex-direction: column;
+/* Memories Section */
+.landing-promo-canvas-scoped .memories-section {
+  background-color: #ff7a59;
+  padding: 100px 24px 100px 24px;
+  border-top: none;
+  margin-top: -4vw;
+  clip-path: polygon(0 4vw, 100% 0, 100% calc(100% - 4vw), 0 100%);
+  position: relative;
+  z-index: 10;
+}
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .memories-section {
+    padding: 140px 48px 140px 48px;
+  }
+}
+}
+@keyframes smooth-pulse {
+  0%,
+  100% {
+    color: rgba(0, 150, 255, 0.4);
+    text-shadow: 0 0 5px rgba(0, 150, 255, 0.5);
+  }
+  30% {
+    color: rgba(100, 200, 255, 1);
+    text-shadow:
+      0 0 10px rgba(100, 200, 255, 1),
+      0 0 15px rgba(100, 200, 255, 1);
+  }
+  50% {
+    color: rgba(255, 105, 180, 1);
+    text-shadow:
+      0 0 10px rgba(255, 105, 180, 1),
+      0 0 15px rgba(255, 105, 180, 1);
+  }
+  70% {
+    color: #ffffff;
+    text-shadow:
+      0 0 10px #fff,
+      0 0 15px #fff,
+      0 0 20px #fff;
+  }
+}
+  margin-right: 20px !important;
+  text-decoration: none !important;
+  color: inherit !important;
+}
+footer.footer-card-container .social-media a:last-child {
+  margin-right: 0 !important;
+}
+footer.footer-card-container .social-media a svg {
+  color: #ff5858 !important;
+  width: 22px !important;
+  height: 22px !important;
+  fill: currentColor !important;
+  transform: none !important;
+}
+/* Landing Promo Card Footer Styles */
+.landing-promo-card-footer-wrapper {
+  background-color: transparent;
+  padding: 48px 24px 24px 24px;
+  margin-top: 60px;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+}
+.landing-promo-card-footer-wrapper .card {
+  width: 100%;
+  max-width: 1200px !important;
+  height: auto !important;
+  background: rgb(38, 38, 38) !important; /* EXACT CARD BODY BACKGROUND COLOR #262626 */
+  box-shadow: 7px 5px 10px rgba(0, 0, 0, 0.333) !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+  border: none !important;
+}
+.landing-promo-card-footer-wrapper .imge {
+  height: 80px !important;
+  background-color: #ff5858 !important; /* EXACT CARD HEADER RED COLOR */
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 24px !important;
+  border-radius: 0 !important;
+}
+.landing-promo-card-footer-wrapper .imge .Usericon {
+  background-color: #414141 !important; /* EXACT ICON BG COLOR */
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: white !important;
+  transform: none !important;
+}
+.landing-promo-card-footer-wrapper .imge .UserName {
+  background-color: transparent !important;
+  color: #262626 !important; /* EXACT USERNAME COLOR (rgb(38,38,38)) */
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+  margin-left: 14px !important;
+  width: auto !important;
+  height: auto !important;
+  transform: none !important;
+  display: block !important;
+  border: none !important;
+}
+.landing-promo-card-footer-wrapper .imge .Id {
+  background-color: #414141 !important;
+  color: #262626 !important; /* EXACT ID COLOR */
+  font-size: 12px !important;
+  font-family: monospace !important;
+  font-weight: 900 !important;
+  margin-left: auto !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 4px 12px !important;
+  border-radius: 5px !important;
+  transform: none !important;
+  border: none !important;
+}
+.landing-promo-card-footer-wrapper .Description {
+  background-color: #414141 !important; /* EXACT DESCRIPTION INNER BOX BACKGROUND */
+  margin: 16px !important;
+  padding: 24px !important;
+  border-radius: 8px !important;
+  color: #dddddd !important;
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+  text-align: left !important;
+  width: auto !important;
+  height: auto !important;
+  transform: none !important;
+  border: 1px solid #141414 !important; /* EXACT DESCRIPTION BORDER COLOR */
+}
+/*______Social Media______*/
+.landing-promo-card-footer-wrapper .social-media-container {
+  background: rgb(38, 38, 38) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+.landing-promo-card-footer-wrapper .social-media {
+  width: 100% !important;
+  border-top: 2px solid #414141 !important;
+  padding: 16px 24px 12px !important;
+  display: flex !important;
+  justify-content: center !important;
+  background: transparent !important;
+  transform: none !important;
+}
+.landing-promo-card-footer-wrapper .social-media:before {
+  display: none !important;
+}
+.landing-promo-card-footer-wrapper .social-media a {
+  margin-right: 24px !important;
+  text-decoration: none !important;
+  color: inherit !important;
+}
+.landing-promo-card-footer-wrapper .social-media a:last-child {
+  margin-right: 0 !important;
+}
+.landing-promo-card-footer-wrapper .social-media a svg {
+  color: #ff5858 !important; /* EXACT SOCIAL ICON COLOR */
+  width: 24px !important;
+  height: 24px !important;
+  fill: currentColor !important;
+  transform: none !important;
+}
+.landing-promo-card-footer-wrapper .copyright-row {
+.landing-promo-card-footer-wrapper .social-media a svg {
+  color: #ff5858 !important;
+  width: 24px !important;
+  height: 24px !important;
+  fill: currentColor !important;
+  transform: none !important;
+}
+  color: #888888 !important;
+.landing-promo-card-footer-wrapper .copyright-row {
+  font-size: 11px !important;
+  color: #888888 !important;
+  padding-bottom: 24px !important;
+  font-weight: 500 !important;
+  width: 100% !important;
+  max-width: 1200px !important;
+  text-align: center !important;
+}
+.landing-promo-card-footer-wrapper .copyright-row a {
+  color: #888888 !important;
+  text-decoration: none !important;
+  transition: color 0.2s !important;
+}
+.landing-promo-card-footer-wrapper .copyright-row a:hover {
+  color: #ffffff !important;
+}
+/* Remove bottom whitespace below footer card */
+.landing-promo-canvas-scoped .connect-section {
+  padding-bottom: 0px !important;
+}

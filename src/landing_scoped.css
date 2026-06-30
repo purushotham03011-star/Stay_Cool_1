@@ -1,0 +1,2039 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Pacifico&family=Space+Grotesk:wght@500;700;900&display=swap');
+
+/* ==========================================
+   CSS VARIABLES & CORE CONFIG
+   ========================================== */
+.landing-promo-canvas-scoped {
+  --bg-pink: #fcd2e2;
+  --brand-green: #bcd83f;
+  --dark-brown: #2b1814;
+  --light-cream: #fffbf0;
+  
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-cursive: 'Pacifico', cursive;
+  
+  --gradient-banner: linear-gradient(135deg, #ff4081 0%, #ff6b9d 45%, #ffb300 100%);
+  --transition-smooth: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* ==========================================
+   IONIC COMPONENTS OVERRIDES & RESETS
+   ========================================== */
+.landing-promo-canvas-scoped, .landing-promo-canvas-scoped {
+  font-family: var(--font-sans);
+  background-color: var(--bg-pink);
+  margin: 0;
+  padding: 0;
+  color: var(--dark-brown);
+}
+
+.landing-promo-canvas-scoped {
+  background-color: var(--bg-pink);
+}
+
+.landing-promo-canvas-scoped {
+  --background: var(--bg-pink);
+}
+
+/* Scrollbar styling */
+.landing-promo-canvas-scoped ion-content::part(scroll){
+  scrollbar-width: thin;
+  scrollbar-color: var(--dark-brown) transparent;
+}
+
+/* ==========================================
+   TYPOGRAPHY & DISPLAY OUTLINES
+   ========================================== */
+.landing-promo-canvas-scoped .font-display{
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.landing-promo-canvas-scoped .font-cursive{
+  font-family: var(--font-cursive);
+}
+
+.landing-promo-canvas-scoped .text-outline-white{
+  -webkit-text-stroke: 2px var(--light-cream);
+  color: transparent;
+  text-transform: uppercase;
+}
+
+.landing-promo-canvas-scoped .text-outline-pink{
+  -webkit-text-stroke: 2px #ff4081;
+  color: transparent;
+  text-transform: uppercase;
+}
+
+@media (max-width: 768px) {
+  .landing-promo-canvas-scoped .text-outline-white{
+    -webkit-text-stroke: 1.5px var(--light-cream);
+  }
+  .landing-promo-canvas-scoped .text-outline-pink{
+    -webkit-text-stroke: 1.5px #ff4081;
+  }
+}
+
+/* ==========================================
+   SECTION 1: HEADER & HERO BANNER
+   ========================================== */
+.landing-promo-canvas-scoped .header-section{
+  position: relative;
+  background-color: var(--bg-pink);
+  padding: 32px 16px 128px 16px;
+  overflow: hidden;
+  z-index: 10;
+}
+
+/* Decorative abstract background blobs */
+.landing-promo-canvas-scoped .background-blob-1{
+  position: absolute;
+  top: -150px;
+  right: -150px;
+  width: 450px;
+  height: 450px;
+  border-radius: 50%;
+  background-color: #ff74a4;
+  filter: blur(80px);
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.landing-promo-canvas-scoped .background-blob-2{
+  position: absolute;
+  bottom: 0px;
+  left: -100px;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  background-color: var(--brand-green);
+  filter: blur(80px);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.landing-promo-canvas-scoped .header-inner{
+  max-width: 1000px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Floating Banner container */
+.landing-promo-canvas-scoped .now-open-banner{
+  position: relative;
+  width: 100%;
+  border-radius: 40px;
+  padding: 64px 24px 84px 24px;
+  text-align: center;
+  border: 3px solid rgba(255, 255, 255, 0.7);
+  background: var(--gradient-banner);
+  box-shadow: 0 20px 45px rgba(255, 64, 129, 0.3);
+  overflow: visible; /* Need overflow visible to allow sticker and search bar to pop out */
+  transition: var(--transition-smooth);
+}
+
+.landing-promo-canvas-scoped .now-open-banner:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 25px 55px rgba(255, 64, 129, 0.35);
+}
+
+/* Radial Halftone Pattern Overlay */
+.landing-promo-canvas-scoped .banner-overlay-halftone{
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(#ffffff 1.3px, transparent 1.3px);
+  background-size: 16px 16px;
+  opacity: 0.16;
+  border-radius: 37px;
+  pointer-events: none;
+}
+
+.landing-promo-canvas-scoped .banner-content{
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Bubbly 3D Sticker Badge on the Left */
+.landing-promo-canvas-scoped .brand-logo-badge-sticker{
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-10deg);
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle at 30% 30%, #ff7ea5 0%, #db2777 60%, #7c3aed 100%);
+  border: 5px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 12px 28px rgba(43, 24, 20, 0.28), inset 0 2px 10px rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  user-select: none;
+  transition: var(--transition-smooth);
+}
+
+.landing-promo-canvas-scoped .brand-logo-badge-sticker:hover{
+  transform: translateY(-52%) rotate(-2deg) scale(1.08);
+}
+
+.landing-promo-canvas-scoped .sticker-halftone{
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 1px);
+  background-size: 6px 6px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.landing-promo-canvas-scoped .sticker-text-wrapper{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(2px);
+}
+
+.landing-promo-canvas-scoped .sticker-line-1, .landing-promo-canvas-scoped .sticker-line-2, .landing-promo-canvas-scoped .sticker-line-3{
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 0.95;
+  letter-spacing: -0.5px;
+}
+
+.landing-promo-canvas-scoped .sticker-line-1{
+  font-size: 20px;
+  color: #ffffff;
+  text-shadow: 2px 2px 0px #3b82f6;
+}
+
+.landing-promo-canvas-scoped .sticker-line-2{
+  font-size: 11px;
+  color: #fffb00;
+  text-shadow: 1px 1px 0px #2b1814;
+  margin: 1px 0;
+}
+
+.landing-promo-canvas-scoped .sticker-line-3{
+  font-size: 26px;
+  color: #ffffff;
+  text-shadow: 3px 3px 0px #2563eb;
+}
+
+/* Cursive calligraphy title */
+.landing-promo-canvas-scoped .now-open-title{
+  font-size: 58px;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 1.5px;
+  user-select: none;
+  text-shadow: 0 0 12px rgba(168, 85, 247, 0.8), 
+               0 0 24px rgba(255, 105, 180, 0.6), 
+               0 0 4px rgba(255, 255, 255, 0.95);
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .now-open-title{
+    font-size: 84px;
+  }
+}
+
+/* Custom Overlapping Search Bar */
+.landing-promo-canvas-scoped .search-container{
+  position: absolute;
+  bottom: -28px;
+  left: 6%;
+  right: 6%;
+  background: #ffffff;
+  border-radius: 9999px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  box-shadow: 0 12px 32px rgba(219, 39, 119, 0.25);
+  border: 3.5px solid #ff4081;
+  z-index: 20;
+}
+
+.landing-promo-canvas-scoped .search-icon-left{
+  font-size: 24px;
+  color: #ff4081;
+  margin-right: 12px;
+}
+
+.landing-promo-canvas-scoped .custom-search-input{
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark-brown);
+}
+
+.landing-promo-canvas-scoped .custom-search-input::placeholder{
+  color: #9ca3af;
+}
+
+/* Row wrapper below banner */
+.landing-promo-canvas-scoped .header-bottom-row{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-top: 56px;
+  position: relative;
+  z-index: 10;
+  width: 100%;
+}
+
+/* Playful heart arrow on Left side */
+.landing-promo-canvas-scoped .heart-arrow-container{
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 24px;
+  margin-top: -10px;
+  pointer-events: none;
+  transition: var(--transition-smooth);
+}
+
+.landing-promo-canvas-scoped .heart-arrow-svg{
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(3px 5px 4px rgba(43, 24, 20, 0.08));
+  animation: heartWobble 4s ease-in-out infinite alternate;
+}
+
+@keyframes heartWobble {
+  0% { transform: scale(1) rotate(-3deg); }
+  100% { transform: scale(1.04) rotate(3deg); }
+}
+
+/* Grid of hanging cards below header (closely packed on the Right) */
+.landing-promo-canvas-scoped .hanging-cards-grid{
+  display: flex;
+  gap: 12px;
+  width: 58%;
+  max-width: 540px;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 15;
+}
+
+.landing-promo-canvas-scoped .hanging-card{
+  flex: 1;
+  position: relative;
+  aspect-ratio: 9/16;
+  border-radius: 20px;
+  overflow: hidden;
+  background-color: var(--dark-brown);
+  border: 3.5px solid #ffffff;
+  box-shadow: 0 16px 36px rgba(43, 24, 20, 0.18);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.landing-promo-canvas-scoped .hanging-card img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.landing-promo-canvas-scoped .hanging-card:hover img{
+  transform: scale(1.06);
+}
+
+/* Asymmetrical alignment exactly like the uploaded reference */
+.landing-promo-canvas-scoped #card1{ transform: translateY(12px); }
+.landing-promo-canvas-scoped #card2{ transform: translateY(-16px); }
+.landing-promo-canvas-scoped #card3{ transform: translateY(28px); }
+
+.landing-promo-canvas-scoped #card1:hover{ transform: translateY(0px) scale(1.04); }
+.landing-promo-canvas-scoped #card2:hover{ transform: translateY(-28px) scale(1.04); }
+.landing-promo-canvas-scoped #card3:hover{ transform: translateY(16px) scale(1.04); }
+
+/* Captions overlay */
+.landing-promo-canvas-scoped .card-caption{
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+  color: #ffffff;
+  padding: 12px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: var(--transition-smooth);
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .card-caption{
+    font-size: 11px;
+    padding: 20px 12px;
+  }
+}
+
+.landing-promo-canvas-scoped .hanging-card:hover .card-caption{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Responsive Overrides */
+@media (max-width: 768px) {
+  .landing-promo-canvas-scoped .brand-logo-badge-sticker{
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: rotate(-6deg);
+    margin: 0 auto 16px auto;
+    width: 104px;
+    height: 104px;
+  }
+  
+  .landing-promo-canvas-scoped .brand-logo-badge-sticker:hover{
+    transform: rotate(0deg) scale(1.05);
+  }
+
+  .landing-promo-canvas-scoped .now-open-banner{
+    padding: 32px 16px 48px 16px;
+    border-radius: 28px;
+  }
+  
+  .landing-promo-canvas-scoped .now-open-title{
+    font-size: 42px;
+  }
+
+  .landing-promo-canvas-scoped .search-container{
+    bottom: -22px;
+    height: 44px;
+    padding: 0 16px;
+    left: 4%;
+    right: 4%;
+  }
+
+  .landing-promo-canvas-scoped .header-bottom-row{
+    flex-direction: column-reverse;
+    align-items: center;
+    margin-top: 48px;
+    gap: 32px;
+  }
+
+  .landing-promo-canvas-scoped .hanging-cards-grid{
+    width: 100%;
+    max-width: 100%;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 8px;
+  }
+
+  .landing-promo-canvas-scoped .hanging-card{
+    aspect-ratio: 9/16;
+    border-radius: 12px;
+    border: 2px solid #ffffff;
+  }
+
+  .landing-promo-canvas-scoped #card1{ transform: translateY(8px); }
+  .landing-promo-canvas-scoped #card2{ transform: translateY(-10px); }
+  .landing-promo-canvas-scoped #card3{ transform: translateY(16px); }
+
+  .landing-promo-canvas-scoped .heart-arrow-container{
+    width: 140px;
+    height: 140px;
+    margin: 0 auto;
+    transform: rotate(0deg);
+  }
+}
+
+
+/* ==========================================
+   SECTION 2: CHOOSE A BETTER STAY (Lime Green)
+   ========================================== */
+.landing-promo-canvas-scoped .hero-green-section{
+  background-color: var(--brand-green);
+  padding: 180px 24px 80px 24px;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .hero-green-section{
+    padding: 230px 48px 112px 48px;
+  }
+}
+
+.landing-promo-canvas-scoped .section-container{
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.landing-promo-canvas-scoped .grid-two-cols{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .grid-two-cols{
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 64px;
+  }
+}
+
+/* Left Hero: Outlined titles & Campfire card */
+.landing-promo-canvas-scoped .hero-left-column{
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.landing-promo-canvas-scoped .outlined-hero-titles{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.landing-promo-canvas-scoped .outlined-hero-titles h2{
+  font-size: 42px;
+  margin: 0;
+  line-height: 0.95;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .outlined-hero-titles h2{
+    font-size: 72px;
+  }
+}
+
+/* Campfire Card with embedded text elements */
+.landing-promo-canvas-scoped .campfire-card{
+  position: relative;
+  width: 100%;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(43, 24, 20, 0.16);
+  background-color: var(--dark-brown);
+  transition: var(--transition-smooth);
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .campfire-card{
+    border-radius: 32px;
+  }
+}
+
+.landing-promo-canvas-scoped .campfire-card:hover{
+  transform: scale(1.01);
+  box-shadow: 0 20px 45px rgba(43, 24, 20, 0.22);
+}
+
+.landing-promo-canvas-scoped .campfire-card img{
+  width: 100%;
+  aspect-ratio: 16/10;
+  object-fit: cover;
+  display: block;
+}
+
+.landing-promo-canvas-scoped .campfire-card-overlay{
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0.2) 100%);
+  pointer-events: none;
+}
+
+.landing-promo-canvas-scoped .campfire-overlaid-text{
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  line-height: 0.9;
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .campfire-overlaid-text{
+    bottom: 28px;
+    left: 28px;
+  }
+}
+
+.landing-promo-canvas-scoped .campfire-overlaid-text h3{
+  font-size: 36px;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .campfire-overlaid-text h3{
+    font-size: 64px;
+  }
+}
+
+/* Right Hero: Descriptions and buttons */
+.landing-promo-canvas-scoped .hero-right-column{
+  display: flex;
+  align-items: flex-start;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .hero-right-column{
+    padding-top: 130px;
+  }
+}
+
+.landing-promo-canvas-scoped .hero-text-wrapper{
+  width: 100%;
+}
+
+.landing-promo-canvas-scoped .hero-subtitle{
+  font-family: var(--font-sans);
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--dark-brown);
+  line-height: 1.4;
+  margin: 0 0 16px 0;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .hero-subtitle{
+    font-size: 24px;
+  }
+}
+
+.landing-promo-canvas-scoped .hero-body-text{
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(43, 24, 20, 0.8);
+  line-height: 1.6;
+  margin: 0 0 32px 0;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .hero-body-text{
+    font-size: 15px;
+  }
+}
+
+/* Custom Ionic Badge Button */
+.landing-promo-canvas-scoped .explore-badge-btn{
+  --background: var(--dark-brown);
+  --background-hover: #ff4081;
+  --color: #ffffff;
+  --border-radius: 9999px;
+  --padding-top: 14px;
+  --padding-bottom: 14px;
+  --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.landing-promo-canvas-scoped .sparkles-icon{
+  color: var(--brand-green);
+  font-size: 16px;
+  animation: sparkleRotation 3s linear infinite;
+}
+
+@keyframes sparkleRotation {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.15); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+
+/* ==========================================
+   SECTION 3: WINS I'M PROUD OF
+   ========================================== */
+.landing-promo-canvas-scoped .wins-section{
+  background-color: var(--bg-pink);
+  padding: 80px 24px;
+  border-top: 2px solid rgba(43, 24, 20, 0.05);
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .wins-section{
+    padding: 112px 48px;
+  }
+}
+
+.landing-promo-canvas-scoped .wins-section-title{
+  font-size: 34px;
+  text-align: center;
+  color: var(--dark-brown);
+  margin: 0 0 48px 0;
+  letter-spacing: -0.5px;
+  word-spacing: 1.5px;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .wins-section-title{
+    font-size: 54px;
+    margin: 0 0 64px 0;
+  }
+}
+
+/* Three-Column Bento Cards */
+.landing-promo-canvas-scoped .grid-three-cols{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 28px;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .grid-three-cols{
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+}
+
+.landing-promo-canvas-scoped .win-card{
+  background-color: var(--light-cream);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(43, 24, 20, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: var(--transition-smooth);
+}
+
+.landing-promo-canvas-scoped .win-card:hover{
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(43, 24, 20, 0.14);
+}
+
+.landing-promo-canvas-scoped .win-card-image-box{
+  width: 100%;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  background-color: #e5e7eb;
+}
+
+.landing-promo-canvas-scoped .win-card-image-box img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.landing-promo-canvas-scoped .win-card:hover .win-card-image-box img{
+  transform: scale(1.05);
+}
+
+.landing-promo-canvas-scoped .win-card-content{
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex-grow: 1;
+  justify-content: space-between;
+}
+
+.landing-promo-canvas-scoped .win-card-content h3{
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--dark-brown);
+  margin: 0 0 10px 0;
+  line-height: 1.3;
+}
+
+.landing-promo-canvas-scoped .win-card-content p{
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: rgba(43, 24, 20, 0.65);
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+  max-width: 220px;
+}
+
+/* Custom View Project button inside card */
+.landing-promo-canvas-scoped .view-project-btn{
+  background-color: var(--dark-brown);
+  color: var(--light-cream);
+  border: none;
+  outline: none;
+  padding: 12px 24px;
+  border-radius: 9999px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: var(--transition-smooth);
+}
+
+.landing-promo-canvas-scoped .win-card:hover .view-project-btn{
+  background-color: #ff4081;
+  color: #ffffff;
+}
+
+.landing-promo-canvas-scoped .view-project-btn:active{
+  transform: scale(0.96);
+}
+
+
+/* ==========================================
+   SECTION 4: TESTIMONIALS (Split Screen)
+   ========================================== */
+.landing-promo-canvas-scoped .testimonials-section{
+  width: 100%;
+}
+
+/* Dark center title band */
+.landing-promo-canvas-scoped .testimonials-ribbon {
+  background-color: var(--dark-brown) !important;
+  padding: calc(4vw + 10px) 16px 12px 16px !important;
+  text-align: center !important;
+  border-top: 2px solid rgba(255, 255, 255, 0.05) !important;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1) !important;
+  user-select: none !important;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .testimonials-ribbon {
+    padding: calc(4vw + 15px) 24px 15px 24px !important;
+  }
+}
+
+.landing-promo-canvas-scoped .ribbon-text{
+  font-size: 26px;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: 0.22em;
+  font-weight: 900;
+  text-indent: 0.22em; /* Keeps it horizontally centered */
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .ribbon-text{
+    font-size: 36px;
+  }
+}
+
+/* Testimonial Columns */
+.landing-promo-canvas-scoped .testimonials-split-grid{
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .testimonials-split-grid{
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.landing-promo-canvas-scoped .testimonial-panel{
+  padding: 64px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .testimonial-panel{
+    padding: 96px 48px;
+  }
+}
+
+.landing-promo-canvas-scoped .panel-white{
+  background-color: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .panel-white{
+    border-bottom: none;
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
+  }
+}
+
+.landing-promo-canvas-scoped .panel-green{
+  background-color: var(--brand-green);
+}
+
+.landing-promo-canvas-scoped .testimonial-image-box{
+  width: 100%;
+  max-width: 380px;
+  aspect-ratio: 16/10;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  margin-bottom: 28px;
+  background-color: #e5e7eb;
+  transition: var(--transition-smooth);
+}
+
+.landing-promo-canvas-scoped .testimonial-image-box img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.landing-promo-canvas-scoped .testimonial-image-box:hover{
+  transform: scale(1.015);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.12);
+}
+
+.landing-promo-canvas-scoped .testimonial-quote{
+  max-width: 440px;
+  margin: 0;
+}
+
+.landing-promo-canvas-scoped .testimonial-quote p{
+  font-family: var(--font-sans);
+  font-size: 15.5px;
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.6;
+  margin: 0 0 16px 0;
+  color: rgba(43, 24, 20, 0.8);
+}
+
+.landing-promo-canvas-scoped .panel-white .testimonial-quote p{
+  color: #4b5563;
+}
+
+.landing-promo-canvas-scoped .quote-highlight-pink{
+  color: #ff4081;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.landing-promo-canvas-scoped .testimonial-author{
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--dark-brown);
+  font-style: normal;
+  text-transform: none;
+}
+
+
+/* ==========================================
+   SECTION 5: LET'S CONNECT (Pink background)
+   ========================================== */
+.landing-promo-canvas-scoped .connect-section{
+  background-color: var(--bg-pink);
+  padding: 80px 24px;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .connect-section{
+    padding: 112px 48px;
+  }
+}
+
+.landing-promo-canvas-scoped .connect-left-column{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.landing-promo-canvas-scoped .connect-headings{
+  display: flex;
+  flex-direction: column;
+  line-height: 0.9;
+}
+
+.landing-promo-canvas-scoped .connect-title{
+  font-size: 58px;
+  color: var(--dark-brown);
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .connect-title{
+    font-size: 88px;
+  }
+}
+
+.landing-promo-canvas-scoped .connect-subtitle{
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(43, 24, 20, 0.85);
+  line-height: 1.5;
+  margin: 0 0 8px 0;
+  max-width: 320px;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .connect-subtitle{
+    font-size: 18px;
+  }
+}
+
+/* Green Contact Capsule box */
+.landing-promo-canvas-scoped .contact-details-box{
+  background-color: var(--brand-green);
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: 0 12px 30px rgba(43, 24, 20, 0.1);
+  border: 1px solid rgba(43, 24, 20, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 420px;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .contact-details-box{
+    padding: 32px;
+  }
+}
+
+.landing-promo-canvas-scoped .contact-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: var(--transition-smooth);
+}
+
+.landing-promo-canvas-scoped .contact-row-info{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.landing-promo-canvas-scoped .contact-icon{
+  font-size: 20px;
+  color: var(--dark-brown);
+  flex-shrink: 0;
+}
+
+.landing-promo-canvas-scoped .contact-row span{
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--dark-brown);
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .contact-row span{
+    font-size: 15px;
+  }
+}
+
+.landing-promo-canvas-scoped .copy-pill-button{
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(43, 24, 20, 0.6);
+  background-color: rgba(255, 255, 255, 0.4);
+  padding: 4px 10px;
+  border-radius: 8px;
+  transition: var(--transition-smooth);
+}
+
+.landing-promo-canvas-scoped .contact-row:hover .copy-pill-button{
+  background-color: #ffffff;
+  color: var(--dark-brown);
+  transform: scale(1.05);
+}
+
+/* Interactive Form on the right */
+.landing-promo-canvas-scoped .connect-right-column{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.landing-promo-canvas-scoped .form-wrapper{
+  background-color: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 28px 24px;
+  border-radius: 36px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .form-wrapper{
+    padding: 36px 32px;
+  }
+}
+
+.landing-promo-canvas-scoped .form-header{
+  font-size: 20px;
+  color: var(--dark-brown);
+  margin: 0 0 24px 0;
+  letter-spacing: -0.2px;
+}
+
+.landing-promo-canvas-scoped .form-group{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.landing-promo-canvas-scoped .form-label{
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: rgba(43, 24, 20, 0.6);
+  letter-spacing: 0.5px;
+}
+
+.landing-promo-canvas-scoped .form-input, .landing-promo-canvas-scoped .form-textarea{
+  background-color: #ffffff;
+  border: none;
+  outline: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  color: var(--dark-brown);
+  font-weight: 500;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);
+  transition: var(--transition-smooth);
+}
+
+.landing-promo-canvas-scoped .form-input::placeholder, .landing-promo-canvas-scoped .form-textarea::placeholder{
+  color: #9ca3af;
+}
+
+.landing-promo-canvas-scoped .form-input:focus, .landing-promo-canvas-scoped .form-textarea:focus{
+  box-shadow: 0 0 0 2.5px rgba(255, 64, 129, 0.25);
+}
+
+.landing-promo-canvas-scoped .form-textarea{
+  resize: none;
+}
+
+.landing-promo-canvas-scoped .submit-button{
+  width: 100%;
+  background-color: var(--dark-brown);
+  color: #ffffff;
+  border: none;
+  outline: none;
+  border-radius: 16px;
+  padding: 14px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin-top: 8px;
+  transition: var(--transition-smooth);
+}
+
+.landing-promo-canvas-scoped .submit-button:hover{
+  background-color: #ff4081;
+}
+
+.landing-promo-canvas-scoped .submit-button:active{
+  transform: scale(0.98);
+}
+
+
+/* ==========================================
+   FOOTER COPYRIGHT
+   ========================================== */
+.landing-promo-canvas-scoped .footer-bottom{
+  margin-top: 80px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(43, 24, 20, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .footer-bottom{
+    flex-direction: row;
+    margin-top: 100px;
+  }
+}
+
+.landing-promo-canvas-scoped .copyright-label{
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(43, 24, 20, 0.55);
+}
+
+.landing-promo-canvas-scoped .footer-nav-links{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.landing-promo-canvas-scoped .footer-nav-links a{
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: rgba(43, 24, 20, 0.55);
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: var(--transition-smooth);
+}
+
+.landing-promo-canvas-scoped .footer-nav-links a:hover{
+  color: #ff4081;
+}
+
+.landing-promo-canvas-scoped .nav-separator{
+  font-size: 10px;
+  color: rgba(43, 24, 20, 0.3);
+}
+
+/* ==========================================
+   CUSTOM OVERRIDES: FULL WIDTH FOOTER,
+   SECTION DIVISION LINES, WHITESPACE REMOVAL
+   ========================================== */
+
+/* Landing Promo Card Footer Styles */
+.landing-promo-card-footer-wrapper {
+  background-color: transparent;
+  padding: 48px 0 0 0 !important; /* No side or bottom padding */
+  margin-top: 60px;
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  position: relative;
+  z-index: 10;
+}
+
+.landing-promo-card-footer-wrapper .card {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  background: rgb(38, 38, 38) !important;
+  box-shadow: none !important;
+  border-radius: 0px !important; /* solid rectangle, no curved rectangle */
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+.landing-promo-card-footer-wrapper .imge {
+  height: 80px !important;
+  background-color: #ff5858 !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 24px !important;
+  border-radius: 0 !important;
+}
+
+.landing-promo-card-footer-wrapper .imge-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.landing-promo-card-footer-wrapper .imge .Usericon {
+  background-color: #414141 !important;
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: white !important;
+  transform: none !important;
+}
+
+.landing-promo-card-footer-wrapper .imge .UserName {
+  background-color: transparent !important;
+  color: #262626 !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+  margin-left: 14px !important;
+  width: auto !important;
+  height: auto !important;
+  transform: none !important;
+  display: block !important;
+  border: none !important;
+}
+
+.landing-promo-card-footer-wrapper .imge .Id {
+  background-color: #414141 !important;
+  color: #262626 !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  padding: 6px 12px !important;
+  border-radius: 20px !important;
+  margin-left: auto !important;
+  width: auto !important;
+  height: auto !important;
+  transform: none !important;
+  display: block !important;
+}
+
+.landing-promo-card-footer-wrapper .Description {
+  padding: 24px 24px !important;
+  font-size: 14px !important;
+  color: #bbbbbb !important;
+  background: rgb(38, 38, 38) !important;
+  line-height: 1.6 !important;
+  text-align: left !important;
+  border: none !important;
+}
+
+.landing-promo-card-footer-wrapper .Description-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+.landing-promo-card-footer-wrapper .footer-col-title {
+  color: #ffffff !important;
+  font-weight: bold !important;
+  font-size: 16px !important;
+  margin-bottom: 12px !important;
+  text-transform: uppercase !important;
+}
+
+.landing-promo-card-footer-wrapper .footer-col-text {
+  color: #bbbbbb !important;
+  font-size: 13px !important;
+  margin-bottom: 8px !important;
+}
+
+.landing-promo-card-footer-wrapper .social-media-container {
+  background: rgb(38, 38, 38) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.landing-promo-card-footer-wrapper .social-media {
+  width: 100% !important;
+  border-top: 2px solid #414141 !important;
+  padding: 16px 24px 12px !important;
+  display: flex !important;
+  justify-content: center !important;
+  background: transparent !important;
+  transform: none !important;
+}
+
+.landing-promo-card-footer-wrapper .social-media:before {
+  display: none !important;
+}
+
+.landing-promo-card-footer-wrapper .social-media a {
+  margin-right: 24px !important;
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+.landing-promo-card-footer-wrapper .social-media a:last-child {
+  margin-right: 0 !important;
+}
+
+.landing-promo-card-footer-wrapper .social-media a svg {
+  color: #ff5858 !important;
+  width: 24px !important;
+  height: 24px !important;
+  fill: currentColor !important;
+  transform: none !important;
+}
+
+.landing-promo-card-footer-wrapper .copyright-row {
+  font-size: 11px !important;
+  color: #888888 !important;
+  padding-bottom: 24px !important;
+  font-weight: 500 !important;
+  width: 100% !important;
+  max-width: 1200px !important;
+  text-align: center !important;
+}
+
+.landing-promo-card-footer-wrapper .copyright-row a {
+  color: #888888 !important;
+  text-decoration: none !important;
+  transition: color 0.2s !important;
+}
+
+.landing-promo-card-footer-wrapper .copyright-row a:hover {
+  color: #ffffff !important;
+}
+
+/* Section layout overrides to implement precise diagonal overlapping inclined sections */
+.landing-promo-canvas-scoped .hero-green-section {
+  background-color: var(--brand-green) !important;
+  margin-top: -4vw !important;
+  clip-path: polygon(0 4vw, 100% 0, 100% calc(100% - 4vw), 0 100%) !important;
+  position: relative !important;
+  z-index: 10 !important;
+  padding: 100px 24px 100px 24px !important;
+}
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .hero-green-section {
+    padding: 140px 48px 140px 48px !important;
+  }
+}
+
+.landing-promo-canvas-scoped .wins-section {
+  background-color: #7f32cd !important; /* Original gorgeous violet purple color */
+  margin-top: -4vw !important;
+  clip-path: polygon(0 4vw, 100% 0, 100% calc(100% - 4vw), 0 100%) !important;
+  position: relative !important;
+  z-index: 11 !important;
+  padding: 100px 24px 100px 24px !important;
+  border-top: none !important;
+}
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .wins-section {
+    padding: 140px 48px 140px 48px !important;
+  }
+}
+
+.landing-promo-canvas-scoped .wins-section-title {
+  color: var(--light-cream) !important;
+}
+
+.landing-promo-canvas-scoped .testimonials-section {
+  width: 100% !important;
+  margin-top: -4vw !important;
+  clip-path: polygon(0 4vw, 100% 0, 100% calc(100% - 4vw), 0 100%) !important;
+  position: relative !important;
+  z-index: 12 !important;
+}
+
+.landing-promo-canvas-scoped .memories-section {
+  background-color: #ff7a59 !important; /* Warm coral background color */
+  margin-top: -4vw !important;
+  clip-path: polygon(0 4vw, 100% 0, 100% calc(100% - 4vw), 0 100%) !important;
+  position: relative !important;
+  z-index: 13 !important;
+  padding: 120px 24px 100px 24px !important;
+  border-top: none !important;
+}
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .memories-section {
+    padding: 140px 48px 140px 48px !important;
+  }
+}
+
+.landing-promo-canvas-scoped .portals-switcher-section {
+  background-color: var(--light-cream) !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  margin-top: -4vw !important;
+  clip-path: polygon(0 4vw, 100% 0, 100% calc(100% - 4vw), 0 100%) !important;
+  padding: 120px 24px 100px 24px !important;
+  position: relative !important;
+  z-index: 14 !important;
+}
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .portals-switcher-section {
+    padding: 160px 48px 130px 48px !important;
+  }
+}
+
+.landing-promo-canvas-scoped .connect-section {
+  background-color: #ffffff !important;
+  margin-top: -4vw !important;
+  clip-path: polygon(0 4vw, 100% 0, 100% 100%, 0 100%) !important; /* Bottom boundary connects flatly */
+  padding: 120px 24px 80px 24px !important;
+  position: relative !important;
+  z-index: 15 !important;
+}
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .connect-section {
+    padding: 160px 48px 112px 48px !important;
+  }
+}
+
+/* Remove bottom whitespace below footer card */
+.landing-promo-canvas-scoped .connect-section {
+  padding-bottom: 0px !important;
+}
+
+/* Swapping Stack Card Carousel styles for Customers Shared Memories section */
+.landing-promo-canvas-scoped .memories-carousel-wrapper {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 1000px !important;
+  height: 500px !important;
+  margin: 0 auto !important;
+  overflow: visible !important;
+}
+
+.landing-promo-canvas-scoped .memories-carousel {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.landing-promo-canvas-scoped .memory-card {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 320px !important;
+  height: 440px !important;
+  background-color: #ffffff !important;
+  border: 4px solid #000000 !important;
+  border-radius: 32px !important;
+  box-shadow: 12px 12px 0px 0px #000000 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  transform-origin: center center !important;
+}
+
+@media (max-width: 480px) {
+  .landing-promo-canvas-scoped .memory-card {
+    width: 260px !important;
+    height: 380px !important;
+  }
+}
+
+.landing-promo-canvas-scoped .memory-card.pos-middle {
+  z-index: 30 !important;
+  opacity: 1 !important;
+  transform: translate(-50%, -50%) scale(1) rotate(0deg) !important;
+  pointer-events: auto !important;
+}
+
+.landing-promo-canvas-scoped .memory-card.pos-left {
+  z-index: 20 !important;
+  opacity: 0.65 !important;
+  transform: translate(calc(-50% - 240px), -50%) scale(0.85) rotate(-6deg) !important;
+  pointer-events: none !important;
+}
+
+.landing-promo-canvas-scoped .memory-card.pos-right {
+  z-index: 20 !important;
+  opacity: 0.65 !important;
+  transform: translate(calc(-50% + 240px), -50%) scale(0.85) rotate(6deg) !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 767px) {
+  .landing-promo-canvas-scoped .memory-card.pos-left {
+    transform: translate(calc(-50% - 110px), -50%) scale(0.8) rotate(-4deg) !important;
+  }
+  .landing-promo-canvas-scoped .memory-card.pos-right {
+    transform: translate(calc(-50% + 110px), -50%) scale(0.8) rotate(4deg) !important;
+  }
+}
+
+.landing-promo-canvas-scoped .memory-card.pos-hidden {
+  z-index: 10 !important;
+  opacity: 0 !important;
+  transform: translate(-50%, -50%) scale(0.7) rotate(0deg) !important;
+  pointer-events: none !important;
+}
+
+.landing-promo-canvas-scoped .memory-card-image-box {
+  width: 100% !important;
+  height: 62% !important;
+  border-bottom: 4px solid #000000 !important;
+  overflow: hidden !important;
+  background-color: #000000 !important;
+  position: relative !important;
+}
+
+.landing-promo-canvas-scoped .memory-card-content {
+  padding: 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  flex-grow: 1 !important;
+  background-color: #ffffff !important;
+}
+
+.landing-promo-canvas-scoped .memory-quote {
+  font-family: var(--font-sans) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #1a1a1a !important;
+  line-height: 1.5 !important;
+  margin: 0 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+.landing-promo-canvas-scoped .memory-author {
+  font-family: var(--font-display) !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  color: #ff4081 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  margin: 8px 0 0 0 !important;
+}
+
+/* Black division lines between sections with different backgrounds */
+.landing-promo-canvas-scoped .hero-green-section,
+.landing-promo-canvas-scoped .wins-section,
+.landing-promo-canvas-scoped .testimonials-section,
+.landing-promo-canvas-scoped .memories-section,
+.landing-promo-canvas-scoped .portals-switcher-section,
+.landing-promo-canvas-scoped .connect-section {
+  position: relative !important;
+}
+
+.landing-promo-canvas-scoped .hero-green-section::before,
+.landing-promo-canvas-scoped .wins-section::before,
+.landing-promo-canvas-scoped .testimonials-section::before,
+.landing-promo-canvas-scoped .memories-section::before,
+.landing-promo-canvas-scoped .portals-switcher-section::before,
+.landing-promo-canvas-scoped .connect-section::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: calc(4vw + 12px) !important;
+  background-color: #000000 !important;
+  z-index: 20 !important;
+  pointer-events: none !important;
+  clip-path: polygon(0 4vw, 100% 0, 100% 4px, 0 calc(4vw + 4px)) !important;
+}
+
+/* Black divider line between Split panel columns (white and green) */
+.landing-promo-canvas-scoped .panel-white {
+  border-bottom: 4px solid #000000 !important;
+}
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .panel-white {
+    border-bottom: none !important;
+    border-right: 4px solid #000000 !important;
+  }
+}
+
+/* Connect section background falling stars animation styling */
+.landing-promo-canvas-scoped .connect-stars-container {
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  z-index: 1 !important;
+  background-color: transparent !important;
+}
+
+.landing-promo-canvas-scoped .connect-stars-container::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: -145% !important;
+  background: transparent !important;
+  background-image: 
+    radial-gradient(1.8px 45px at 25px 235px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(1.8px 45px at 325px 235px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(1.5px 1.5px at 175px 117.5px, #ff4081 100%, rgba(255, 255, 255, 0) 150%),
+    radial-gradient(1.8px 45px at 250px 252px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(1.8px 45px at 550px 252px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(1.5px 1.5px at 100px 126px, #00b0ff 100%, rgba(255, 255, 255, 0) 150%),
+    radial-gradient(1.8px 45px at 75px 150px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(1.8px 45px at 375px 150px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(1.5px 1.5px at 225px 75px, #ff4081 100%, rgba(255, 255, 255, 0) 150%),
+    radial-gradient(1.8px 45px at 200px 253px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(1.8px 45px at 500px 253px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(1.5px 1.5px at 50px 126.5px, #00b0ff 100%, rgba(255, 255, 255, 0) 150%),
+    radial-gradient(1.8px 45px at 120px 204px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(1.8px 45px at 420px 204px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(1.5px 1.5px at 270px 102px, #ff4081 100%, rgba(255, 255, 255, 0) 150%),
+    radial-gradient(1.8px 45px at 275px 134px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(1.8px 45px at 575px 134px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(1.5px 1.5px at 125px 67px, #00b0ff 100%, rgba(255, 255, 255, 0) 150%),
+    radial-gradient(1.8px 45px at 45px 179px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(1.8px 45px at 345px 179px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(1.5px 1.5px at 195px 89.5px, #ff4081 100%, rgba(255, 255, 255, 0) 150%),
+    radial-gradient(1.8px 45px at 165px 299px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(1.8px 45px at 465px 299px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(1.5px 1.5px at 15px 149.5px, #00b0ff 100%, rgba(255, 255, 255, 0) 150%),
+    radial-gradient(1.8px 45px at 225px 215px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(1.8px 45px at 525px 215px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(1.5px 1.5px at 75px 107.5px, #ff4081 100%, rgba(255, 255, 255, 0) 150%),
+    radial-gradient(1.8px 45px at 140px 281px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(1.8px 45px at 440px 281px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(1.5px 1.5px at 290px 140.5px, #00b0ff 100%, rgba(255, 255, 255, 0) 150%),
+    radial-gradient(1.8px 45px at 90px 158px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(1.8px 45px at 390px 158px, #ff4081, rgba(255, 255, 255, 0)),
+    radial-gradient(1.5px 1.5px at 240px 79px, #ff4081 100%, rgba(255, 255, 255, 0) 150%),
+    radial-gradient(1.8px 45px at 260px 210px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(1.8px 45px at 560px 210px, #00b0ff, rgba(255, 255, 255, 0)),
+    radial-gradient(1.5px 1.5px at 110px 105px, #00b0ff 100%, rgba(255, 255, 255, 0) 150%) !important;
+  background-size:
+    300px 235px,
+    300px 235px,
+    300px 235px,
+    300px 252px,
+    300px 252px,
+    300px 252px,
+    300px 150px,
+    300px 150px,
+    300px 150px,
+    300px 253px,
+    300px 253px,
+    300px 253px,
+    300px 204px,
+    300px 204px,
+    300px 204px,
+    300px 134px,
+    300px 134px,
+    300px 134px,
+    300px 179px,
+    300px 179px,
+    300px 179px,
+    300px 299px,
+    300px 299px,
+    300px 299px,
+    300px 215px,
+    300px 215px,
+    300px 215px,
+    300px 281px,
+    300px 281px,
+    300px 281px,
+    300px 158px,
+    300px 158px,
+    300px 158px,
+    300px 210px,
+    300px 210px,
+    300px 210px !important;
+  background-repeat: repeat !important;
+  animation: cssRainFall 9s linear infinite !important;
+  opacity: 0.85 !important;
+  transform: rotate(-45deg) translateY(0);
+}
+
+@keyframes cssRainFall {
+  0% {
+    transform: rotate(-45deg) translateY(0);
+  }
+  100% {
+    transform: rotate(-45deg) translateY(1000px);
+  }
+}
+
+@keyframes fallingStars {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(-100px, 400px);
+  }
+}
+
+/* Custom button animation styles (Book Now / Sign Up Now) below the arrow */
+.landing-promo-canvas-scoped .btn-wrapper {
+  --color: #ff4081 !important;
+  --txt-color: #ffffff !important;
+  --txt-color-2: #ffffff !important;
+  --point-size: 8px !important;
+  --point-color: #ffffff !important;
+  --line-color: #000000 !important;
+  --line-style: solid !important;
+  --line-weight: 2px !important;
+  --anim-speed: 1s !important;
+
+  position: relative !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 1.5rem 5rem !important;
+  min-width: 200px !important;
+  min-height: 56px !important;
+  user-select: none !important;
+}
+
+.landing-promo-canvas-scoped .txt-secondary {
+  position: absolute !important;
+  bottom: -2.2rem !important;
+  font: 700 0.85em var(--font-display), sans-serif !important;
+  color: #000a !important;
+  font-style: italic !important;
+  will-change: opacity !important;
+  transition: opacity calc(var(--anim-speed, 1s) * 0.5) ease !important;
+  opacity: 1 !important;
+}
+
+.landing-promo-canvas-scoped #hint2 {
+  opacity: 0 !important;
+}
+
+.landing-promo-canvas-scoped .btn {
+  filter: drop-shadow(0 6px 2px #00000033) !important;
+  position: absolute !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  border: none !important;
+  background: none !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.landing-promo-canvas-scoped .txt-box {
+  position: absolute !important;
+  display: grid !important;
+  place-items: center !important;
+  text-wrap: nowrap !important;
+  inset: 0 0% !important;
+  overflow: clip !important;
+  will-change: inset, filter !important;
+  transition: filter 0.25s ease !important;
+  animation: frame-half calc(var(--anim-speed, 1s) * 0.5) forwards !important;
+}
+
+.landing-promo-canvas-scoped .txt-box::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: var(--point-size, 8px) !important;
+  background: repeating-linear-gradient(45deg, #ff4081, #7f32cd 15%, #fff 20%) !important;
+  mix-blend-mode: hard-light !important;
+  background-size: 440% !important;
+  transition: background-size 0.4s ease-in !important;
+  filter: blur(1px) !important;
+  z-index: 3 !important;
+  opacity: 0.15 !important;
+}
+
+.landing-promo-canvas-scoped .txt {
+  position: absolute !important;
+  padding: 1rem 2rem !important;
+  z-index: 2 !important;
+  font-family: var(--font-display), sans-serif !important;
+  font-weight: 900 !important;
+  font-size: 1.3em !important;
+  color: var(--txt-color, #ffffff) !important;
+  will-change: opacity, display, text-shadow !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+}
+
+.landing-promo-canvas-scoped .txt:last-child {
+  color: var(--txt-color-2, #ffffff) !important;
+  opacity: 0 !important;
+  animation: none !important;
+}
+
+.landing-promo-canvas-scoped .frame {
+  position: absolute !important;
+  inset: 0 0% !important;
+  z-index: 1 !important;
+  border: var(--line-style, solid) var(--line-weight, 2px) var(--line-color, #000000) !important;
+  background-color: var(--color, #ff4081) !important;
+  transition-delay: calc(var(--anim-speed, 1s) * 0.5) !important;
+  box-shadow: inset 0 1px 4px 1px #fff5 !important;
+  animation: frame-half calc(var(--anim-speed, 1s) * 0.5) forwards !important;
+}
+
+.landing-promo-canvas-scoped .point {
+  position: absolute !important;
+  box-sizing: border-box !important;
+  width: var(--point-size, 8px) !important;
+  aspect-ratio: 1 !important;
+  border-radius: 25% !important;
+  border: solid var(--line-weight, 2px) var(--line-color, #000000) !important;
+  background-color: var(--point-color, #fff) !important;
+  background-image: radial-gradient(circle at 50% 120%, #0005, #ffff) !important;
+}
+
+.landing-promo-canvas-scoped .point.top {
+  top: calc(var(--point-size, 8px) * -0.5) !important;
+}
+.landing-promo-canvas-scoped .point.bottom {
+  bottom: calc(var(--point-size, 8px) * -0.5) !important;
+}
+.landing-promo-canvas-scoped .point.left {
+  left: calc(var(--point-size, 8px) * -0.5) !important;
+}
+.landing-promo-canvas-scoped .point.right {
+  right: calc(var(--point-size, 8px) * -0.5) !important;
+}
+
+.landing-promo-canvas-scoped .btn:hover .txt {
+  animation: txt-out calc(var(--anim-speed, 1s) * 0.5) forwards !important;
+}
+.landing-promo-canvas-scoped .btn:hover .txt:last-child {
+  animation: txt-in calc(var(--anim-speed, 1s) * 0.5) forwards !important;
+}
+
+.landing-promo-canvas-scoped .btn:hover .txt-box {
+  animation: frame var(--anim-speed, 1s) ease !important;
+}
+.landing-promo-canvas-scoped .btn:hover .txt-box::after {
+  background-size: 700% !important;
+}
+
+.landing-promo-canvas-scoped .btn:hover .frame {
+  animation: frame var(--anim-speed, 1s) ease !important;
+}
+
+.landing-promo-canvas-scoped .btn:hover ~ #hint1 {
+  opacity: 0 !important;
+}
+.landing-promo-canvas-scoped .btn:hover ~ #hint2 {
+  opacity: 1 !important;
+}
+
+.landing-promo-canvas-scoped .btn::before {
+  content: "Redirecting..." !important;
+  position: absolute !important;
+  inset: 0 !important;
+  font-family: var(--font-display), sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 1.1em !important;
+  letter-spacing: 0.03em !important;
+  color: #000000 !important;
+  z-index: -1 !important;
+  filter: blur(16px) !important;
+  opacity: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.landing-promo-canvas-scoped .btn:active .txt-box {
+  filter: contrast(1.4) brightness(1.4) !important;
+}
+
+.landing-promo-canvas-scoped .btn:focus::before {
+  animation: appear calc(var(--anim-speed, 1s) * 1.5) cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+}
+
+/* Double the size of the "Customers Shared Memories" text */
+.landing-promo-canvas-scoped .memories-section-title {
+  font-size: 52px !important;
+  text-align: center !important;
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  margin-bottom: 40px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+  line-height: 1.1 !important;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .memories-section-title {
+    font-size: 84px !important;
+    margin-bottom: 60px !important;
+  }
+}
+
+/* Connect section light theme adjustments with falling stars background */
+.landing-promo-canvas-scoped .connect-section {
+  background-color: #ffffff !important;
+}
+
+.landing-promo-canvas-scoped .connect-section .section-container {
+  position: relative !important;
+  z-index: 5 !important;
+}
+
+.landing-promo-canvas-scoped .connect-title {
+  color: var(--dark-brown) !important;
+}
+
+.landing-promo-canvas-scoped .connect-subtitle {
+  color: rgba(43, 24, 20, 0.85) !important;
+}
+
+.landing-promo-canvas-scoped .form-wrapper {
+  background-color: rgba(255, 255, 255, 0.45) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+.landing-promo-canvas-scoped .form-header {
+  color: var(--dark-brown) !important;
+}
+
+.landing-promo-canvas-scoped .form-label {
+  color: rgba(43, 24, 20, 0.6) !important;
+}
+
+.landing-promo-canvas-scoped .form-input, 
+.landing-promo-canvas-scoped .form-textarea {
+  background-color: #ffffff !important;
+  color: var(--dark-brown) !important;
+  border: 2px solid rgba(43, 24, 20, 0.1) !important;
+}
+
+.landing-promo-canvas-scoped .form-input:focus, 
+.landing-promo-canvas-scoped .form-textarea:focus {
+  border-color: #ff4081 !important;
+  box-shadow: 0 0 10px rgba(255, 64, 129, 0.15) !important;
+}
+
+.landing-promo-canvas-scoped .submit-button {
+  background-color: var(--dark-brown) !important;
+  color: #ffffff !important;
+  border: 2px solid var(--dark-brown) !important;
+  transition: all 0.3s ease !important;
+}
+
+.landing-promo-canvas-scoped .submit-button:hover {
+  background-color: #ff4081 !important;
+  color: #ffffff !important;
+  border-color: #ff4081 !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Restore footer copyright text readability on white background */
+.landing-promo-canvas-scoped .footer-bottom {
+  border-top-color: rgba(43, 24, 20, 0.1) !important;
+}
+
+.landing-promo-canvas-scoped .footer-bottom p {
+  color: rgba(43, 24, 20, 0.6) !important;
+}
+
+.landing-promo-canvas-scoped .footer-bottom a {
+  color: rgba(43, 24, 20, 0.8) !important;
+}
+
+.landing-promo-canvas-scoped .footer-bottom a:hover {
+  color: #ff4081 !important;
+}
+
+
+
+
