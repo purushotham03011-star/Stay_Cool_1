@@ -312,116 +312,121 @@ export default function App() {
                 />
               </div>
             ) : (
-              <div className="max-w-md mx-auto my-6 p-7 bg-white rounded-3xl border border-slate-200 shadow-xl space-y-5 animate-scale-up">
-                <div className="text-center space-y-1.5">
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-650 mx-auto">
-                    <Monitor className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-base font-black font-display text-slate-900 uppercase tracking-tight">Operator Verification</h3>
-                  <p className="text-xs text-slate-500">Access registered co-living rooms, occupancy grids, and collect rental payments.</p>
+              <div className="w-full min-h-screen relative flex items-center justify-center p-4 bg-[#f8fafc]">
+                {/* Radar background */}
+                <div className="radar-pattern absolute inset-0 z-0">
+                  <div className="radar-center"></div>
                 </div>
 
-                {adminLoginError && (
-                  <div className="p-2.5 bg-rose-50 border border-rose-100 rounded-xl text-[10.5px] font-semibold text-rose-700">
-                    {adminLoginError}
-                  </div>
-                )}
+                {/* Transparent Card Replaced with 2nd Card Style */}
+                <div className="hq-security-login-card w-full max-w-md p-8 shadow-2xl space-y-6 animate-scale-up relative overflow-hidden z-10">
+                  <p className="heading">Operator Verification</p>
+                  <p className="sub-text">Access registered co-living rooms, occupancy grids, and collect rental payments.</p>
 
-                <form onSubmit={(e) => {
-                  e.preventDefault();
-                  setAdminLoginError('');
-                  
-                  if (!adminLoginEmail || !adminLoginPassword) {
-                    setAdminLoginError('Kindly enter operating security email and password PIN.');
-                    return;
-                  }
+                  {adminLoginError && (
+                    <div className="p-2.5 bg-rose-50 border border-rose-100 rounded-xl text-[10.5px] font-semibold text-rose-700 relative z-10">
+                      {adminLoginError}
+                    </div>
+                  )}
 
-                  const registeredProps = getLocalStorageData<Property[]>('properties', []);
-                  let matchedProp = registeredProps.find(
-                    p => p.adminEmail?.toLowerCase() === adminLoginEmail.toLowerCase() && p.adminPassword === adminLoginPassword
-                  );
-
-                  // Backward compatibility for legacy demo logins
-                  if (!matchedProp && adminLoginEmail.toLowerCase() === 'manager_hsr@homelystays.com' && adminLoginPassword === 'admin123') {
-                    matchedProp = registeredProps.find(p => p.id === 'prop-1');
-                  }
-
-                  if (matchedProp) {
-                    const deactivatedPropIds = getLocalStorageData<string[]>('deactivated_properties', []);
-                    const isSuspended = deactivatedPropIds.includes(matchedProp.id) || matchedProp.status === 'Suspended';
-                    if (isSuspended) {
-                      setAdminLoginError('This administrator account has been suspended. Please contact corporate HQ.');
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    setAdminLoginError('');
+                    
+                    if (!adminLoginEmail || !adminLoginPassword) {
+                      setAdminLoginError('Kindly enter operating security email and password PIN.');
                       return;
                     }
-                    const sessionObj = {
-                      name: matchedProp.adminName || 'Regional Host Manager',
-                      email: matchedProp.adminEmail || adminLoginEmail,
-                      phone: matchedProp.adminPhone || '+91 99000 12345',
-                      propertyId: matchedProp.id,
-                      adminId: matchedProp.adminId || `admin-${matchedProp.id.split('-')[1]}`
-                    };
-                    setLocalStorageData('active_admin_session', sessionObj);
-                    setAdminSession(sessionObj);
-                    handleAddAuditLog(`Administrator session verified for property ${matchedProp.name}: ${adminLoginEmail}`, 'SuperAdmin');
-                  } else {
-                    setAdminLoginError('Invalid email address or access PIN password combination.');
-                  }
-                }} className="space-y-3.5 text-xs font-sans">
-                  
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Email Username</label>
-                    <input 
-                      type="email"
-                      value={adminLoginEmail}
-                      onChange={(e) => setAdminLoginEmail(e.target.value)}
-                      placeholder="manager_hsr@homelystays.com"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-3.5 pr-3 text-xs outline-none focus:ring-1 focus:ring-indigo-600 focus:bg-white text-slate-900 font-semibold"
-                      required
-                    />
-                  </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Access PIN / Password</label>
-                    <input 
-                      type="password"
-                      value={adminLoginPassword}
-                      onChange={(e) => setAdminLoginPassword(e.target.value)}
-                      placeholder="Enter password"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-3.5 pr-3 text-xs outline-none focus:ring-1 focus:ring-indigo-600 focus:bg-white text-slate-900"
-                      required
-                    />
-                  </div>
+                    const registeredProps = getLocalStorageData<Property[]>('properties', []);
+                    let matchedProp = registeredProps.find(
+                      p => p.adminEmail?.toLowerCase() === adminLoginEmail.toLowerCase() && p.adminPassword === adminLoginPassword
+                    );
 
-                  <button 
-                    type="submit"
-                    className="w-full bg-transparent border-2 border-slate-800 hover:bg-slate-50 text-slate-800 font-bold py-2.5 rounded-xl text-xs transition active:scale-98 cursor-pointer mt-1"
-                  >
-                    Enter Operator Console
-                  </button>
-                </form>
+                    // Backward compatibility for legacy demo logins
+                    if (!matchedProp && adminLoginEmail.toLowerCase() === 'manager_hsr@homelystays.com' && adminLoginPassword === 'admin123') {
+                      matchedProp = registeredProps.find(p => p.id === 'prop-1');
+                    }
 
-                <button 
-                  type="button"
-                  onClick={() => setActivePortal(null)}
-                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition active:scale-98 cursor-pointer text-center block"
-                >
-                  ← Back to System Portal Selection
-                </button>
+                    if (matchedProp) {
+                      const deactivatedPropIds = getLocalStorageData<string[]>('deactivated_properties', []);
+                      const isSuspended = deactivatedPropIds.includes(matchedProp.id) || matchedProp.status === 'Suspended';
+                      if (isSuspended) {
+                        setAdminLoginError('This administrator account has been suspended. Please contact corporate HQ.');
+                        return;
+                      }
+                      const sessionObj = {
+                        name: matchedProp.adminName || 'Regional Host Manager',
+                        email: matchedProp.adminEmail || adminLoginEmail,
+                        phone: matchedProp.adminPhone || '+91 99000 12345',
+                        propertyId: matchedProp.id,
+                        adminId: matchedProp.adminId || `admin-${matchedProp.id.split('-')[1]}`
+                      };
+                      setLocalStorageData('active_admin_session', sessionObj);
+                      setAdminSession(sessionObj);
+                      handleAddAuditLog(`Administrator session verified for property ${matchedProp.name}: ${adminLoginEmail}`, 'SuperAdmin');
+                    } else {
+                      setAdminLoginError('Invalid email address or access PIN password combination.');
+                    }
+                  }} className="space-y-4 font-sans text-slate-800 relative z-10">
+                    
+                    <div className="hq-input-container">
+                      <Mail className="hq-input-icon w-4 h-4 text-slate-600" />
+                      <input 
+                        type="email"
+                        value={adminLoginEmail}
+                        onChange={(e) => setAdminLoginEmail(e.target.value)}
+                        placeholder="Email Username"
+                        className="hq-input-field"
+                        required
+                      />
+                    </div>
 
-                <div className="pt-4 border-t border-slate-100 text-center space-y-3">
-                  <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">First-Time Host Onboarding</span>
-                  
-                  <button 
-                    type="button" 
-                    onClick={() => setIsAdminWizardOpen(true)}
-                    className="w-full bg-transparent hover:bg-emerald-50 text-emerald-700 border-2 border-emerald-600 font-bold py-2.5 rounded-xl text-xs transition tracking-wide flex items-center justify-center space-x-1.5"
-                  >
-                    <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Register New Admin & Property Setup</span>
-                  </button>
-                  <p className="text-[10px] text-slate-400 leading-normal">
-                    Onboard regional assets inside India, configure physical floors, adjust room numbers, and set tiered daily or seasonal pricing.
-                  </p>
+                    <div className="hq-input-container">
+                      <Lock className="hq-input-icon w-4 h-4 text-slate-600" />
+                      <input 
+                        type="password"
+                        value={adminLoginPassword}
+                        onChange={(e) => setAdminLoginPassword(e.target.value)}
+                        placeholder="Access PIN / Password"
+                        className="hq-input-field"
+                        required
+                      />
+                    </div>
+
+                    <button 
+                      type="submit"
+                      className="hq-submit-btn-purple"
+                    >
+                      Submit
+                    </button>
+
+                    <div className="text-center pt-1">
+                      <button 
+                        type="button"
+                        onClick={() => setActivePortal(null)}
+                        className="hq-forgot-link"
+                      >
+                        ← Back to System Portal Selection
+                      </button>
+                    </div>
+
+                    <div className="pt-4 border-t border-slate-150 text-center space-y-3 relative z-10">
+                      <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">First-Time Host Onboarding</span>
+                      
+                      <button 
+                        type="button" 
+                        onClick={() => setIsAdminWizardOpen(true)}
+                        className="w-full bg-transparent hover:bg-emerald-50 text-emerald-700 border-2 border-emerald-600 font-bold py-2.5 rounded-xl text-xs transition tracking-wide flex items-center justify-center space-x-1.5 cursor-pointer"
+                      >
+                        <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>Register New Admin & Property Setup</span>
+                      </button>
+                      <p className="text-[10px] text-slate-400 leading-normal">
+                        Onboard regional assets inside India, configure physical floors, adjust room numbers, and set tiered daily or seasonal pricing.
+                      </p>
+                    </div>
+                  </form>
                 </div>
               </div>
             )}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Sparkles, Mail, Phone, Share2, X, ArrowRight, Layers } from 'lucide-react';
+import { Search, Sparkles, Mail, Phone, Share2, X, ArrowRight, Layers, MapPin, Twitter, Instagram, Facebook, Linkedin } from 'lucide-react';
 import campfireImg from '../assets/campfire.jpg';
 import hotelStayImg from '../assets/hotel_stay.jpg';
 import pgLivingImg from '../assets/pg_living.jpg';
@@ -230,7 +230,7 @@ export default function LandingPromo({
           {/* BOTTOM ROW: Heart Arrow on Left, Three Hanging Cards on Right */}
           <div className="header-bottom-row">
             {/* Wrapper to stack arrow and parrot button vertically */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '30px', zIndex: 30 }}>
+            <div className="hero-arrow-btn-stack" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '30px', zIndex: 30 }}>
               {/* Playful black arrow with a heart-shaped loop on the Left */}
               <div className="heart-arrow-container scroll-reveal" style={{ '--reveal-delay': '200ms' } as React.CSSProperties}>
                 <svg viewBox="0 0 100 100" className="heart-arrow-svg">
@@ -561,15 +561,15 @@ export default function LandingPromo({
         <div className="section-container grid-two-cols">
           
           {/* Left side: Connections & green details box */}
-          <div className="connect-left-column scroll-reveal">
-            <div className="connect-headings">
+          <div className="connect-left-column">
+            <div className="connect-headings scroll-reveal">
               <h2 className="font-display connect-title">Let's</h2>
               <h2 className="font-display connect-title">Connect</h2>
             </div>
-            <p className="connect-subtitle">Tell me what you're planing up—I'd love to reach to you answering them.</p>
+            <p className="connect-subtitle scroll-reveal" style={{ '--reveal-delay': '100ms' } as React.CSSProperties}>Tell me what you're planing up—I'd love to reach to you answering them.</p>
 
             {/* Green Contact card */}
-            <div className="contact-details-box" id="contactDetailsBox">
+            <div className="contact-details-box scroll-reveal" id="contactDetailsBox" style={{ '--reveal-delay': '200ms' } as React.CSSProperties}>
               {/* Row 1: Email */}
               <div className="contact-row cursor-pointer" onClick={() => handleCopy('hello@reallygreatsite.com', 'Email')}>
                 <div className="contact-row-info flex items-center gap-2">
@@ -623,85 +623,83 @@ export default function LandingPromo({
           </div>
 
         </div>
-
-
-        {/* Black Company Footer replaced with Long Footer Card */}
-        <div className="landing-promo-card-footer-wrapper">
-          <div className="card">
-            {/* Header section (Red) */}
-            <div className="imge">
-              <div className="imge-content">
-                <div className="Usericon">
-                  <Layers className="w-6 h-6 text-white" />
-                </div>
-                <p className="UserName">STAYHUB CO.</p>
-                <p className="Id">ESTD. 2026</p>
-              </div>
-            </div>
-
-            {/* Description section (Dark Grey Box) */}
-            <div className="Description">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
-                {/* Col 1 */}
-                <div className="space-y-2">
-                  <h4 className="font-extrabold text-[12px] uppercase text-white tracking-wider">About StayHub</h4>
-                  <p className="leading-relaxed text-slate-300 font-sans font-medium text-[11.5px]">
-                    StayHub is a next-generation PG and Hotel management platform engineered to deliver unified billing, smart room reservations, seamless visitor registration, and automated housekeeping systems for corporate franchise co-lives and hotels.
-                  </p>
-                </div>
-
-                {/* Col 2 */}
-                <div className="space-y-2">
-                  <h4 className="font-extrabold text-[12px] uppercase text-white tracking-wider">Contact & Headquarters</h4>
-                  <p className="leading-relaxed text-slate-300 font-sans font-medium text-[11.5px]">
-                    <strong>Support Hotline:</strong> +91 80 4321 0000<br />
-                    <strong>Email Address:</strong> corp@stayhub.co
-                  </p>
-                  <p className="text-[10px] text-slate-400 font-sans leading-relaxed pt-1">
-                    Plot 42, 100 Feet Rd, Sector 2, HSR Layout, Bengaluru, Karnataka, India - 560102
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Social Media & Copyright section */}
-            <div className="social-media-container">
-              <div className="social-media">
-                <a href="#" onClick={(e) => { e.preventDefault(); alert("Twitter/X link clicked"); }}>
-                  <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"></path>
-                  </svg>
-                </a>
-                <a href="#" onClick={(e) => { e.preventDefault(); alert("Instagram link clicked"); }}>
-                  <svg viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"></path>
-                  </svg>
-                </a>
-                <a href="#" onClick={(e) => { e.preventDefault(); alert("Facebook link clicked"); }}>
-                  <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.78 90.69 226.38 209.25 245V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.28c-30.8 0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.31 482.38 504 379.78 504 256z"></path>
-                  </svg>
-                </a>
-                <a href="#" onClick={(e) => { e.preventDefault(); alert("LinkedIn link clicked"); }}>
-                  <svg viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"></path>
-                  </svg>
-                </a>
-              </div>
-
-              {/* Copyright Row */}
-              <div className="copyright-row">
-                <span>© {new Date().getFullYear()} StayHub Technologies Private Limited. All rights reserved.</span>
-                <span className="mx-2">•</span>
-                <a href="#" onClick={(e) => e.preventDefault()}>Privacy Policy</a>
-                <span className="mx-2">•</span>
-                <a href="#" onClick={(e) => e.preventDefault()}>Terms of Service</a>
-              </div>
-            </div>
-
-          </div>
-        </div>
       </footer>
+
+      {/* Footer replaced completely with the Quote card */}
+      <div className="landing-promo-card-footer-wrapper">
+        <div className="new-stayhub-footer-card">
+          {/* SVG Quote Icon in corner */}
+          <div className="footer-quote-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 330 307" height="90" width="90">
+              <path fill="currentColor" d="M302.258 176.221C320.678 176.221 329.889 185.432 329.889 203.853V278.764C329.889 297.185 320.678 306.395 302.258 306.395H231.031C212.61 306.395 203.399 297.185 203.399 278.764V203.853C203.399 160.871 207.902 123.415 216.908 91.4858C226.323 59.1472 244.539 30.902 271.556 6.75027C280.562 -1.02739 288.135 -2.05076 294.275 3.68014L321.906 29.4692C328.047 35.2001 326.614 42.1591 317.608 50.3461C303.69 62.6266 292.228 80.4334 283.223 103.766C274.626 126.69 270.328 150.842 270.328 176.221H302.258ZM99.629 176.221C118.05 176.221 127.26 185.432 127.26 203.853V278.764C127.26 297.185 118.05 306.395 99.629 306.395H28.402C9.98126 306.395 0.770874 297.185 0.770874 278.764V203.853C0.770874 160.871 5.27373 123.415 14.2794 91.4858C23.6945 59.1472 41.9106 30.902 68.9277 6.75027C77.9335 -1.02739 85.5064 -2.05076 91.6467 3.68014L119.278 29.4692C125.418 35.2001 123.985 42.1591 114.98 50.3461C101.062 62.6266 89.6 80.4334 80.5942 103.766C71.9979 126.69 67.6997 150.842 67.6997 176.221H99.629Z"></path>
+            </svg>
+          </div>
+
+          <p className="footer-brand-title">STAYHUB CO.</p>
+
+          <div className="footer-content-grid">
+            {/* Col 1: Overview */}
+            <div className="footer-col">
+              <h4 className="footer-col-header">Overview</h4>
+              <p className="footer-col-description">
+                StayHub is a next-generation PG and Hotel management platform engineered to deliver unified billing, smart room reservations, seamless visitor registration, and automated housekeeping systems for corporate franchise co-lives and hotels.
+              </p>
+            </div>
+
+            {/* Col 2: Quick Links */}
+            <div className="footer-col">
+              <h4 className="footer-col-header">Quick Links</h4>
+              <div className="footer-links-list">
+                <a href="#" onClick={(e) => e.preventDefault()}>Home</a>
+                <a href="#" onClick={(e) => e.preventDefault()}>Services</a>
+                <a href="#" onClick={(e) => e.preventDefault()}>Rooms</a>
+                <a href="#" onClick={(e) => e.preventDefault()}>Contact</a>
+              </div>
+            </div>
+
+            {/* Col 3: Contact Info */}
+            <div className="footer-col">
+              <h4 className="footer-col-header">Contact Info</h4>
+              <div className="footer-info-list">
+                <div className="footer-info-item">
+                  <MapPin className="w-3.5 h-3.5 mr-2 inline text-slate-800" />
+                  <span>Plot 42, HSR Layout, Bengaluru, India</span>
+                </div>
+                <div className="footer-info-item">
+                  <Phone className="w-3.5 h-3.5 mr-2 inline text-slate-800" />
+                  <span>+91 80 4321 0000</span>
+                </div>
+                <div className="footer-info-item">
+                  <Mail className="w-3.5 h-3.5 mr-2 inline text-slate-800" />
+                  <span>corp@stayhub.co</span>
+                </div>
+              </div>
+              
+              {/* White circle social icons */}
+              <div className="footer-social-circles">
+                <a href="#" onClick={(e) => { e.preventDefault(); alert("Twitter clicked"); }} className="social-circle">
+                  <Twitter className="w-4 h-4" />
+                </a>
+                <a href="#" onClick={(e) => { e.preventDefault(); alert("Instagram clicked"); }} className="social-circle">
+                  <Instagram className="w-4 h-4" />
+                </a>
+                <a href="#" onClick={(e) => { e.preventDefault(); alert("Facebook clicked"); }} className="social-circle">
+                  <Facebook className="w-4 h-4" />
+                </a>
+                <a href="#" onClick={(e) => { e.preventDefault(); alert("LinkedIn clicked"); }} className="social-circle">
+                  <Linkedin className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div className="footer-divider-line"></div>
+
+          <p className="footer-copyright-text">
+            © {new Date().getFullYear()} StayHub. All rights reserved.
+          </p>
+        </div>
+      </div>
 
       {/* REACT TOAST NOTIFICATION PORTAL */}
       {toastMsg && (

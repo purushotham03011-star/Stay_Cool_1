@@ -941,12 +941,12 @@
    ========================================== */
 .landing-promo-canvas-scoped .connect-section{
   background-color: var(--bg-pink);
-  padding: 80px 24px;
+  padding: 80px 24px 130px 24px;
 }
 
 @media (min-width: 768px) {
   .landing-promo-canvas-scoped .connect-section{
-    padding: 112px 48px;
+    padding: 112px 48px 180px 48px;
   }
 }
 
@@ -1069,8 +1069,10 @@
 }
 
 .landing-promo-canvas-scoped .form-wrapper{
-  background-color: rgba(255, 255, 255, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
   padding: 28px 24px;
   border-radius: 36px;
   width: 100%;
@@ -1224,7 +1226,7 @@
 .landing-promo-card-footer-wrapper {
   background-color: transparent;
   padding: 48px 0 0 0 !important; /* No side or bottom padding */
-  margin-top: 60px;
+  margin-top: 0px !important;
   width: 100% !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
@@ -1473,19 +1475,19 @@
   background-color: #ffffff !important;
   margin-top: -4vw !important;
   clip-path: polygon(0 4vw, 100% 0, 100% 100%, 0 100%) !important; /* Bottom boundary connects flatly */
-  padding: 120px 24px 80px 24px !important;
+  padding: 120px 24px 65px 24px !important;
   position: relative !important;
   z-index: 15 !important;
 }
 @media (min-width: 768px) {
   .landing-promo-canvas-scoped .connect-section {
-    padding: 160px 48px 112px 48px !important;
+    padding: 160px 48px 90px 48px !important;
   }
 }
 
 /* Remove bottom whitespace below footer card */
 .landing-promo-canvas-scoped .connect-section {
-  padding-bottom: 0px !important;
+  padding-bottom: 90px !important;
 }
 
 /* Swapping Stack Card Carousel styles for Customers Shared Memories section */
@@ -2029,36 +2031,6 @@
   background-color: #ffffff !important;
 }
 
-.landing-promo-canvas-scoped .connect-section .section-container {
-  position: relative !important;
-  z-index: 5 !important;
-}
-
-.landing-promo-canvas-scoped .connect-title {
-  color: var(--dark-brown) !important;
-}
-
-.landing-promo-canvas-scoped .connect-subtitle {
-  color: rgba(43, 24, 20, 0.85) !important;
-}
-
-.landing-promo-canvas-scoped .form-wrapper {
-  background-color: rgba(255, 255, 255, 0.25) !important;
-  border: 3px solid rgba(127, 50, 205, 0.65) !important;
-  box-shadow: 0 15px 35px rgba(127, 50, 205, 0.18), 0 5px 15px rgba(0, 0, 0, 0.03) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-}
-
-.landing-promo-canvas-scoped .form-header {
-  color: var(--dark-brown) !important;
-}
-
-.landing-promo-canvas-scoped .form-label {
-  color: rgba(43, 24, 20, 0.6) !important;
-}
-
-.landing-promo-canvas-scoped .form-input, 
 .landing-promo-canvas-scoped .form-textarea {
   background-color: #ffffff !important;
   color: var(--dark-brown) !important;
@@ -2578,29 +2550,21 @@
 
 /* HQ Security Check - Purple Login Card Theme */
 .hq-security-login-card {
-  background-color: rgb(255, 255, 255) !important;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   box-shadow: 0px 0px 40px rgba(0, 0, 0, 0.062) !important;
   position: relative !important;
   overflow: hidden !important;
   border-radius: 20px !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
   z-index: 10 !important;
   display: flex !important;
   flex-direction: column !important;
 }
 
 .hq-security-login-card::before {
-  position: absolute !important;
-  content: "" !important;
-  width: 300px !important;
-  height: 300px !important;
-  background-color: rgb(209, 193, 255) !important;
-  transform: rotate(45deg) !important;
-  left: -180px !important;
-  bottom: 30px !important;
-  z-index: 1 !important;
-  border-radius: 30px !important;
-  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.082) !important;
+  display: none !important;
 }
 
 .hq-security-login-card .heading {
@@ -3523,4 +3487,717 @@
 
 .folder-toggle:checked ~ .folder-container .file-tag {
   opacity: 1;
+}
+
+@media (max-width: 767px) {
+  /* =======================================================
+     1st SECTION: HERO ROW (Arrow + Button on Left, Cards on Right)
+     ======================================================= */
+  .landing-promo-canvas-scoped .header-bottom-row {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-top: 48px !important;
+    gap: 8px !important;
+    padding: 0 8px !important;
+    width: 100% !important;
+  }
+
+  .landing-promo-canvas-scoped .hero-arrow-btn-stack {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 38% !important;
+    flex-shrink: 0 !important;
+  }
+
+  .landing-promo-canvas-scoped .heart-arrow-container {
+    width: 65px !important;
+    height: 65px !important;
+    margin: 0 auto !important;
+  }
+
+  .landing-promo-canvas-scoped .btn-wrapper {
+    transform: scale(0.65) !important;
+    transform-origin: center center !important;
+    margin: 0 !important;
+  }
+
+  .landing-promo-canvas-scoped .hanging-cards-grid {
+    width: 58% !important;
+    max-width: 58% !important;
+    gap: 4px !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+  }
+
+  .landing-promo-canvas-scoped .hanging-card {
+    border-radius: 8px !important;
+    border: 1.5px solid #ffffff !important;
+    box-shadow: 0 8px 18px rgba(43, 24, 20, 0.12) !important;
+  }
+
+  .landing-promo-canvas-scoped .hanging-card .card-caption {
+    font-size: 7px !important;
+    padding: 4px !important;
+  }
+
+  .landing-promo-canvas-scoped #card1 { transform: translateY(6px) !important; }
+  .landing-promo-canvas-scoped #card2 { transform: translateY(-8px) !important; }
+  .landing-promo-canvas-scoped #card3 { transform: translateY(12px) !important; }
+
+  /* =======================================================
+     2nd SECTION: CHOOSE A BETTER STAY (Campfire Left, Text Right)
+     ======================================================= */
+  .landing-promo-canvas-scoped .hero-green-section .grid-two-cols {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 16px !important;
+  }
+
+  .landing-promo-canvas-scoped .outlined-hero-titles h2 {
+    font-size: 20px !important;
+    line-height: 1.1 !important;
+  }
+
+  .landing-promo-canvas-scoped .campfire-card {
+    border-radius: 12px !important;
+  }
+
+  .landing-promo-canvas-scoped .campfire-card img {
+    aspect-ratio: 16/10 !important;
+  }
+
+  .landing-promo-canvas-scoped .campfire-overlaid-text h3 {
+    font-size: 14px !important;
+  }
+
+  .landing-promo-canvas-scoped .hero-subtitle {
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+    margin-bottom: 8px !important;
+    font-weight: 800 !important;
+  }
+
+  .landing-promo-canvas-scoped .hero-body-text {
+    font-size: 9px !important;
+    line-height: 1.4 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .landing-promo-canvas-scoped .explore-badge-btn {
+    padding: 8px 12px !important;
+    font-size: 10px !important;
+    border-radius: 8px !important;
+    margin-top: 12px !important;
+  }
+
+  /* =======================================================
+     3rd SECTION: CHOOSE YOUR PERFECT STAY (Bento Cards Side-by-Side)
+     ======================================================= */
+  .landing-promo-canvas-scoped .grid-three-cols {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .landing-promo-canvas-scoped .win-card {
+    border-radius: 12px !important;
+    border: 1px solid rgba(0, 0, 0, 0.03) !important;
+  }
+
+  .landing-promo-canvas-scoped .win-card-content {
+    padding: 10px 8px !important;
+  }
+
+  .landing-promo-canvas-scoped .win-card-content h3 {
+    font-size: 10px !important;
+    margin: 0 0 4px 0 !important;
+  }
+
+  .landing-promo-canvas-scoped .win-card-content p {
+    font-size: 8px !important;
+    line-height: 1.3 !important;
+    margin: 0 0 10px 0 !important;
+    max-width: 100% !important;
+  }
+
+  .landing-promo-canvas-scoped .view-project-btn {
+    padding: 6px 10px !important;
+    font-size: 7.5px !important;
+    border-radius: 9999px !important;
+  }
+
+  /* =======================================================
+     4th SECTION: STAY OPTIONS (Split Panels Side-by-Side)
+     ======================================================= */
+  .landing-promo-canvas-scoped .testimonials-split-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .landing-promo-canvas-scoped .testimonial-panel {
+    padding: 20px 10px !important;
+  }
+
+  .landing-promo-canvas-scoped .testimonial-image-box {
+    margin-bottom: 12px !important;
+    border-radius: 10px !important;
+  }
+
+  .landing-promo-canvas-scoped .testimonial-quote h3 {
+    font-size: 11px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .landing-promo-canvas-scoped .testimonial-quote p.text-xs {
+    font-size: 8px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .landing-promo-canvas-scoped .testimonial-quote p.text-sm {
+    font-size: 8.5px !important;
+    line-height: 1.3 !important;
+  }
+
+  /* =======================================================
+     5th SECTION: LET'S CONNECT (Flex / Grid side-by-side on mobile)
+     ======================================================= */
+  .landing-promo-canvas-scoped .connect-section .grid-two-cols {
+    display: grid !important;
+    grid-template-columns: 1.1fr 0.9fr !important;
+    gap: 16px !important;
+  }
+
+  .landing-promo-canvas-scoped .connect-title {
+    font-size: 28px !important;
+  }
+
+  .landing-promo-canvas-scoped .connect-subtitle {
+    font-size: 10px !important;
+    line-height: 1.3 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .landing-promo-canvas-scoped .contact-details-box {
+    border-radius: 12px !important;
+    padding: 10px 8px !important;
+    gap: 8px !important;
+  }
+
+  .landing-promo-canvas-scoped .contact-row span {
+    font-size: 8px !important;
+  }
+
+  .landing-promo-canvas-scoped .copy-pill-button {
+    font-size: 7px !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+  }
+
+  .landing-promo-canvas-scoped .form-wrapper {
+    padding: 12px 10px !important;
+    border-radius: 16px !important;
+  }
+
+  .landing-promo-canvas-scoped .form-header {
+    font-size: 11px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .landing-promo-canvas-scoped .form-group {
+    margin-bottom: 8px !important;
+  }
+
+  .landing-promo-canvas-scoped .form-label {
+    font-size: 7.5px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .landing-promo-canvas-scoped .form-input,
+  .landing-promo-canvas-scoped .form-textarea {
+    padding: 5px 8px !important;
+    font-size: 8.5px !important;
+    border-radius: 6px !important;
+  }
+
+  .landing-promo-canvas-scoped .submit-button {
+    padding: 6px 12px !important;
+    font-size: 8px !important;
+    border-radius: 8px !important;
+    margin-top: 6px !important;
+  }
+
+  /* Mobile vertical alignment centering for the lime section */
+  .landing-promo-canvas-scoped .hero-right-column {
+    align-self: center !important;
+    padding-top: 0 !important;
+  }
+}
+
+/* =======================================================
+   RADAR BACKDROP PATTERN
+   ======================================================= */
+.radar-pattern {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #f8fafc; /* Soft slate white */
+
+  /* Base square grid */
+  background-image: linear-gradient(
+      rgba(139, 92, 246, 0.08) 0.1em,
+      transparent 0.1em
+    ),
+    linear-gradient(90deg, rgba(139, 92, 246, 0.08) 0.1em, transparent 0.1em);
+  background-size: 3em 3em;
+  overflow: hidden;
+}
+
+/* Concentric Radar Rings */
+.radar-pattern::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150vw; /* Ensures rings cover the screen even if rotated */
+  height: 150vh;
+  transform: translate(-50%, -50%);
+  background: repeating-radial-gradient(
+    circle,
+    transparent 0,
+    transparent 2.9em,
+    rgba(139, 92, 246, 0.12) 3em
+  );
+  z-index: 1;
+}
+
+/* The Sweeping Radar Beam */
+.radar-pattern::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40em;
+  height: 40em;
+  margin-top: -20em;
+  margin-left: -20em;
+  border-radius: 50%;
+  /* Conic gradient creates the sweeping beam light */
+  background: conic-gradient(
+    from 0deg,
+    transparent 75%,
+    rgba(139, 92, 246, 0.25) 100%
+  );
+  animation: radar-spin 4s linear infinite;
+  z-index: 2;
+}
+
+/* Glowing Center Dot */
+.radar-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1em;
+  height: 1em;
+  transform: translate(-50%, -50%);
+  background-color: #8b5cf6;
+  border-radius: 50%;
+  z-index: 3;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* Animations */
+@keyframes radar-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    box-shadow: 0 0 0.8em 0.2em rgba(139, 92, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 2em 0.5em rgba(139, 92, 246, 0.7);
+  }
+}
+
+/* =======================================================
+   SCROLL REVEAL SYSTEM
+   ======================================================= */
+.landing-promo-canvas-scoped .scroll-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.215, 0.61, 0.355, 1), 
+              transform 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) !important;
+  /* Apply delay from custom property if set */
+  transition-delay: var(--reveal-delay, 0ms) !important;
+}
+
+.landing-promo-canvas-scoped .scroll-reveal.revealed {
+  opacity: 1 !important;
+  transform: translateY(0);
+}
+
+/* Side-by-Side: Left Cards Slide-in from Left */
+.landing-promo-canvas-scoped #campfireCard.scroll-reveal,
+.landing-promo-canvas-scoped #panelHotels.scroll-reveal,
+.landing-promo-canvas-scoped .connect-left-column.scroll-reveal,
+.landing-promo-canvas-scoped .connect-headings.scroll-reveal,
+.landing-promo-canvas-scoped .connect-subtitle.scroll-reveal,
+.landing-promo-canvas-scoped .contact-details-box.scroll-reveal {
+  transform: translateX(-50px) translateY(0);
+}
+
+.landing-promo-canvas-scoped #campfireCard.scroll-reveal.revealed,
+.landing-promo-canvas-scoped #panelHotels.scroll-reveal.revealed,
+.landing-promo-canvas-scoped .connect-left-column.scroll-reveal.revealed,
+.landing-promo-canvas-scoped .connect-headings.scroll-reveal.revealed,
+.landing-promo-canvas-scoped .connect-subtitle.scroll-reveal.revealed,
+.landing-promo-canvas-scoped .contact-details-box.scroll-reveal.revealed {
+  opacity: 1 !important;
+  transform: translateX(0) translateY(0);
+}
+
+/* Side-by-Side: Right Cards Slide-in from Right */
+.landing-promo-canvas-scoped .hero-text-wrapper.scroll-reveal,
+.landing-promo-canvas-scoped #panelPGs.scroll-reveal,
+.landing-promo-canvas-scoped .connect-right-column.scroll-reveal {
+  transform: translateX(50px) translateY(0);
+}
+
+.landing-promo-canvas-scoped .hero-text-wrapper.scroll-reveal.revealed,
+.landing-promo-canvas-scoped #panelPGs.scroll-reveal.revealed,
+.landing-promo-canvas-scoped .connect-right-column.scroll-reveal.revealed {
+  opacity: 1 !important;
+  transform: translateX(0) translateY(0);
+}
+
+/* Connect Form Card Glassmorphism and Softer Border */
+.landing-promo-canvas-scoped .form-wrapper {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border: 2px solid rgba(127, 50, 205, 0.35) !important;
+  box-shadow: 0 15px 35px rgba(127, 50, 205, 0.1), 0 5px 15px rgba(0, 0, 0, 0.03) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
+/* Position select connect text/cards above falling stars animation backdrop */
+.landing-promo-canvas-scoped .connect-section .section-container {
+  position: relative !important;
+  z-index: auto !important;
+}
+
+.landing-promo-canvas-scoped .contact-details-box {
+  position: relative !important;
+  z-index: 5 !important;
+}
+
+.landing-promo-canvas-scoped .connect-subtitle,
+.landing-promo-canvas-scoped .connect-title,
+.landing-promo-canvas-scoped .form-wrapper {
+  position: relative !important;
+  z-index: 0 !important;
+}
+
+/* Quote Card Footer Styling (Sky Blue and Dark Blue Theme) */
+.landing-promo-canvas-scoped .quote-card-footer {
+  background: #38bdf8 !important; /* Sky Blue background */
+  font-family: inherit;
+  position: relative;
+  border-radius: 20px;
+  padding: 32px 40px;
+  width: 100%;
+  max-width: 100% !important;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 200px;
+  transition: transform 0.3s ease;
+  overflow: hidden;
+  box-shadow: 0 15px 30px rgba(56, 189, 248, 0.25) !important;
+}
+
+.landing-promo-canvas-scoped .quote-card-footer:hover {
+  transform: translateY(-4px);
+}
+
+.landing-promo-canvas-scoped .quote-card-name {
+  text-transform: uppercase;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #0369a1 !important; /* Dark Blue heading */
+  z-index: 2;
+  text-align: left;
+}
+
+.landing-promo-canvas-scoped .quote-card-quote {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: rgba(255, 255, 255, 0.3) !important; /* Light/soft white-blue svg quote */
+  z-index: 1;
+}
+
+.landing-promo-canvas-scoped .quote-card-body-text {
+  font-size: 20px;
+  font-weight: 900;
+  color: #1e3a8a !important; /* Dark Blue body text */
+  line-height: 1.3;
+  margin-top: 15px;
+  margin-bottom: 24px;
+  z-index: 2;
+  text-align: left;
+  font-family: var(--font-display), sans-serif;
+}
+
+@media (min-width: 768px) {
+  .landing-promo-canvas-scoped .connect-section {
+    padding: 160px 48px 90px 48px !important;
+  }
+  .landing-promo-canvas-scoped .quote-card-body-text {
+    font-size: 32px !important;
+  }
+}
+
+.landing-promo-canvas-scoped .connect-section {
+  padding-bottom: 90px !important;
+}
+
+.landing-promo-canvas-scoped .quote-card-author-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  text-align: left;
+}
+
+.landing-promo-canvas-scoped .quote-card-footer:hover .quote-card-author-container {
+  opacity: 1;
+}
+
+.landing-promo-canvas-scoped .quote-card-pic {
+  width: 32px;
+  height: 32px;
+  background-color: #0284c7; /* Sky blue/dark accent circle */
+  border-radius: 50%;
+}
+
+.landing-promo-canvas-scoped .quote-card-author {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0369a1 !important; /* Dark Blue author text */
+  line-height: 1.3;
+  display: flex;
+  align-items: center;
+}
+
+.landing-promo-canvas-scoped .quote-card-author span {
+  font-weight: 500;
+  opacity: 0.8;
+  font-size: 9.5px;
+  display: block;
+}
+
+.landing-promo-canvas-scoped .quote-card-author svg {
+  color: #1e3a8a !important;
+  opacity: 0.65;
+  vertical-align: middle;
+}
+
+/* ==========================================
+   STAYHUB SKY BLUE FOOTER CARD STYLES
+   ========================================== */
+.landing-promo-card-footer-wrapper {
+  background-color: #0b3c5d !important; /* Premium dark navy blue outer backdrop */
+  padding: 48px 24px !important;
+  margin-top: 0px !important;
+  width: 100vw !important;
+  position: relative !important;
+  left: 50% !important;
+  margin-left: -50vw !important;
+  margin-right: -50vw !important;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+.landing-promo-canvas-scoped .new-stayhub-footer-card {
+  background: #38bdf8 !important; /* Bright sky blue card background */
+  border-radius: 16px;
+  padding: 32px 40px;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 1200px; /* Centered card container width */
+  margin: 0 auto;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
+  box-sizing: border-box;
+}
+
+.landing-promo-canvas-scoped .footer-quote-icon {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  color: rgba(255, 255, 255, 0.4) !important;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.landing-promo-canvas-scoped .footer-brand-title {
+  font-family: var(--font-display), sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  color: #1e3a8a !important; /* Dark Blue title */
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 2;
+  text-align: left;
+}
+
+.landing-promo-canvas-scoped .footer-content-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr 1fr;
+  gap: 40px;
+  position: relative;
+  z-index: 2;
+  text-align: left;
+}
+
+@media (max-width: 767px) {
+  .landing-promo-canvas-scoped .footer-content-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+  .landing-promo-canvas-scoped .new-stayhub-footer-card {
+    padding: 24px 20px !important;
+  }
+}
+
+.landing-promo-canvas-scoped .footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.landing-promo-canvas-scoped .footer-col-header {
+  font-family: var(--font-display), sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #1e293b !important; /* Slightly darker slate-blue for column titles */
+  margin: 0;
+  text-align: left;
+}
+
+.landing-promo-canvas-scoped .footer-col-description {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1e3a8a !important; /* Dark Blue overview text */
+  line-height: 1.5;
+  margin: 0;
+}
+
+.landing-promo-canvas-scoped .footer-links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.landing-promo-canvas-scoped .footer-links-list a {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e3a8a !important; /* Dark Blue links */
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.landing-promo-canvas-scoped .footer-links-list a:hover {
+  opacity: 0.75;
+}
+
+.landing-promo-canvas-scoped .footer-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.landing-promo-canvas-scoped .footer-info-item {
+  display: flex;
+  align-items: center;
+  font-family: var(--font-sans), sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1e3a8a !important; /* Dark Blue contacts */
+  line-height: 1.4;
+}
+
+.landing-promo-canvas-scoped .footer-info-item svg {
+  color: #1e3a8a !important;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.landing-promo-canvas-scoped .footer-social-circles {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.landing-promo-canvas-scoped .social-circle {
+  width: 32px;
+  height: 32px;
+  background-color: #ffffff !important; /* White circle background */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+
+.landing-promo-canvas-scoped .social-circle:hover {
+  transform: scale(1.1);
+}
+
+.landing-promo-canvas-scoped .social-circle svg {
+  color: #38bdf8 !important; /* Sky Blue icon color */
+}
+
+.landing-promo-canvas-scoped .footer-divider-line {
+  width: 100%;
+  height: 1px;
+  background-color: rgba(30, 58, 138, 0.15); /* Light blue-dark divider */
+  margin: 24px 0 16px 0;
+  position: relative;
+  z-index: 2;
+}
+
+.landing-promo-canvas-scoped .footer-copyright-text {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e3a8a !important; /* Dark Blue copyright */
+  margin: 0;
+  text-align: center;
+  position: relative;
+  z-index: 2;
 }
