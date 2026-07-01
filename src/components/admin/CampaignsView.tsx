@@ -129,8 +129,8 @@ export default function CampaignsView({
         
         {/* Left Section: Campaign Info */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl shadow-5xs space-y-4">
-            <h3 className="font-extrabold text-sm text-slate-900 dark:text-white font-display flex items-center gap-1.5 border-b pb-2.5 border-slate-100 dark:border-slate-800">
+          <div className={`border p-5 rounded-3xl shadow-5xs space-y-4 ${isDarkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'}`}>
+            <h3 className="font-extrabold text-sm font-display flex items-center gap-1.5 border-b pb-2.5 border-slate-100 dark:border-slate-800">
               <Gift className="w-4.5 h-4.5 text-indigo-505 dark:text-cyan-400" />
               <span>Campaign Header</span>
             </h3>
@@ -191,8 +191,8 @@ export default function CampaignsView({
 
         {/* Right Section: Discount Setup */}
         <div className="lg:col-span-7">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl shadow-5xs space-y-4">
-            <h3 className="font-extrabold text-sm text-slate-900 dark:text-white font-display flex items-center gap-1.5 border-b pb-2.5 border-slate-100 dark:border-slate-800">
+          <div className={`border p-5 rounded-3xl shadow-5xs space-y-4 ${isDarkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'}`}>
+            <h3 className="font-extrabold text-sm font-display flex items-center gap-1.5 border-b pb-2.5 border-slate-100 dark:border-slate-800">
               <Sliders className="w-4.5 h-4.5 text-indigo-505 dark:text-cyan-400" />
               <span>Discount Configuration Rates</span>
             </h3>
@@ -228,7 +228,7 @@ export default function CampaignsView({
                     return (
                       <div 
                         key={room.id}
-                        className="bg-slate-50 dark:bg-slate-850 border border-slate-150 dark:border-slate-800 p-3.5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 transition-colors hover:border-slate-250 dark:hover:border-slate-700"
+                        className={`border p-3.5 rounded-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 transition-colors ${isDarkMode ? 'bg-slate-850 border-slate-800 text-white hover:border-slate-700' : 'bg-slate-50 border-slate-150 text-slate-900 hover:border-slate-250'}`}
                       >
                         <div className="flex-1 min-w-0">
                           <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono font-bold">ROOM {room.roomNumber} &bull; {room.type}</div>

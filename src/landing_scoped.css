@@ -2230,7 +2230,7 @@
 .super-hq-peach-theme {
   --peach-bg: #ffffff;
   --peach-border: #cbd5e1;
-  --peach-accent: #3b82f6;
+  --peach-accent: rgb(242, 90, 36);
   --peach-header: #1e293b;
   --peach-dark: #0f172a;
 }
@@ -2238,7 +2238,7 @@
 /* Card Containers & Panels */
 .super-hq-peach-theme .bg-white,
 .super-hq-peach-theme .bg-slate-50,
-.super-hq-peach-theme .bg-slate-100/50,
+.super-hq-peach-theme .bg-slate-100\/50,
 .super-hq-peach-theme .bg-slate-100 {
   background-color: #ffffff !important;
   border-color: #e2e8f0 !important;
@@ -2328,34 +2328,36 @@
 .super-hq-peach-theme input:focus,
 .super-hq-peach-theme select:focus,
 .super-hq-peach-theme textarea:focus {
-  border-color: #3b82f6 !important;
-  box-shadow: 0px 0px 0px 2px rgba(59, 130, 246, 0.15) !important;
+  border-color: rgb(242, 90, 36) !important;
+  box-shadow: 0px 0px 0px 2px rgba(242, 90, 36, 0.15) !important;
   background-color: #ffffff !important;
 }
 
 /* Form Buttons */
-.super-hq-peach-theme button:not(.hq-static-blue-btn):not(.bg-red-600):not(.bg-rose-600):not(.hq-submit-btn-purple),
+.super-hq-peach-theme main button:not(.hq-static-blue-btn):not(.bg-red-600):not(.bg-rose-600):not(.hq-submit-btn-purple),
 .super-hq-peach-theme .checkout-btn {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   padding: 8px 16px !important;
-  background-color: #3b82f6 !important;
-  background: #3b82f6 !important;
+  background-color: #ffffff !important; /* Default white background */
+  background: #ffffff !important;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
   border-radius: 6px !important;
-  border: none !important;
-  font-weight: 600 !important;
+  border: 2px solid rgb(242, 90, 36) !important; /* Orange border */
+  font-weight: 700 !important;
   font-size: 12px !important;
-  color: #ffffff !important;
+  color: #000000 !important; /* Black text */
   cursor: pointer !important;
   transition: all 0.2s ease !important;
 }
 
-.super-hq-peach-theme button:not(.hq-static-blue-btn):not(.bg-red-600):not(.bg-rose-600):not(.hq-submit-btn-purple):hover,
+.super-hq-peach-theme main button:not(.hq-static-blue-btn):not(.bg-red-600):not(.bg-rose-600):not(.hq-submit-btn-purple):hover,
 .super-hq-peach-theme .checkout-btn:hover {
-  background-color: #2563eb !important;
-  background: #2563eb !important;
+  background-color: rgb(242, 90, 36) !important; /* Orange on hover */
+  background: rgb(242, 90, 36) !important;
+  color: #ffffff !important; /* White text on hover */
+  border-color: rgb(242, 90, 36) !important;
 }
 
 /* Delete / Destructive buttons stay red for safety, but with rounded borders */
@@ -2412,7 +2414,7 @@
 .super-hq-peach-theme .bg-green-100,
 .super-hq-peach-theme .text-green-800,
 .super-hq-peach-theme .text-emerald-800,
-.super-hq-peach-theme .bg-emerald-100/50,
+.super-hq-peach-theme .bg-emerald-100\/50,
 .super-hq-peach-theme .bg-emerald-100 {
   background-color: #d1fae5 !important;
   color: #065f46 !important;
@@ -2425,7 +2427,7 @@
 .super-hq-peach-theme .bg-red-100,
 .super-hq-peach-theme .text-red-800,
 .super-hq-peach-theme .text-rose-800,
-.super-hq-peach-theme .bg-rose-100/50,
+.super-hq-peach-theme .bg-rose-100\/50,
 .super-hq-peach-theme .bg-rose-100 {
   background-color: #fee2e2 !important;
   color: #991b1b !important;
@@ -2435,39 +2437,43 @@
   font-weight: 700 !important;
 }
 
-/* Sidebar navigation */
-.super-hq-peach-theme aside {
-  background-color: #1e293b !important;
-  border-right: 1px solid #334155 !important;
+/* Sidebar navigation - Daylight Mode (Light background) */
+.super-hq-peach-theme:not(.dark) aside {
+  background-color: #f1f5f9 !important; /* Shaded daylight backdrop */
+  border-right: 1px solid #cbd5e1 !important;
 }
 
 /* Change color of HQ brand seal */
 .super-hq-peach-theme .hq-brand-seal {
-  background: #3b82f6 !important;
+  background: rgb(242, 90, 36) !important;
   color: #ffffff !important;
 }
 
 .super-hq-peach-theme aside button {
-  background-color: transparent !important;
-  color: #94a3b8 !important;
+  background-color: transparent !important; /* Transparent default background */
+  color: #0f172a !important; /* Black text */
   margin-bottom: 6px !important;
-  border: none !important;
+  border: 1px solid transparent !important;
   border-radius: 6px !important;
   box-shadow: none !important;
+  transition: all 0.2s ease !important;
 }
 
 .super-hq-peach-theme aside button.bg-slate-900,
 .super-hq-peach-theme aside button.bg-slate-800,
-.super-hq-peach-theme aside button.bg-indigo-600 {
-  background-color: #3b82f6 !important;
-  color: #ffffff !important;
+.super-hq-peach-theme aside button.bg-indigo-600,
+.super-hq-peach-theme aside button[class*="bg-indigo-50"],
+.super-hq-peach-theme aside button.bg-indigo-50 {
+  background-color: #ffffff !important; /* Clean white background for selected one */
+  color: #0f172a !important; /* Black text */
   font-weight: 700 !important;
-  border-left: none !important;
+  border: 2px solid rgb(242, 90, 36) !important; /* Selected one has orange border */
 }
 
 .super-hq-peach-theme aside button:hover {
-  background-color: rgba(255, 255, 255, 0.08) !important;
-  color: #ffffff !important;
+  background-color: rgb(242, 90, 36) !important; /* Orange only while pointing */
+  color: #ffffff !important; /* White text on hover */
+  border-color: rgb(242, 90, 36) !important;
 }
 
 /* Outer layout backdrop */
@@ -2548,22 +2554,26 @@
 /* Edit / Delete Buttons inside these cards should match the style as well */
 .super-hq-peach-theme .hq-property-card button,
 .super-hq-peach-theme .hq-customer-card button {
-  border: none !important;
-  background-color: rgb(162, 104, 255) !important;
-  color: white !important;
+  border: 2px solid rgb(242, 90, 36) !important; /* Orange border */
+  background-color: #ffffff !important; /* White background */
+  color: #000000 !important; /* Black icon / text */
   font-size: 0.85em !important;
-  font-weight: 500 !important;
+  font-weight: 700 !important;
   padding: 6px 12px !important;
   border-radius: 4px !important;
   cursor: pointer !important;
-  transition: background-color 0.2s ease !important;
+  transition: all 0.2s ease !important;
   box-shadow: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .super-hq-peach-theme .hq-property-card button:hover,
 .super-hq-peach-theme .hq-customer-card button:hover {
-  background-color: rgb(126, 84, 255) !important;
-  color: white !important;
+  background-color: rgb(242, 90, 36) !important; /* Orange background on hover */
+  color: #ffffff !important; /* White icon / text on hover */
+  border-color: rgb(242, 90, 36) !important;
 }
 
 /* HQ Security Check - Purple Login Card Theme */
@@ -2649,7 +2659,7 @@
 
 .hq-input-field:focus {
   outline: none !important;
-  border-bottom: 2px solid rgb(199, 114, 255) !important;
+  border-bottom: 2px solid rgb(250, 140, 80) !important;
 }
 
 .hq-input-field::placeholder {
@@ -2663,7 +2673,7 @@
   position: relative !important;
   width: 100% !important;
   border: none !important;
-  background-color: rgb(162, 104, 255) !important;
+  background-color: rgb(242, 90, 36) !important;
   height: 38px !important;
   color: white !important;
   font-size: 0.9em !important;
@@ -2676,7 +2686,7 @@
 }
 
 .hq-submit-btn-purple:hover {
-  background-color: rgb(126, 84, 255) !important;
+  background-color: rgb(210, 70, 20) !important;
 }
 
 .hq-forgot-link {
@@ -2711,7 +2721,9 @@
 /* Card Containers & Panels to Black */
 .super-hq-peach-theme.dark .bg-white,
 .super-hq-peach-theme.dark .bg-slate-50,
-.super-hq-peach-theme.dark .bg-slate-100/50,
+.super-hq-peach-theme.dark .bg-slate-100\/50,
+.super-hq-peach-theme.dark .bg-emerald-100\/50,
+.super-hq-peach-theme.dark .bg-rose-100\/50,
 .super-hq-peach-theme.dark .bg-slate-100,
 .super-hq-peach-theme.dark .overflow-x-auto,
 .super-hq-peach-theme.dark .overflow-hidden,
@@ -2766,7 +2778,7 @@
   background-color: #222222 !important;
 }
 
-/* Buttons background colors to gray */
+/* Buttons background colors to gray by default, but action buttons to black with orange border */
 .super-hq-peach-theme.dark button,
 .super-hq-peach-theme.dark .checkout-btn {
   background-color: #333333 !important;
@@ -2782,13 +2794,47 @@
   background: #555555 !important;
 }
 
-/* Active tab highlight color in dark mode (slightly lighter gray to denote active state) */
+/* Specific Action buttons inside main column in Dark Mode */
+.super-hq-peach-theme.dark main button:not(.hq-static-blue-btn):not(.bg-red-600):not(.bg-rose-600):not(.hq-submit-btn-purple),
+.super-hq-peach-theme.dark .checkout-btn {
+  background-color: #000000 !important; /* Black background */
+  background: #000000 !important;
+  color: #ffffff !important; /* White text */
+  border: 2px solid rgb(242, 90, 36) !important; /* Orange border */
+}
+
+.super-hq-peach-theme.dark main button:not(.hq-static-blue-btn):not(.bg-red-600):not(.bg-rose-600):not(.hq-submit-btn-purple):hover,
+.super-hq-peach-theme.dark .checkout-btn:hover {
+  background-color: rgb(242, 90, 36) !important; /* Orange hover */
+  background: rgb(242, 90, 36) !important;
+  color: #ffffff !important; /* White text on hover */
+  border-color: rgb(242, 90, 36) !important;
+}
+
+/* Edit / Delete buttons inside property and customer cards in Dark Mode */
+.super-hq-peach-theme.dark .hq-property-card button,
+.super-hq-peach-theme.dark .hq-customer-card button {
+  background-color: #000000 !important; /* Black background */
+  color: #ffffff !important; /* White icon / text */
+  border: 2px solid rgb(242, 90, 36) !important; /* Orange border */
+}
+
+.super-hq-peach-theme.dark .hq-property-card button:hover,
+.super-hq-peach-theme.dark .hq-customer-card button:hover {
+  background-color: rgb(242, 90, 36) !important; /* Orange hover */
+  color: #ffffff !important; /* White icon / text on hover */
+  border-color: rgb(242, 90, 36) !important;
+}
+
 .super-hq-peach-theme.dark aside button.bg-slate-900,
 .super-hq-peach-theme.dark aside button.bg-slate-800,
-.super-hq-peach-theme.dark aside button.bg-indigo-600 {
-  background-color: #555555 !important;
-  background: #555555 !important;
-  border-left: 3px solid #ffffff !important;
+.super-hq-peach-theme.dark aside button.bg-indigo-600,
+.super-hq-peach-theme.dark aside button[class*="bg-indigo-50"],
+.super-hq-peach-theme.dark aside button.bg-indigo-50 {
+  background-color: #000000 !important;
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid rgb(242, 90, 36) !important;
 }
 
 /* Text inputs, selects, and textareas in dark mode */
@@ -2840,15 +2886,641 @@
   color: #ffffff !important;
 }
 
-/* In dark mode, edit/delete buttons inside cards are gray */
+/* In dark mode, edit/delete buttons inside cards match orange-black style */
 .super-hq-peach-theme.dark .hq-property-card button,
 .super-hq-peach-theme.dark .hq-customer-card button {
-  background-color: #444444 !important;
-  color: #ffffff !important;
-  border: 1px solid #555555 !important;
+  background-color: #000000 !important; /* Black background */
+  color: #ffffff !important; /* White icon / text */
+  border: 2px solid rgb(242, 90, 36) !important; /* Orange border */
 }
 
 .super-hq-peach-theme.dark .hq-property-card button:hover,
 .super-hq-peach-theme.dark .hq-customer-card button:hover {
-  background-color: #555555 !important;
+  background-color: rgb(242, 90, 36) !important; /* Orange background on hover */
+  color: #ffffff !important;
+  border-color: rgb(242, 90, 36) !important;
+}
+
+/* HS Logo and bottom control buttons override in Admin Core Portal */
+#operator-admin-interface .from-indigo-500.to-cyan-500,
+#operator-admin-interface .from-indigo-500 {
+  background: rgb(242, 90, 36) !important;
+  background-color: rgb(242, 90, 36) !important;
+}
+
+/* Bottom status bar in Admin Core Portal */
+#operator-admin-interface:not(.dark) aside div[class*="bg-slate-900"] {
+  background-color: #e2e8f0 !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+#operator-admin-interface:not(.dark) aside button:not(.no-uiverse) {
+  background-color: #e2e8f0 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02) !important;
+}
+
+#operator-admin-interface:not(.dark) aside button:not(.no-uiverse):hover {
+  background-color: rgb(242, 90, 36) !important;
+  border-color: rgb(242, 90, 36) !important;
+  color: #ffffff !important;
+}
+
+#operator-admin-interface:not(.dark) aside button:not(.no-uiverse):hover * {
+  color: #ffffff !important;
+}
+
+#operator-admin-interface.dark aside button:not(.no-uiverse) {
+  background-color: #1e293b !important;
+  border: 1px solid #334155 !important;
+  color: #ffffff !important;
+}
+
+#operator-admin-interface.dark aside button:not(.no-uiverse):hover {
+  background-color: rgb(242, 90, 36) !important;
+  border-color: rgb(242, 90, 36) !important;
+  color: #ffffff !important;
+}
+
+/* --- Welcome Banner (Dashboard) Styles --- */
+.super-hq-peach-theme:not(.dark) .hq-welcome-banner {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+}
+.super-hq-peach-theme:not(.dark) .hq-welcome-title {
+  color: #0f172a !important;
+}
+.super-hq-peach-theme:not(.dark) .hq-welcome-sub {
+  color: #475569 !important;
+}
+
+.super-hq-peach-theme.dark .hq-welcome-banner {
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+}
+.super-hq-peach-theme.dark .hq-welcome-title {
+  color: #ffffff !important;
+}
+.super-hq-peach-theme.dark .hq-welcome-sub {
+  color: #94a3b8 !important;
+}
+
+/* --- Corporate HQ Chat (Admin Panel) Styles --- */
+.super-hq-peach-theme .hq-chat-bubble-left {
+  border: 1px solid #cbd5e1 !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+.super-hq-peach-theme:not(.dark) .hq-chat-bubble-left p,
+.super-hq-peach-theme:not(.dark) .hq-chat-bubble-left span {
+  color: #0f172a !important;
+}
+
+.super-hq-peach-theme.dark .hq-chat-bubble-left {
+  border: 1px solid #334155 !important;
+  background-color: #1e293b !important;
+  background: #1e293b !important;
+}
+.super-hq-peach-theme.dark .hq-chat-bubble-left p,
+.super-hq-peach-theme.dark .hq-chat-bubble-left span {
+  color: #ffffff !important;
+}
+
+/* Right Chat Bubble (Admin sender) - styled in orange! */
+.super-hq-peach-theme .hq-chat-bubble-right {
+  background-color: rgb(242, 90, 36) !important;
+  background: rgb(242, 90, 36) !important;
+  border: 1px solid rgb(242, 90, 36) !important;
+}
+.super-hq-peach-theme .hq-chat-bubble-right p,
+.super-hq-peach-theme .hq-chat-bubble-right span {
+  color: #ffffff !important; /* Force text inside right bubble to be white */
+}
+
+.super-hq-peach-theme:not(.dark) span[class*="bg-indigo-50"],
+.super-hq-peach-theme:not(.dark) span[class*="bg-indigo-950"] {
+  background-color: #e2e8f0 !important; /* Light gray background */
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important; /* Black text */
+}
+
+.super-hq-peach-theme.dark span[class*="bg-indigo-50"],
+.super-hq-peach-theme.dark span[class*="bg-indigo-950"] {
+  background-color: #000000 !important; /* Black background */
+  border: 1px solid #334155 !important;
+  color: #ffffff !important; /* White text */
+}
+
+/* Force light background for cards & containers in Daylight Mode for Admin Portal */
+#operator-admin-interface:not(.dark) .bg-white,
+#operator-admin-interface:not(.dark) [class*="bg-white"],
+#operator-admin-interface:not(.dark) .bg-slate-50,
+#operator-admin-interface:not(.dark) [class*="bg-slate-50"],
+#operator-admin-interface:not(.dark) .bg-slate-100\/50,
+#operator-admin-interface:not(.dark) .bg-slate-100 {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+#operator-admin-interface:not(.dark) .bg-white *,
+#operator-admin-interface:not(.dark) [class*="bg-white"] *,
+#operator-admin-interface:not(.dark) .bg-slate-50 *,
+#operator-admin-interface:not(.dark) [class*="bg-slate-50"] * {
+  color: #0f172a !important; /* Force black text */
+}
+
+/* Override the text color specifically for buttons inside light cards */
+#operator-admin-interface:not(.dark) .bg-white button,
+#operator-admin-interface:not(.dark) [class*="bg-white"] button {
+  color: #000000 !important;
+}
+#operator-admin-interface:not(.dark) .bg-white button:hover,
+#operator-admin-interface:not(.dark) [class*="bg-white"] button:hover {
+  color: #ffffff !important;
+}
+
+/* Force pure black background for all cards, containers, sidebars, tables & inputs in Dark Mode */
+.super-hq-peach-theme.dark,
+#operator-admin-interface.dark,
+.super-hq-peach-theme.dark .bg-white,
+.super-hq-peach-theme.dark [class*="bg-white"],
+.super-hq-peach-theme.dark .bg-slate-50,
+.super-hq-peach-theme.dark [class*="bg-slate-50"],
+.super-hq-peach-theme.dark .bg-slate-100\/50,
+.super-hq-peach-theme.dark .bg-slate-100,
+.super-hq-peach-theme.dark aside,
+.super-hq-peach-theme.dark .hq-welcome-banner,
+.super-hq-peach-theme.dark .hq-chat-bubble-left,
+.super-hq-peach-theme.dark table,
+.super-hq-peach-theme.dark tr,
+.super-hq-peach-theme.dark td,
+.super-hq-peach-theme.dark th,
+.super-hq-peach-theme.dark input,
+.super-hq-peach-theme.dark select,
+.super-hq-peach-theme.dark textarea,
+#operator-admin-interface.dark aside div[class*="bg-white"],
+#operator-admin-interface.dark aside div[class*="bg-slate-800"] {
+  background-color: #000000 !important;
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #334155 !important;
+}
+
+.super-hq-peach-theme.dark *,
+#operator-admin-interface.dark * {
+  color: #ffffff !important; /* Force white text */
+}
+
+/* Force hover button to be solid orange background and white text in dark mode */
+.super-hq-peach-theme.dark button:hover,
+#operator-admin-interface.dark button:hover {
+  background-color: rgb(242, 90, 36) !important;
+  background: rgb(242, 90, 36) !important;
+  color: #ffffff !important;
+  border-color: rgb(242, 90, 36) !important;
+}
+.super-hq-peach-theme.dark button:hover *,
+#operator-admin-interface.dark button:hover * {
+  color: #ffffff !important;
+}
+
+/* Selected button has orange border, black background in dark mode */
+.super-hq-peach-theme.dark button[class*="bg-indigo-50"],
+.super-hq-peach-theme.dark button.bg-indigo-50,
+#operator-admin-interface.dark button[class*="bg-indigo-50"],
+#operator-admin-interface.dark button.bg-indigo-50 {
+  background-color: #000000 !important;
+  background: #000000 !important;
+  border: 2px solid rgb(242, 90, 36) !important;
+}
+
+/* --- PREMIUM REALISTIC TOGGLE SWITCH --- */
+.togglesw-premium {
+  --hue: 220deg;
+  --width: 6.5rem; /* Adjusted width to fit nicely in sidebar */
+  --accent-hue: 22deg;
+  --duration: 0.4s;
+  --easing: cubic-bezier(1, 0, 1, 1);
+  --shadow-offset: calc(var(--width) / 20);
+  
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  width: var(--width);
+  height: calc(var(--width) / 2.5);
+  border-radius: var(--width);
+  box-shadow: inset 3px 3px 5px hsl(var(--hue) 20% 70%),
+    inset -3px -3px 5px hsl(var(--hue) 20% 93%);
+  background-color: #e2e8f0;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.super-hq-peach-theme.dark .togglesw-premium,
+#operator-admin-interface.dark .togglesw-premium {
+  box-shadow: inset 3px 3px 5px hsl(var(--hue) 20% 10%),
+    inset -3px -3px 5px hsl(var(--hue) 20% 25%);
+  background-color: #0d1117 !important;
+  background: #0d1117 !important;
+}
+
+.togglesw-input {
+  display: none !important;
+}
+
+.togglesw-indicator {
+  content: '';
+  position: absolute;
+  width: 40%;
+  height: 60%;
+  transition: all var(--duration) var(--easing);
+  box-shadow: inset 0 0 2px hsl(var(--hue) 20% 15% / 60%),
+    inset 0 0 3px 2px hsl(var(--hue) 20% 15% / 60%),
+    inset 0 0 5px 2px hsl(var(--hue) 20% 45% / 60%);
+}
+
+.togglesw-indicator.left {
+  --hue: var(--accent-hue);
+  overflow: hidden;
+  left: 10%;
+  border-radius: 100px 0 0 100px;
+  background: linear-gradient(180deg, hsl(calc(var(--accent-hue) + 20deg) 95% 80%) 10%, hsl(calc(var(--accent-hue) + 20deg) 100% 60%) 30%, hsl(var(--accent-hue) 90% 50%) 60%, hsl(var(--accent-hue) 90% 60%) 75%, hsl(var(--accent-hue) 90% 50%)) !important;
+}
+
+.togglesw-indicator.left::after {
+  content: '';
+  position: absolute;
+  opacity: 0.6;
+  width: 100%;
+  height: 100%;
+}
+
+.togglesw-indicator.right {
+  right: 10%;
+  border-radius: 0 100px 100px 0;
+  background-image: linear-gradient(180deg, hsl(var(--hue) 20% 95%), hsl(var(--hue) 20% 65%) 60%, hsl(var(--hue) 20% 70%) 70%, hsl(var(--hue) 20% 65%)) !important;
+}
+
+.togglesw-btn {
+  position: absolute;
+  z-index: 1;
+  width: 55%;
+  height: 80%;
+  left: 5%;
+  border-radius: 100px;
+  background-image: linear-gradient(160deg, hsl(var(--hue) 20% 95%) 40%, hsl(var(--hue) 20% 65%) 70%) !important;
+  background: linear-gradient(160deg, hsl(var(--hue) 20% 95%) 40%, hsl(var(--hue) 20% 65%) 70%) !important;
+  transition: all var(--duration) var(--easing);
+  box-shadow: 1px 1px 2px hsl(var(--hue) 18% 50% / 80%),
+    2px 2px 4px hsl(var(--hue) 18% 50% / 45%) !important;
+}
+
+.togglesw-btn::before, 
+.togglesw-btn::after {
+  content: '';
+  position: absolute;
+  top: 10%;
+  width: 41%;
+  height: 80%;
+  border-radius: 100%;
+}
+
+.togglesw-btn::before {
+  left: 5%;
+  box-shadow: inset 1px 1px 2px hsl(var(--hue) 20% 85%);
+  background-image: linear-gradient(-50deg, hsl(var(--hue) 20% 95%) 20%, hsl(var(--hue) 20% 85%) 80%) !important;
+}
+
+.togglesw-btn::after {
+  right: 5%;
+  box-shadow: inset 1px 1px 3px hsl(var(--hue) 20% 70%);
+  background-image: linear-gradient(-50deg, hsl(var(--hue) 20% 95%) 20%, hsl(var(--hue) 20% 75%) 80%) !important;
+}
+
+.togglesw-input:checked ~ .togglesw-btn {
+  left: 40%;
+}
+
+.togglesw-input:not(:checked) ~ .togglesw-indicator.left,
+.togglesw-input:checked ~ .togglesw-indicator.right {
+  box-shadow: inset 0 0 5px hsl(var(--hue) 20% 15% / 100%),
+    inset 10px 10px 5px hsl(var(--hue) 20% 15% / 100%),
+    inset 10px 10px 8px hsl(var(--hue) 20% 45% / 100%) !important;
+}
+
+/* --- FUTURISTIC 3D FOLDER ANIMATION STYLES --- */
+.folder-card {
+  width: 170px;
+  height: 130px;
+  perspective: 1200px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  transform: scale(0.38); /* Keep it small and neat */
+  transform-origin: right top;
+  margin: 0 !important;
+}
+
+.folder-toggle {
+  display: none !important;
+}
+
+.hint-wrapper {
+  position: absolute;
+  top: -40px;
+  right: -55px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+  z-index: 100;
+  animation: floatHint 2.5s ease-in-out infinite;
+}
+
+.hint-text {
+  font-family: "Inter", sans-serif;
+  color: #60a5fa;
+  font-size: 10px;
+  font-weight: 900;
+  text-decoration: underline;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  position: relative;
+  right: -25px;
+  top: 10px;
+  transform: rotate(45deg);
+}
+
+.hint-arrow {
+  height: 35px;
+  width: 35px;
+}
+
+@keyframes floatHint {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+.folder-toggle:checked ~ .hint-wrapper {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.folder-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+.folder-toggle:checked ~ .folder-container {
+  transform: none;
+}
+
+.folder-back {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.4));
+}
+
+.folder-front-wrapper {
+  position: absolute;
+  bottom: -7px;
+  width: 100%;
+  z-index: 90;
+  transform-origin: bottom;
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border-radius: 12px;
+}
+
+.folder-label {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 30px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+}
+
+.counter {
+  position: absolute;
+  top: -95px;
+  right: -10px;
+  background-color: rgb(242, 90, 36) !important; /* Premium orange counter */
+  padding: 4px 8px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  transform: scale(0) translateY(20px);
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 100;
+  pointer-events: auto;
+}
+
+.folder-toggle:checked ~ .folder-container .counter {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+  transition-delay: 0.2s;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  background: #34d399;
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 0 10px #34d399;
+}
+
+.status-dot::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #34d399;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(3); opacity: 0; }
+}
+
+.counter-label {
+  font-family: "Inter", sans-serif;
+  font-size: 8px;
+  font-weight: 800;
+  color: white !important;
+  text-transform: uppercase;
+}
+
+.counter-number {
+  font-family: "Inter", sans-serif;
+  font-size: 12px;
+  font-weight: 900;
+  color: #ffffff !important;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.file {
+  position: absolute;
+  bottom: 5px;
+  left: 10%;
+  width: 80%;
+  height: 85px;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  z-index: 0;
+}
+
+.file-1 {
+  background: #ff5f6d;
+  z-index: 25;
+  transition-delay: 0.15s;
+}
+
+.file-2 {
+  background: #ffc371;
+  z-index: 24;
+  transition-delay: 0.1s;
+}
+
+.file-3 {
+  background: #4facfe;
+  z-index: 23;
+  transition-delay: 0.05s;
+}
+
+.file-4 {
+  background: #f59e0b; /* Orange for Daylight Mode button */
+  z-index: 22;
+  transition-delay: 0.02s;
+}
+
+.file-5 {
+  background: #ef4444; /* Red for Sign Out button */
+  z-index: 21;
+  transition-delay: 0s;
+}
+
+.shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-20deg);
+  transition: none;
+}
+
+.folder-toggle:checked ~ .folder-container .shine {
+  left: 150%;
+  transition: left 0.8s ease-in-out;
+  transition-delay: 0.3s;
+}
+
+.file-text {
+  font-family: "Inter", sans-serif;
+  font-size: 10px;
+  color: white !important;
+  padding: 10px;
+  font-weight: 800;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateY(5px);
+  transition: all 0.3s ease 0.4s;
+}
+
+.folder-toggle:checked ~ .folder-container .file-text {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.folder-toggle:checked ~ .folder-container .folder-front-wrapper {
+  transform: rotateX(-50deg);
+}
+
+.folder-toggle:checked ~ .folder-container .file-1 {
+  transform: translateY(-70px) translateZ(20px);
+}
+
+.folder-toggle:checked ~ .folder-container .file-2 {
+  transform: translateY(-55px) translateZ(10px);
+}
+
+.folder-toggle:checked ~ .folder-container .file-3 {
+  transform: translateY(-40px);
+}
+
+.folder-toggle:checked ~ .folder-container .file-4 {
+  transform: translateY(-25px);
+}
+
+.folder-toggle:checked ~ .folder-container .file-5 {
+  transform: translateY(-10px);
+}
+
+.folder-toggle:checked ~ .folder-container .file:hover {
+  cursor: pointer;
+  filter: brightness(1.1);
+}
+
+.file-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 14px;
+  height: 14px;
+  color: rgba(255, 255, 255, 0.6) !important;
+  transition: color 0.3s ease;
+}
+
+.file-tag {
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-family: "Inter", sans-serif;
+  font-size: 7px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 4px;
+  opacity: 0;
+  transform: translateX(10px);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+.folder-toggle:checked ~ .folder-container .file:hover .file-icon {
+  color: rgba(255, 255, 255, 1) !important;
+}
+
+.folder-toggle:checked ~ .folder-container .file-tag {
+  opacity: 1;
 }

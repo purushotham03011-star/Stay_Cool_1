@@ -32,6 +32,7 @@ import {
   Wand2,
   ChevronLeft,
   ChevronRight,
+  ArrowLeft,
   Settings,
   ShieldCheck,
   ShieldAlert,
@@ -81,7 +82,8 @@ export default function AdminPanel({ propertyId, onAddAuditLog, onLogoutAdmin }:
 
   // Toggle states
   const [isSidebarExpanded, setIsSidebarExpanded] = useState<boolean>(true);
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
+  const [isFolderOpen, setIsFolderOpen] = useState<boolean>(false);
 
   // Selected property
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>(propertyId || 'prop-1');
@@ -176,7 +178,7 @@ export default function AdminPanel({ propertyId, onAddAuditLog, onLogoutAdmin }:
   const currentPropertyObj = properties.find(p => p.id === selectedPropertyId);
 
   return (
-    <div id="operator-admin-interface" className={`grid grid-cols-1 md:grid-cols-12 min-h-[640px] font-sans transition-colors duration-200 ${isDarkMode ? 'dark bg-[#0f111a] text-slate-200' : 'bg-white text-slate-900'}`}>
+    <div id="operator-admin-interface" className={`grid grid-cols-1 md:grid-cols-12 min-h-[640px] font-sans transition-colors duration-200 super-hq-peach-theme ${isDarkMode ? 'dark bg-[#0f111a] text-slate-200' : 'bg-white text-slate-900'}`}>
       
       {/* PERSISTENT COLLAPSIBLE SIDEBAR NAVIGATION PANEL */}
       <aside className={`no-uiverse transition-all duration-300 flex flex-col justify-between border-r ${
@@ -189,13 +191,230 @@ export default function AdminPanel({ propertyId, onAddAuditLog, onLogoutAdmin }:
           {/* Header Organization Brand Title & Collapse Toggle */}
           <div className="flex items-center justify-between gap-2">
             {isSidebarExpanded ? (
-              <div className="flex items-center space-x-2.5 bg-white border border-slate-200 shadow-xs p-3.5 rounded-2xl w-full select-none dark:bg-slate-800 dark:border-slate-700">
-                <div className="bg-gradient-to-tr from-indigo-500 to-cyan-500 text-white p-2 rounded-xl font-display font-black text-[12px] tracking-wider shadow-sm">
-                  HS
+              <div className={`flex items-center justify-between shadow-xs p-3.5 rounded-2xl w-full select-none border relative ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'}`}>
+                <div className="flex items-center space-x-2.5">
+                  <div className="bg-gradient-to-tr from-indigo-500 to-cyan-500 text-white p-2 rounded-xl font-display font-black text-[12px] tracking-wider shadow-sm">
+                    HS
+                  </div>
+                  <div>
+                    <h2 className={`text-xs font-black font-display tracking-widest uppercase ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>StayHub HQ</h2>
+                    <span className={`text-[9px] font-mono font-bold block mt-0.5 ${isDarkMode ? 'text-cyan-400' : 'text-indigo-650'}`}>ADMIN CORE NODE</span>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-xs font-black font-display text-slate-900 dark:text-white tracking-widest uppercase">StayHub HQ</h2>
-                  <span className="text-[9px] text-indigo-600 dark:text-cyan-400 font-mono font-bold block mt-0.5">ADMIN CORE NODE</span>
+
+                <div className="block md:hidden absolute right-4 top-2.5 z-50">
+                  <label className="folder-card">
+                    <input 
+                      type="checkbox" 
+                      className="folder-toggle" 
+                      checked={isFolderOpen}
+                      onChange={(e) => setIsFolderOpen(e.target.checked)}
+                    />
+
+                    <div className="hint-wrapper">
+                      <span className="hint-text">Click to open</span>
+                      <svg
+                        className="hint-arrow"
+                        viewBox="0 0 40 40"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M 35 5 C 35 5, 15 5, 10 25 M 10 25 L 3 18 M 10 25 L 18 22"
+                          stroke="#60a5fa"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        ></path>
+                      </svg>
+                    </div>
+
+                    <div className="folder-container">
+                      <svg className="folder-back" viewBox="0 0 50 40" fill="none">
+                        <path
+                          d="M0 4C0 1.79086 1.79086 0 4 0H16.524C17.721 0 18.8415 0.54051 19.574 1.4673L22.426 5.0654C23.1585 5.99219 24.279 6.5327 25.476 6.5327H46C48.2091 6.5327 50 8.32356 50 10.5327V36C50 38.2091 48.2091 40 46 40H4C1.79086 40 0 38.2091 0 36V4Z"
+                          fill="#0056b3"
+                        ></path>
+                      </svg>
+
+                      <div className="file file-5" onClick={() => { setIsFolderOpen(false); localStorage.removeItem('adminToken'); window.location.reload(); }}>
+                        <div className="shine"></div>
+                        <ArrowLeft className="file-icon text-white" />
+                        <div className="file-text">Sign Out</div>
+                        <div className="file-tag">LOGOUT</div>
+                      </div>
+
+                      <div className="file file-4" onClick={() => { setIsFolderOpen(false); setIsDarkMode(!isDarkMode); }}>
+                        <div className="shine"></div>
+                        {isDarkMode ? <Sun className="file-icon text-white" /> : <Moon className="file-icon text-white" />}
+                        <div className="file-text">{isDarkMode ? 'Daylight Mode' : 'Dark Mode'}</div>
+                        <div className="file-tag">THEME</div>
+                      </div>
+
+                      <div className="file file-3" onClick={() => { setActiveSubTab('booking_management'); setIsFolderOpen(false); }}>
+                        <div className="shine"></div>
+                        <Clock className="file-icon text-white" />
+                        <div className="file-text">Bookings</div>
+                        <div className="file-tag">RESERVE</div>
+                      </div>
+
+                      <div className="file file-2" onClick={() => { setActiveSubTab('property_management'); setIsFolderOpen(false); }}>
+                        <div className="shine"></div>
+                        <BedIcon className="file-icon text-white" />
+                        <div className="file-text">Property</div>
+                        <div className="file-tag">STAYS</div>
+                      </div>
+
+                      <div className="file file-1" onClick={() => { setActiveSubTab('dashboard'); setIsFolderOpen(false); }}>
+                        <div className="shine"></div>
+                        <LayoutGrid className="file-icon text-white" />
+                        <div className="file-text">Dashboard</div>
+                        <div className="file-tag">STATS</div>
+                      </div>
+
+                      <div className="folder-front-wrapper">
+                        <svg className="folder-front" viewBox="0 0 50 34" fill="none">
+                          <path
+                            d="M0 4C0 1.79086 1.79086 0 4 0H46C48.2091 0 50 1.79086 50 4V30C50 32.2091 48.2091 34 46 34H4C1.79086 34 0 32.2091 0 30V4Z"
+                            fill="rgba(0, 123, 255, 0.65)"
+                          ></path>
+                        </svg>
+                        <div className="folder-label"></div>
+                        <div className="counter">
+                          <div className="status-dot"></div>
+                          <span className="counter-label">MENU</span>
+                          <span className="counter-number">10</span>
+                        </div>
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* Transparent dropdown card menu */}
+                  {isFolderOpen && (
+                    <div className="absolute right-0 top-[52px] w-64 max-w-sm overflow-hidden z-50 bg-white dark:bg-black p-4 rounded-2xl shadow-xl border border-slate-200/50 dark:border-slate-800 space-y-1 before:w-24 before:h-24 before:absolute before:bg-purple-500/40 before:rounded-full before:-z-10 before:blur-2xl before:top-0 before:left-0 after:w-32 after:h-32 after:absolute after:bg-sky-400/40 after:rounded-full after:-z-10 after:blur-xl after:bottom-0 after:-right-12">
+                      <button
+                        onClick={() => { setActiveSubTab('dashboard'); setIsFolderOpen(false); }}
+                        className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition relative z-10 ${
+                          activeSubTab === 'dashboard' ? 'bg-indigo-50 text-indigo-750 font-bold' : 'text-slate-750 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <LayoutGrid className="w-4 h-4 text-indigo-600 dark:text-cyan-400" />
+                        <span>1. Dashboard</span>
+                      </button>
+
+                      <button
+                        onClick={() => { setActiveSubTab('user_management'); setIsFolderOpen(false); }}
+                        className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition relative z-10 ${
+                          activeSubTab === 'user_management' ? 'bg-indigo-50 text-indigo-750 font-bold' : 'text-slate-750 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <Users className="w-4 h-4 text-indigo-600 dark:text-cyan-400" />
+                        <span>2. User Management</span>
+                      </button>
+
+                      <button
+                        onClick={() => { setActiveSubTab('property_management'); setIsFolderOpen(false); }}
+                        className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition relative z-10 ${
+                          activeSubTab === 'property_management' ? 'bg-indigo-50 text-indigo-750 font-bold' : 'text-slate-750 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <BedIcon className="w-4 h-4 text-indigo-600 dark:text-cyan-400" />
+                        <span>3. Property Management</span>
+                      </button>
+
+                      <button
+                        onClick={() => { setActiveSubTab('booking_management'); setIsFolderOpen(false); }}
+                        className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition relative z-10 ${
+                          activeSubTab === 'booking_management' ? 'bg-indigo-50 text-indigo-750 font-bold' : 'text-slate-750 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <Clock className="w-4 h-4 text-indigo-600 dark:text-cyan-400" />
+                        <span>4. Booking Management</span>
+                      </button>
+
+                      <button
+                        onClick={() => { setActiveSubTab('billing_management'); setIsFolderOpen(false); }}
+                        className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition relative z-10 ${
+                          activeSubTab === 'billing_management' ? 'bg-indigo-50 text-indigo-750 font-bold' : 'text-slate-750 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <CreditCard className="w-4 h-4 text-indigo-600 dark:text-cyan-400" />
+                        <span>5. Billing Management</span>
+                      </button>
+
+                      <button
+                        onClick={() => { setActiveSubTab('dining'); setIsFolderOpen(false); }}
+                        className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition relative z-10 ${
+                          activeSubTab === 'dining' ? 'bg-indigo-50 text-indigo-750 font-bold' : 'text-slate-750 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <Utensils className="w-4 h-4 text-indigo-600 dark:text-cyan-400" />
+                        <span>6. Canteen & Meals</span>
+                      </button>
+
+                      <button
+                        onClick={() => { setActiveSubTab('campaigns'); setIsFolderOpen(false); }}
+                        className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition relative z-10 ${
+                          activeSubTab === 'campaigns' ? 'bg-indigo-50 text-indigo-750 font-bold' : 'text-slate-750 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <Percent className="w-4 h-4 text-indigo-600 dark:text-cyan-400" />
+                        <span>7. Discounts & Campaigns</span>
+                      </button>
+
+                      <button
+                        onClick={() => { setActiveSubTab('reports'); setIsFolderOpen(false); }}
+                        className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition relative z-10 ${
+                          activeSubTab === 'reports' ? 'bg-indigo-50 text-indigo-750 font-bold' : 'text-slate-750 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <PieChart className="w-4 h-4 text-indigo-600 dark:text-cyan-400" />
+                        <span>8. Reports</span>
+                      </button>
+
+                      <button
+                        onClick={() => { setActiveSubTab('settings'); setIsFolderOpen(false); }}
+                        className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition relative z-10 ${
+                          activeSubTab === 'settings' ? 'bg-indigo-50 text-indigo-750 font-bold' : 'text-slate-750 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <Settings className="w-4 h-4 text-indigo-600 dark:text-cyan-400" />
+                        <span>9. System Settings</span>
+                      </button>
+
+                      <button
+                        onClick={() => { setActiveSubTab('corporate_chat'); setIsFolderOpen(false); }}
+                        className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition relative z-10 ${
+                          activeSubTab === 'corporate_chat' ? 'bg-indigo-50 text-indigo-750 font-bold' : 'text-slate-750 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <MessageSquare className="w-4 h-4 text-indigo-600 dark:text-cyan-400" />
+                        <span>10. HQ Corporate Chat</span>
+                      </button>
+
+                      {/* Integrated Daylight Switch */}
+                      <div className="flex items-center justify-between px-3 py-2 border-t border-slate-150/40 dark:border-slate-800 mt-1.5 pt-2 relative z-10">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Daylight Mode</span>
+                        <div className="scale-[0.7] origin-right">
+                          <label className="togglesw-premium" title="Change daylight/dark mode">
+                            <input className="togglesw-input" type="checkbox" checked={isDarkMode} onChange={() => setIsDarkMode(!isDarkMode)} />
+                            <div className="togglesw-indicator left"></div>
+                            <div className="togglesw-indicator right"></div>
+                            <div className="togglesw-btn"></div>
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Integrated Sign Out Button */}
+                      <button
+                        onClick={() => { setIsFolderOpen(false); localStorage.removeItem('adminToken'); window.location.reload(); }}
+                        className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 relative z-10"
+                      >
+                        <ArrowLeft className="w-4 h-4 text-rose-500" />
+                        <span>Sign Out Profile</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
@@ -216,10 +435,10 @@ export default function AdminPanel({ propertyId, onAddAuditLog, onLogoutAdmin }:
             </button>
           </div>
 
-          <div className="h-[1px] bg-slate-200 dark:bg-slate-800 w-full my-1" />
+          <div className="hidden md:block h-[1px] bg-slate-200 dark:bg-slate-800 w-full my-1" />
 
           {/* Dynamic Nav Tabs */}
-          <nav className="flex md:flex-col overflow-x-auto md:overflow-x-visible space-x-1 md:space-x-0 md:space-y-1 text-xs font-semibold pb-2 md:pb-0 scrollbar-none w-full">
+          <nav className="hidden md:flex md:flex-col md:space-y-1 text-xs font-semibold scrollbar-none w-full">
             
             {/* Category separator A: MAIN ANALYTICS */}
             {isSidebarExpanded && (
@@ -372,10 +591,10 @@ export default function AdminPanel({ propertyId, onAddAuditLog, onLogoutAdmin }:
           </nav>
           
           {/* Dark Mode toggle & Sign Out Area */}
-          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 mt-4 shrink-0 space-y-2">
+          <div className="hidden md:block pt-4 border-t border-slate-200 dark:border-slate-800 mt-4 shrink-0 space-y-2">
             
             <div
-              className="w-full bg-[#161925] border border-[#222638] text-slate-350 text-[10.5px] font-bold py-2 rounded-xl flex items-center justify-center space-x-1.5 shadow-5xs"
+              className={`w-full border text-[10.5px] font-bold py-2 rounded-xl flex items-center justify-center space-x-1.5 shadow-5xs ${isDarkMode ? 'bg-[#161925] border-[#222638] text-slate-350' : 'bg-slate-50 border-slate-200 text-slate-800'}`}
             >
               <ShieldCheck className="w-3.5 h-3.5 text-[#0055ff]" />
               {isSidebarExpanded && <span>Operator Node Secure</span>}
@@ -384,19 +603,20 @@ export default function AdminPanel({ propertyId, onAddAuditLog, onLogoutAdmin }:
             {onLogoutAdmin && (
               <button
                 onClick={onLogoutAdmin}
-                className="w-full bg-slate-200/80 hover:bg-rose-50 text-slate-700 hover:text-rose-750 text-[11px] font-bold py-2.5 rounded-xl transition flex items-center justify-center space-x-1.5 border border-slate-350/20 shadow-xs cursor-pointer dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-rose-950/20"
+                className="hidden md:flex w-full bg-slate-200/80 hover:bg-rose-50 text-slate-700 hover:text-rose-750 text-[11px] font-bold py-2.5 rounded-xl transition items-center justify-center space-x-1.5 border border-slate-350/20 shadow-xs cursor-pointer dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-rose-950/20"
               >
                 {isSidebarExpanded ? <span>Sign Out Host Profile</span> : <span className="font-mono text-[9px]">OUT</span>}
               </button>
             )}
 
-            <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className="w-full bg-slate-200/80 hover:bg-indigo-50 text-slate-700 hover:text-indigo-650 text-[11px] font-bold py-2.5 rounded-xl transition flex items-center justify-center space-x-1.5 border border-slate-350/20 shadow-xs cursor-pointer dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-indigo-950/20 mt-2"
-            >
-              {isDarkMode ? <Sun className="w-3.5 h-3.5 text-amber-500" /> : <Moon className="w-3.5 h-3.5 text-indigo-500" />}
-              {isSidebarExpanded ? <span>{isDarkMode ? 'Daylight Mode' : 'Dark Mode'}</span> : <span className="font-mono text-[9px]">{isDarkMode ? 'LIGHT' : 'DARK'}</span>}
-            </button>
+            <div className={`hidden md:flex w-full justify-center transition-all ${isSidebarExpanded ? 'py-3 scale-90' : 'py-1 scale-[0.45] -my-5'}`}>
+              <label className="togglesw-premium" title="Change daylight/dark mode">
+                <input className="togglesw-input" type="checkbox" checked={isDarkMode} onChange={() => setIsDarkMode(!isDarkMode)} />
+                <div className="togglesw-indicator left"></div>
+                <div className="togglesw-indicator right"></div>
+                <div className="togglesw-btn"></div>
+              </label>
+            </div>
             
           </div>
         </div>
@@ -772,8 +992,8 @@ function AdminHQChat({
               <div key={msg.id} className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[75%] rounded-2xl p-3 shadow-5xs ${
                   isAdmin 
-                    ? 'bg-indigo-650 text-white rounded-br-none' 
-                    : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-750 rounded-bl-none'
+                    ? 'bg-indigo-650 text-white rounded-br-none hq-chat-bubble-right' 
+                    : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-750 rounded-bl-none hq-chat-bubble-left'
                 }`}>
                   <span className="text-[9px] uppercase font-extrabold tracking-wider opacity-60 block mb-0.5">
                     {msg.sender}

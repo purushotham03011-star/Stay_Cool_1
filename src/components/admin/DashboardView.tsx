@@ -428,17 +428,17 @@ export default function DashboardView({
     <div className="space-y-4 animate-fadeIn text-slate-800 text-xs font-sans">
       
       {/* 1. PREMIUM GLASSMORPHISM WELCOME CARD */}
-      <div className="relative rounded-2xl overflow-hidden shadow-xs border border-slate-150/60 bg-gradient-to-r from-indigo-900 to-slate-900 text-white p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="relative rounded-2xl overflow-hidden shadow-xs border border-slate-150/60 p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hq-welcome-banner">
         
         {/* Subtle glowing radial gradient orb */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-10 left-10 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="space-y-1 z-10 text-left">
-          <h2 className="text-lg sm:text-xl font-black tracking-tight text-white leading-tight">
+          <h2 className="text-lg sm:text-xl font-black tracking-tight leading-tight hq-welcome-title">
             Welcome back, {adminName} 👋
           </h2>
-          <p className="text-[10px] text-indigo-200 font-bold tracking-wide uppercase">
+          <p className="text-[10px] font-bold tracking-wide uppercase hq-welcome-sub">
             {currentProperty ? `${currentProperty.name} • ${currentProperty.city}` : 'Silicon Valley Elite PG • Bangalore'}
           </p>
         </div>

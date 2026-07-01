@@ -670,7 +670,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
 
 
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
   // --- NEW: PROPERTY REPLACEMENT / EXTRA CRUD FUNCTIONS ---
 
@@ -2346,8 +2346,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
             </div>
 
-            {/* Folder Card Navigation (Mobile Only) */}
-            <div className="block lg:hidden relative z-50">
+            <div className="block lg:hidden absolute right-4 top-2.5 z-50">
               <label className="folder-card">
                 <input 
                   type="checkbox" 
@@ -2389,11 +2388,11 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
                     <div className="file-tag">LOGOUT</div>
                   </div>
 
-                  <div className="file file-4" onClick={() => { setActiveTab('queries-notifications'); setIsFolderOpen(false); }}>
+                  <div className="file file-4" onClick={() => { setIsFolderOpen(false); setIsDarkMode(!isDarkMode); }}>
                     <div className="shine"></div>
-                    <MessageSquare className="file-icon text-white" />
-                    <div className="file-text">Queries & Chats</div>
-                    <div className="file-tag">QUERIES</div>
+                    {isDarkMode ? <Sun className="file-icon text-white" /> : <Moon className="file-icon text-white" />}
+                    <div className="file-text">{isDarkMode ? 'Daylight Mode' : 'Dark Mode'}</div>
+                    <div className="file-tag">THEME</div>
                   </div>
 
                   <div className="file file-3" onClick={() => { setActiveTab('customers'); setIsFolderOpen(false); }}>
@@ -2436,17 +2435,17 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
               {/* Transparent dropdown card menu */}
               {isFolderOpen && (
-                <div className="absolute right-0 top-[95px] bg-white/95 backdrop-blur-md border border-slate-200/50 shadow-xl rounded-2xl p-1.5 w-48 z-50 animate-fadeIn space-y-1">
+                <div className="absolute right-0 top-[52px] w-64 max-w-sm overflow-hidden z-50 bg-white dark:bg-black p-4 rounded-2xl shadow-xl border border-slate-200/50 dark:border-slate-800 space-y-1 before:w-24 before:h-24 before:absolute before:bg-purple-500/40 before:rounded-full before:-z-10 before:blur-2xl before:top-0 before:left-0 after:w-32 after:h-32 after:absolute after:bg-sky-400/40 after:rounded-full after:-z-10 after:blur-xl after:bottom-0 after:-right-12">
                   <button
                     onClick={() => {
                       setActiveTab('org-setup');
                       setIsFolderOpen(false);
                     }}
-                    className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition ${
-                      activeTab === 'org-setup' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-750 hover:bg-slate-100'
+                    className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition relative z-10 ${
+                      activeTab === 'org-setup' ? 'bg-indigo-50 text-indigo-750 font-bold' : 'text-slate-750 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
                     }`}
                   >
-                    <Building2 className="w-4 h-4 text-indigo-600" />
+                    <Building2 className="w-4 h-4 text-indigo-600 dark:text-cyan-400" />
                     <span>1. Corporate Setup</span>
                   </button>
 
@@ -2455,11 +2454,11 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
                       setActiveTab('property-setup');
                       setIsFolderOpen(false);
                     }}
-                    className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition ${
-                      activeTab === 'property-setup' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-750 hover:bg-slate-100'
+                    className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition relative z-10 ${
+                      activeTab === 'property-setup' ? 'bg-indigo-50 text-indigo-750 font-bold' : 'text-slate-750 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
                     }`}
                   >
-                    <Home className="w-4 h-4 text-indigo-600" />
+                    <Home className="w-4 h-4 text-indigo-600 dark:text-cyan-400" />
                     <span>2. Stays Registry</span>
                   </button>
 
@@ -2468,11 +2467,11 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
                       setActiveTab('customers');
                       setIsFolderOpen(false);
                     }}
-                    className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition ${
-                      activeTab === 'customers' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-750 hover:bg-slate-100'
+                    className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition relative z-10 ${
+                      activeTab === 'customers' ? 'bg-indigo-50 text-indigo-750 font-bold' : 'text-slate-750 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
                     }`}
                   >
-                    <UserCheck className="w-4 h-4 text-indigo-600" />
+                    <UserCheck className="w-4 h-4 text-indigo-600 dark:text-cyan-400" />
                     <span>3. Customers Directory</span>
                   </button>
 
@@ -2481,11 +2480,11 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
                       setActiveTab('audit-logs');
                       setIsFolderOpen(false);
                     }}
-                    className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition ${
-                      activeTab === 'audit-logs' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-750 hover:bg-slate-100'
+                    className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition relative z-10 ${
+                      activeTab === 'audit-logs' ? 'bg-indigo-50 text-indigo-750 font-bold' : 'text-slate-750 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
                     }`}
                   >
-                    <FileLock2 className="w-4 h-4 text-indigo-600" />
+                    <FileLock2 className="w-4 h-4 text-indigo-600 dark:text-cyan-400" />
                     <span>4. Forensic Audit Logs</span>
                   </button>
 
@@ -2494,22 +2493,34 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
                       setActiveTab('queries-notifications');
                       setIsFolderOpen(false);
                     }}
-                    className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition ${
-                      activeTab === 'queries-notifications' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-750 hover:bg-slate-100'
+                    className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold transition relative z-10 ${
+                      activeTab === 'queries-notifications' ? 'bg-indigo-50 text-indigo-750 font-bold' : 'text-slate-750 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
                     }`}
                   >
-                    <MessageSquare className="w-4 h-4 text-indigo-600" />
+                    <MessageSquare className="w-4 h-4 text-indigo-600 dark:text-cyan-400" />
                     <span>5. Queries & Chats</span>
                   </button>
 
-                  <div className="border-t border-slate-150 my-1"></div>
+                  {/* Integrated Daylight Switch */}
+                  <div className="flex items-center justify-between px-3 py-2 border-t border-slate-150/40 dark:border-slate-800 mt-1.5 pt-2 relative z-10">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Daylight Mode</span>
+                    <div className="scale-[0.7] origin-right">
+                      <label className="togglesw-premium" title="Change daylight/dark mode">
+                        <input className="togglesw-input" type="checkbox" checked={isDarkMode} onChange={() => setIsDarkMode(!isDarkMode)} />
+                        <div className="togglesw-indicator left"></div>
+                        <div className="togglesw-indicator right"></div>
+                        <div className="togglesw-btn"></div>
+                      </label>
+                    </div>
+                  </div>
 
+                  {/* Integrated Sign Out Button */}
                   <button
                     onClick={() => {
                       setIsFolderOpen(false);
                       onLogout();
                     }}
-                    className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-bold transition text-rose-600 hover:bg-rose-50"
+                    className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 relative z-10"
                   >
                     <ArrowLeft className="w-4 h-4 text-rose-500" />
                     <span>Logout HQ</span>
@@ -2616,19 +2627,20 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
             <button 
               onClick={onLogout}
-              className="w-auto lg:w-full shrink-0 flex items-center space-x-3 px-3.5 py-3 rounded-xl transition text-rose-600 hover:bg-rose-50 font-bold"
+              className="hidden lg:flex w-full shrink-0 items-center space-x-3 px-3.5 py-3 rounded-xl transition text-rose-600 hover:bg-rose-50 font-bold"
             >
               <ArrowLeft className="w-4.5 h-4.5 shrink-0 text-rose-500" />
               <span>Logout HQ</span>
             </button>
 
-            <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className="w-auto lg:w-full shrink-0 flex items-center space-x-3 px-3.5 py-3 rounded-xl transition text-slate-700 hover:bg-indigo-50 hover:text-indigo-650 font-bold mt-2 border border-slate-200 cursor-pointer"
-            >
-              {isDarkMode ? <Sun className="w-4.5 h-4.5 shrink-0 text-amber-500" /> : <Moon className="w-4.5 h-4.5 shrink-0 text-indigo-500" />}
-              <span>{isDarkMode ? 'Daylight Mode' : 'Dark Mode'}</span>
-            </button>
+            <div className="hidden lg:flex w-full justify-center py-2 scale-[0.8] lg:scale-100 -my-2.5">
+              <label className="togglesw-premium" title="Change daylight/dark mode">
+                <input className="togglesw-input" type="checkbox" checked={isDarkMode} onChange={() => setIsDarkMode(!isDarkMode)} />
+                <div className="togglesw-indicator left"></div>
+                <div className="togglesw-indicator right"></div>
+                <div className="togglesw-btn"></div>
+              </label>
+            </div>
           </nav>
 
 
