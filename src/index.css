@@ -1,10 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Outfit", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-serif: "Playfair Display", Georgia, serif;
 
   /* Custom palette bindings mapping for backward compatibility */
   --color-indigo-605: #4f46e5;
@@ -542,5 +543,92 @@ body {
     overflow-x: hidden !important;
   }
 }
+.double-range-slider input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: none;
+}
+.double-range-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #38bdf8;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+  cursor: pointer;
+}
+.double-range-slider input[type="range"]::-moz-range-thumb {
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #38bdf8;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+  cursor: pointer;
+}
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
 
+/* Student/Customer portal theme - overridden with vibrant orange */
+#customer-container, 
+#property-details-backdrop,
+.auth-wizard-modal,
+#customer-tab-profile,
+#customer-tab-home {
+  --color-indigo-50: #fff7ed !important;
+  --color-indigo-100: #ffedd5 !important;
+  --color-indigo-150: #fed7aa !important;
+  --color-indigo-200: #fed7aa !important;
+  --color-indigo-300: #fdba74 !important;
+  --color-indigo-400: #fb923c !important;
+  --color-indigo-500: #f25a24 !important;
+  --color-indigo-600: #f25a24 !important;
+  --color-indigo-605: #f25a24 !important;
+  --color-indigo-650: #f25a24 !important;
+  --color-indigo-700: #ea580c !important;
+  --color-indigo-750: #c2410c !important;
+  --color-indigo-755: #c2410c !important;
+  --color-indigo-800: #9a3412 !important;
+  --color-indigo-900: #7c2d12 !important;
+  --color-indigo-950: #431407 !important;
+}
+
+#customer-container aside button {
+  border-radius: 12px !important;
+}
+
+/* Hide number input spinners */
+#customer-container input[type="number"]::-webkit-outer-spin-button,
+#customer-container input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+#customer-container input[type="number"] {
+  -moz-appearance: textfield !important;
+}
+
+/* Curved rectangle buttons with black text and orange border */
+#customer-container .curved-orange-border-btn {
+  border-radius: 12px !important;
+  border: 2px solid #f25a24 !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+#customer-container .curved-orange-border-btn:hover {
+  background-color: #fff7ed !important;
+  background: #fff7ed !important;
+  border-color: #ea580c !important;
+}

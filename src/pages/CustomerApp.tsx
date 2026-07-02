@@ -22,6 +22,9 @@ import {
   Camera, 
   UploadCloud, 
   ChevronRight,
+  ChevronLeft,
+  ChevronDown,
+  Menu,
   Sparkles,
   Info,
   Tag,
@@ -35,7 +38,23 @@ import {
   AlertCircle,
   Building,
   Lock as LockIcon,
-  ArrowLeft
+  ArrowLeft,
+  Phone,
+  Mail,
+  Play,
+  Bed as BedIcon,
+  Bath,
+  Maximize,
+  Users,
+  Share2,
+  Wind,
+  Tv,
+  Wifi,
+  Volume2,
+  Sofa,
+  Utensils,
+  ShieldCheck,
+  Lock
 } from 'lucide-react';
 
 
@@ -119,8 +138,12 @@ export default function CustomerApp({
       setWizardName(currentUser.name || '');
       setWizardMobile(currentUser.phone || '');
       setWizardEmail(currentUser.email || '');
+      setBookingName(currentUser.name || '');
+      setBookingPhone(currentUser.phone || '');
     } else {
       setProfileCompleted(false);
+      setBookingName('');
+      setBookingPhone('');
     }
   }, [currentUser]);
 
@@ -273,6 +296,10 @@ export default function CustomerApp({
 
   // Bottom Navigation tab: 'home' | 'bookings' | 'checkin' | 'profile' | 'filters'
   const [activeTab, setActiveTab] = useState<'home' | 'bookings' | 'checkin' | 'profile' | 'filters'>('home');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [roomTypeDropdownOpen, setRoomTypeDropdownOpen] = useState(false);
+  const [amenitiesDropdownOpen, setAmenitiesDropdownOpen] = useState(false);
+  const [filterDuration, setFilterDuration] = useState<'All' | 'night' | 'day' | 'month' | 'seasonal'>('All');
 
   const handleCustomerLogin = (user: any, isRegister?: boolean) => {
     const nowStr = new Date().toLocaleString();
@@ -352,6 +379,26 @@ export default function CustomerApp({
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [bookingRoom, setBookingRoom] = useState<Room | null>(null);
 
+  // Auto scroll gallery images for 2 seconds
+  useEffect(() => {
+    if (!selectedProperty) return;
+    
+    const galleryImages = [
+      selectedProperty.imageUrl,
+      ...(PROPERTY_IMAGES[selectedProperty.id] || [])
+    ].filter(Boolean);
+    while (galleryImages.length < 4) {
+      galleryImages.push('https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600');
+    }
+    const totalImages = galleryImages.length;
+    
+    const interval = setInterval(() => {
+      setActiveImgIdx((prev) => (prev + 1) % totalImages);
+    }, 2000);
+    
+    return () => clearInterval(interval);
+  }, [selectedProperty]);
+
   // New review submission state
   const [userRating, setUserRating] = useState<number>(5);
   const [userComment, setUserComment] = useState<string>('');
@@ -360,6 +407,11 @@ export default function CustomerApp({
   // Booking form fields
   const [checkInDate, setCheckInDate] = useState('2026-06-01');
   const [checkOutDate, setCheckOutDate] = useState('2026-06-15');
+  const [bookingName, setBookingName] = useState('');
+  const [bookingPhone, setBookingPhone] = useState('');
+  const [bookingAdults, setBookingAdults] = useState('1');
+  const [bookingChildren, setBookingChildren] = useState('0');
+  const [bookingNumRooms, setBookingNumRooms] = useState('1');
   const [mealPlan, setMealPlan] = useState<'None' | 'Breakfast Only' | 'Full Board'>('None');
   const [bookingNotes, setBookingNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'Card' | 'Cash' | 'NetBanking'>('UPI');
@@ -559,6 +611,13 @@ export default function CustomerApp({
     
     const matchesCity = selectedCity === 'All' || prop.city === selectedCity;
 
+    let matchesDuration = true;
+    if (filterDuration === 'night' || filterDuration === 'day') {
+      matchesDuration = prop.type === 'Hotel';
+    } else if (filterDuration === 'month' || filterDuration === 'seasonal') {
+      matchesDuration = prop.type === 'PG';
+    }
+
     // Quick category list selections (from transparent buttons)
     let matchesCategory = true;
     if (activeCategoryFilter === 'hotel') {
@@ -604,14 +663,20 @@ export default function CustomerApp({
         matchesRoomType = filterRoomTypes.includes(rTypeClass);
       }
 
-      // 3- Sharing Type: Single sharing, Double sharing, Triple sharing, etc.
+      // 3- Sharing Type: single, double, triple, 4 share, dormitory
       let matchesSharingType = true;
       if (filterSharingTypes.length > 0) {
-        let rShareClass = 'Single sharing';
-        if (r.type === 'Double') rShareClass = 'Double sharing';
-        if (r.type === 'Triple') rShareClass = 'Triple sharing';
-        if (r.type === 'Four-Sharing') rShareClass = 'Triple sharing'; // Fallback
-        matchesSharingType = filterSharingTypes.includes(rShareClass);
+        let rShareClass = 'single';
+        if (r.type === 'Double') rShareClass = 'double';
+        else if (r.type === 'Triple') rShareClass = 'triple';
+        else if (r.type === 'Four-Sharing') rShareClass = '4 share';
+        
+        const isDorm = r.type === 'Four-Sharing' || (r.amenities || []).some(a => a.toLowerCase().includes('dorm'));
+        
+        matchesSharingType = filterSharingTypes.some(selected => {
+          if (selected === 'dormitory') return isDorm;
+          return selected === rShareClass;
+        });
       }
 
       // 4- Amenities: WiFi, AC, TV, Food, Laundry
@@ -645,7 +710,7 @@ export default function CustomerApp({
 
     const hasMatchingRooms = matchingRooms.length > 0;
 
-    return matchesQuery && matchesCity && matchesCategory && matchesCategorySharing && hasMatchingRooms;
+    return matchesQuery && matchesCity && matchesCategory && matchesCategorySharing && matchesDuration && hasMatchingRooms;
   }).map(prop => {
     // Inject calculated distance if user has granted coords
     if (userCoords) {
@@ -673,9 +738,13 @@ export default function CustomerApp({
     setSelectedProperty(prop);
     const propRooms = rooms.filter(r => r.propertyId === prop.id);
     setPropertyRooms(propRooms);
+    // Auto-select first available room of the property
+    const firstAvail = propRooms.find(r => r.occupancyStatus === 'Available') || propRooms[0] || null;
+    setBookingRoom(firstAvail);
     setActiveImgIdx(0);
     setReviewStatus('');
     setUserComment('');
+    setBookingSuccessMode(false);
   };
 
   // Trigger Booking flow
@@ -804,9 +873,9 @@ export default function CustomerApp({
       propertyName: selectedProperty.name,
       roomId: bookingRoom.id,
       roomNumber: bookingRoom.roomNumber,
-      customerName: currentUser.name,
+      customerName: bookingName || currentUser.name,
       customerEmail: currentUser.email,
-      customerPhone: currentUser.phone,
+      customerPhone: bookingPhone || currentUser.phone,
       checkInDate,
       checkOutDate,
       mealPlan,
@@ -974,7 +1043,7 @@ export default function CustomerApp({
 
           {/* Absolute header branding */}
           <div className="absolute top-6 left-6 flex items-center space-x-2 text-white/90">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-amber-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
               <Building className="w-4 h-4 text-white" />
             </div>
             <span className="font-extrabold uppercase tracking-widest text-[11px] font-sans">StayHub Premium Customer Portal</span>
@@ -1049,7 +1118,7 @@ export default function CustomerApp({
         {/* Scroll Progress Bar */}
         <div className="fixed top-0 left-0 w-full h-1 bg-slate-100/60 z-50">
           <div 
-            className="h-full bg-gradient-to-r from-indigo-500 to-cyan-500 transition-all duration-75"
+            className="h-full bg-gradient-to-r from-indigo-500 to-amber-500 transition-all duration-75"
             style={{ 
               width: `${
                 wizardContainerRef.current 
@@ -1398,14 +1467,22 @@ export default function CustomerApp({
   }
 
   return (
-    <div id="customer-container shadow-inner" className={`w-full max-w-7xl mx-auto bg-slate-50 min-h-[750px] pb-24 shadow-2xl relative md:rounded-3xl overflow-hidden flex flex-col justify-between border border-slate-200 ${
+    <div id="customer-container" className={`w-full bg-white h-screen relative overflow-hidden flex flex-col ${
       settingsToggles.mockDarkOverlay ? 'brightness-90 select-none grayscale-10 transition' : 'transition'
     }`}>
       
       {/* Primary Mobile Header Bar */}
       <header id="customer-header" className="bg-white px-4 py-3 border-b border-slate-100 shadow-xs flex justify-between items-center relative z-20">
         <div id="mobile-branding" className="flex items-center space-x-2">
-          <div className="bg-gradient-to-tr from-cyan-500 to-indigo-600 p-1.5 rounded-xl text-white shadow-sm">
+          <button 
+            type="button"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-800 transition active:scale-95 cursor-pointer mr-1 border border-slate-200"
+            title="Toggle Filter Sidebar"
+          >
+            <SlidersHorizontal className="w-4 h-4 text-indigo-600" />
+          </button>
+          <div className="bg-gradient-to-tr from-amber-500 to-indigo-600 p-1.5 rounded-xl text-white shadow-sm">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
@@ -1414,152 +1491,371 @@ export default function CustomerApp({
           </div>
         </div>
 
-        {/* Header toolbar Actions */}
-        <div id="header-interactive-actions" className="no-uiverse flex items-center space-x-2">
           <button 
-            id="notifications-bell"
-            onClick={() => setShowNotificationsOverlay(!showNotificationsOverlay)}
-            className="p-1.5 rounded-full hover:bg-slate-100 text-slate-700 relative transition-transform active:scale-90"
-            title="Notification Alerts"
+            onClick={() => onLogout?.()}
+            className="text-[10px] font-extrabold uppercase border border-slate-200 hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-xl transition cursor-pointer flex items-center gap-1 active:scale-95 shadow-2xs"
+            title="Return to main portal select screen"
           >
-            <Bell className="w-4.5 h-4.5" />
-            {unreadNotifCount > 0 && (
-              <span id="unread-dot" className="absolute top-0.5 right-0.5 bg-rose-500 text-white text-[8px] font-bold w-4 h-4 flex items-center justify-center rounded-full animate-bounce">
-                {unreadNotifCount}
-              </span>
-            )}
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Portal Select</span>
           </button>
-
-          {currentUser ? (
-            <button 
-              id="user-profile-menu-button"
-              onClick={() => setActiveTab('profile')}
-              className="flex items-center space-x-1.5 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100/75 p-1 rounded-full pr-2.5 transition active:scale-95"
-            >
-              <div className="w-5.5 h-5.5 rounded-full bg-gradient-to-tr from-indigo-500 to-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
-                {currentUser.name[0]}
-              </div>
-              <span className="text-[10px] font-extrabold text-indigo-950 truncate max-w-[65px]">{currentUser.name.split(' ')[0]}</span>
-            </button>
-          ) : (
-            <button 
-              id="login-button-trigger"
-              onClick={() => setShowAuthModal(true)}
-              className="text-[10px] font-black uppercase bg-indigo-600 hover:bg-indigo-700 hover:shadow-indigo-200 hover:shadow-md text-white px-3 py-1.5 rounded-xl transition cursor-pointer"
-            >
-              Log In
-            </button>
-          )}
-        </div>
       </header>
 
       {/* Main Container viewport */}
-      <main id="customer-main-view" className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
+      <div className="flex-1 flex overflow-hidden w-full relative">
+        {/* Mobile Backdrop */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-30 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* Collapsible Left Sidebar */}
+        <aside className={`bg-slate-50 border-r border-slate-200/60 w-80 shrink-0 flex flex-col justify-between transition-all duration-305 duration-300 z-35 absolute lg:static inset-y-0 left-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:w-0 lg:opacity-0 lg:-mr-80'
+        } h-full`}>
+          <div className="flex-1 overflow-y-auto p-5 space-y-6 no-scrollbar">
+            {/* Navigation Section */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 block">Navigation</label>
+              <div className="space-y-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('home');
+                    if (window.innerWidth < 1024) setSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                    activeTab === 'home' 
+                      ? 'curved-orange-border-btn shadow-xs' 
+                      : 'text-slate-700 hover:bg-slate-200/50'
+                  }`}
+                >
+                  <Search className="w-4 h-4" />
+                  <span>Explore Stays</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('bookings');
+                    if (window.innerWidth < 1024) setSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                    activeTab === 'bookings' 
+                      ? 'curved-orange-border-btn shadow-xs' 
+                      : 'text-slate-700 hover:bg-slate-200/50'
+                  }`}
+                >
+                  <Calendar className="w-4 h-4" />
+                  <span>My Bookings</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('profile');
+                    if (window.innerWidth < 1024) setSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                    activeTab === 'profile' 
+                      ? 'curved-orange-border-btn shadow-xs' 
+                      : 'text-slate-700 hover:bg-slate-200/50'
+                  }`}
+                >
+                  <User className="w-4 h-4" />
+                  <span>Profile & KYC</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Filter Controls */}
+            <div className="space-y-5 pt-4 border-t border-slate-200/60">
+              <div className="flex justify-between items-center">
+                <label className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Search Filters</label>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    setFilterDuration('All');
+                    setMinPrice(0);
+                    setMaxPrice(65000);
+                    setFilterRoomTypes([]);
+                    setFilterSharingTypes([]);
+                    setFilterAmenities([]);
+                  }}
+                  className="text-[9px] font-black uppercase text-indigo-600 hover:underline cursor-pointer"
+                >
+                  Reset All
+                </button>
+              </div>
+
+              {/* 1. STAY DURATION */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Stay Duration</span>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {['night', 'day', 'month', 'seasonal'].map((dur) => {
+                    const active = filterDuration === dur;
+                    return (
+                      <button
+                        key={dur}
+                        type="button"
+                        onClick={() => setFilterDuration(active ? 'All' : (dur as any))}
+                        className={`px-2 py-2 rounded-xl text-xs font-bold capitalize border transition cursor-pointer ${
+                          active 
+                            ? 'curved-orange-border-btn font-black shadow-xs'
+                            : 'bg-white border-slate-200 text-slate-750 hover:bg-slate-50'
+                        }`}
+                      >
+                        {dur}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 2. COST RANGE BAR */}
+              <div className="space-y-3">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Average price per night</span>
+                
+                {/* Min / Max Input Fields */}
+                <div className="flex items-center gap-2 justify-between">
+                  <div className="flex-1 bg-white border border-slate-200 rounded-xl p-2 px-3 shadow-xs relative">
+                    <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">Min</span>
+                    <div className="flex items-center text-xs font-black text-slate-900 mt-0.5">
+                      <span className="text-slate-400 mr-0.5">₹</span>
+                      <input
+                        type="number"
+                        value={minPrice}
+                        min="0"
+                        max={maxPrice - 500}
+                        onChange={(e) => {
+                          const val = Math.min(Number(e.target.value), maxPrice - 500);
+                          setMinPrice(val);
+                        }}
+                        className="w-full bg-transparent focus:outline-none border-none p-0"
+                      />
+                    </div>
+                  </div>
+                  <span className="text-slate-400 font-extrabold text-xs">-</span>
+                  <div className="flex-1 bg-white border border-slate-200 rounded-xl p-2 px-3 shadow-xs relative">
+                    <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider block">Max</span>
+                    <div className="flex items-center text-xs font-black text-slate-900 mt-0.5">
+                      <span className="text-slate-400 mr-0.5">₹</span>
+                      <input
+                        type="number"
+                        value={maxPrice}
+                        min={minPrice + 500}
+                        max="65000"
+                        onChange={(e) => {
+                          const val = Math.max(Number(e.target.value), minPrice + 500);
+                          setMaxPrice(val);
+                        }}
+                        className="w-full bg-transparent focus:outline-none border-none p-0"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Slider bar */}
+                <div className="relative h-5 w-full mt-1.5 double-range-slider select-none">
+                  <input
+                    type="range"
+                    min="0"
+                    max="65000"
+                    step="500"
+                    value={minPrice}
+                    onChange={(e) => {
+                      const val = Math.min(Number(e.target.value), maxPrice - 500);
+                      setMinPrice(val);
+                    }}
+                    className="absolute w-full pointer-events-none appearance-none z-20 h-1 bg-transparent focus:outline-none"
+                  />
+                  <input
+                    type="range"
+                    min="0"
+                    max="65000"
+                    step="500"
+                    value={maxPrice}
+                    onChange={(e) => {
+                      const val = Math.max(Number(e.target.value), minPrice + 500);
+                      setMaxPrice(val);
+                    }}
+                    className="absolute w-full pointer-events-none appearance-none z-20 h-1 bg-transparent focus:outline-none"
+                  />
+                  <div className="absolute left-0 right-0 top-1.5 h-1 bg-slate-200 rounded-full"></div>
+                  <div 
+                    className="absolute top-1.5 h-1 bg-indigo-600 rounded-full"
+                    style={{
+                      left: `${(minPrice / 65000) * 100}%`,
+                      right: `${100 - (maxPrice / 65000) * 100}%`
+                    }}
+                  ></div>
+                </div>
+
+                {/* Tick marks under slider */}
+                <div className="space-y-1">
+                  <div className="flex justify-between px-1 text-slate-200 select-none">
+                    {Array.from({ length: 15 }).map((_, i) => (
+                      <div key={i} className="w-[1px] h-1.5 bg-slate-200/80"></div>
+                    ))}
+                  </div>
+                  <div className="flex justify-between text-[9px] font-mono text-slate-400 px-1">
+                    <span>₹0</span>
+                    <span>₹65,000</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. ROOM TYPE DROPDOWN */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Room Type</span>
+                <div className="relative">
+                  <button 
+                    type="button"
+                    onClick={() => setRoomTypeDropdownOpen(!roomTypeDropdownOpen)}
+                    className="w-full flex items-center justify-between border border-slate-200 bg-white px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                  >
+                    <span className="truncate">
+                      {filterRoomTypes.length === 0 ? "Select Room Types" : `${filterRoomTypes.length} Selected`}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${roomTypeDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {roomTypeDropdownOpen && (
+                    <div className="absolute z-50 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-lg p-2.5 space-y-2 animate-scale-up">
+                      {['Standard', 'Deluxe', 'Suite', 'Dormitory', 'PGs'].map((roomType) => {
+                        const isChecked = filterRoomTypes.includes(roomType);
+                        return (
+                          <label key={roomType} className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer hover:bg-slate-50 p-1.5 rounded-lg">
+                            <input 
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => {
+                                if (isChecked) {
+                                  setFilterRoomTypes(filterRoomTypes.filter(x => x !== roomType));
+                                } else {
+                                  setFilterRoomTypes([...filterRoomTypes, roomType]);
+                                }
+                              }}
+                              className="rounded border-slate-300 text-indigo-650 focus:ring-indigo-500 w-3.5 h-3.5"
+                            />
+                            <span>{roomType}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 4. SHARING TYPE BUTTONS */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Sharing Type</span>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {['single', 'double', 'triple', '4 share', 'dormitory'].map((type) => {
+                    const active = filterSharingTypes.includes(type);
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => {
+                          if (active) {
+                            setFilterSharingTypes(filterSharingTypes.filter(x => x !== type));
+                          } else {
+                            setFilterSharingTypes([...filterSharingTypes, type]);
+                          }
+                        }}
+                        className={`px-2 py-2 rounded-xl text-xs font-bold capitalize border transition cursor-pointer ${
+                          active 
+                            ? 'bg-indigo-600 border-indigo-650 text-white font-black shadow-xs'
+                            : 'bg-white border-slate-200 text-slate-750 hover:bg-slate-50'
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 5. AMENITIES DROPDOWN */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Amenities</span>
+                <div className="relative">
+                  <button 
+                    type="button"
+                    onClick={() => setAmenitiesDropdownOpen(!amenitiesDropdownOpen)}
+                    className="w-full flex items-center justify-between border border-slate-200 bg-white px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                  >
+                    <span className="truncate">
+                      {filterAmenities.length === 0 ? "Select Amenities" : `${filterAmenities.length} Selected`}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${amenitiesDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {amenitiesDropdownOpen && (
+                    <div className="absolute z-50 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-lg p-2.5 space-y-2 animate-scale-up">
+                      {['WiFi', 'AC', 'TV', 'Food', 'Laundry'].map((amenity) => {
+                        const isChecked = filterAmenities.includes(amenity);
+                        return (
+                          <label key={amenity} className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer hover:bg-slate-50 p-1.5 rounded-lg">
+                            <input 
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => {
+                                if (isChecked) {
+                                  setFilterAmenities(filterAmenities.filter(x => x !== amenity));
+                                } else {
+                                  setFilterAmenities([...filterAmenities, amenity]);
+                                }
+                              }}
+                              className="rounded border-slate-300 text-indigo-650 focus:ring-indigo-500 w-3.5 h-3.5"
+                            />
+                            <span>{amenity}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* User profile quick section at sidebar bottom */}
+          <div className="p-4 border-t border-slate-200 bg-slate-100/50 flex items-center justify-between shrink-0">
+            {currentUser ? (
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[11px] font-black font-mono shadow-xs">
+                  {currentUser.name[0]}
+                </div>
+                <div className="truncate max-w-[120px]">
+                  <p className="text-xs font-bold text-slate-900 leading-tight truncate">{currentUser.name}</p>
+                  <p className="text-[9px] text-slate-400 truncate">{currentUser.email}</p>
+                </div>
+              </div>
+            ) : (
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Guest Session</span>
+            )}
+            <button 
+              type="button"
+              onClick={() => {
+                setActiveTab('profile');
+                if (window.innerWidth < 1024) setSidebarOpen(false);
+              }}
+              className="p-1.5 rounded-xl hover:bg-slate-200 text-slate-650 hover:text-slate-900 transition cursor-pointer"
+              title="Profile Settings"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
+        <main id="customer-main-view" className="flex-1 overflow-y-auto px-4 py-3 space-y-4 h-full">
         
         {/* VIEW TAB 1: Search Hub (Home) */}
         {activeTab === 'home' && (
           <div id="customer-tab-home" className="space-y-4 animate-fade-in text-slate-800">
             
-            {/* Elegant contextual welcome card */}
-            <div className="bg-gradient-to-tr from-indigo-800 via-indigo-900 to-slate-950 rounded-2xl p-4 text-white shadow-xl relative overflow-hidden">
-              <div className="absolute -right-3 -bottom-3 opacity-15">
-                <Sparkles className="w-24 h-24 text-indigo-200" />
-              </div>
-              <span className="text-[8px] tracking-widest font-mono font-bold text-amber-300 uppercase block">Zero broker charges</span>
-              <h2 className="text-base font-black font-display leading-tight mt-0.5">Stay Anywhere Instantly</h2>
-              <p className="text-[10.5px] text-slate-300 leading-relaxed max-w-[90%] mt-1">Book premium hostels, boutique hotel rooms, and elite PG co-living with fully automated verification clearances.</p>
-              
-              <div className="flex items-center space-x-1 bg-white/10 border border-white/5 py-1 px-2.5 rounded-lg text-[9px] w-max mt-3 font-mono">
-                <MapPin className="w-3 h-3 text-cyan-400 shrink-0" />
-                <span>Cities: Bangalore, Hyderabad, Mumbai</span>
-              </div>
-            </div>
 
-            {/* LOCATION ACCESS PERMISSION MESSAGE FROM CUSTOMER AS A REQUEST MESSAGE */}
-            {locationPermission === 'prompt' && (
-              <div id="location-permission-prompt" className="bg-gradient-to-r from-cyan-50/75 via-indigo-50/75 to-violet-50/75 border border-indigo-100 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 animate-fade-in shadow-xs text-slate-800">
-                <div className="flex items-start space-x-3">
-                  <div className="p-2 bg-indigo-100 text-indigo-700 rounded-xl shrink-0">
-                    <MapPin className="w-5 h-5 animate-pulse" />
-                  </div>
-                  <div className="space-y-0.5">
-                    <h4 className="text-[11.5px] font-black text-indigo-950 uppercase tracking-wide">📍 Location Access Needed</h4>
-                    <p className="text-[10px] text-slate-600 leading-relaxed">
-                      We use your coordinates to calculate distance from your exact position to discover nearby hotels and elite PGs.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(
-                          (pos) => {
-                            const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                            setUserCoords(coords);
-                            setLocationPermission('granted');
-                            localStorage.setItem('hotel_pg_loc_permission', 'granted');
-                            localStorage.setItem('hotel_pg_user_coords', JSON.stringify(coords));
-                            onAddAuditLog('Customer enabled geological GPS permissions', 'Bookings');
-                          },
-                          () => {
-                            // Safe fallback in case they block system permissions: Bangalore Central
-                            const fallbackCoords = { lat: 12.9716, lng: 77.5946 };
-                            setUserCoords(fallbackCoords);
-                            setLocationPermission('granted');
-                            localStorage.setItem('hotel_pg_loc_permission', 'granted');
-                            localStorage.setItem('hotel_pg_user_coords', JSON.stringify(fallbackCoords));
-                            onAddAuditLog('Customer simulated coordinates fallback to Bangalore Central', 'Bookings');
-                          }
-                        );
-                      } else {
-                        const fallbackCoords = { lat: 12.9716, lng: 77.5946 };
-                        setUserCoords(fallbackCoords);
-                        setLocationPermission('granted');
-                      }
-                    }}
-                    className="bg-indigo-600 hover:bg-indigo-700 hover:shadow-indigo-100 hover:shadow-md text-white font-extrabold text-[10px] uppercase px-3 py-2 rounded-xl transition cursor-pointer active:scale-95"
-                  >
-                    Grant Location
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLocationPermission('denied');
-                      localStorage.setItem('hotel_pg_loc_permission', 'denied');
-                    }}
-                    className="text-slate-500 hover:bg-slate-100 border border-slate-200 bg-white font-bold text-[10px] uppercase px-3 py-2 rounded-xl transition"
-                  >
-                    Not Now
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {locationPermission === 'granted' && (
-              <div id="location-active-badge" className="bg-emerald-50/85 border border-emerald-100 p-2.5 rounded-xl flex items-center justify-between text-[10.5px] text-emerald-800 font-medium font-sans">
-                <div className="flex items-center space-x-2">
-                  <span className="relative flex h-2 w-2 shrink-0">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                  </span>
-                  <span>📍 GPS Linked ({userCoords ? `${userCoords.lat.toFixed(3)}, ${userCoords.lng.toFixed(3)}` : 'Bangalore Central'}): Showing nearest listings & distance away.</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setLocationPermission('prompt');
-                    setUserCoords(null);
-                    localStorage.removeItem('hotel_pg_loc_permission');
-                    localStorage.removeItem('hotel_pg_user_coords');
-                  }}
-                  className="text-slate-500 hover:text-rose-600 hover:underline text-[9.5px]"
-                >
-                  Disconnect GPS
-                </button>
-              </div>
-            )}
 
             {/* Quick Search Hub Form */}
             <div className="bg-white p-3.5 rounded-2xl shadow-xs border border-slate-100 space-y-3">
@@ -1572,82 +1868,6 @@ export default function CustomerApp({
                   placeholder="Ask for property names, city, Wifi, features..."
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-9 pr-3 text-xs focus:ring-1 focus:ring-indigo-500 focus:bg-white outline-none text-slate-800"
                 />
-              </div>
-
-              {/* Below search bar some transparent buttons */}
-              <div className="space-y-1.5 pt-0.5 border-t border-slate-50">
-                <span className="text-[8.5px] uppercase tracking-wider text-slate-400 font-bold block mb-1">Quick Presets:</span>
-                <div className="flex space-x-1.5 overflow-x-auto select-none no-scrollbar py-0.5">
-                  {[
-                    { id: 'all', label: '🌍 All Stays' },
-                    { id: 'hotel', label: '🏨 Hotels' },
-                    { id: 'pg', label: '🏠 PGs' },
-                    { id: 'colive', label: '🤝 Co-Living' },
-                    { id: '2-share', label: '👥 2-Share' },
-                    { id: '3-share', label: '👥👥 3-Share' },
-                    { id: '4-share', label: '🛌 4-Share' },
-                    { id: 'dormitory', label: '🏫 Dormitory' }
-                  ].map((cat) => {
-                    const active = activeCategoryFilter === cat.id;
-                    return (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        onClick={() => setActiveCategoryFilter(cat.id as any)}
-                        className={`text-[9.5px] font-bold border px-3 py-1.5 rounded-full transition shrink-0 uppercase tracking-tight duration-200 ${
-                          active 
-                            ? 'bg-indigo-50/50 border-indigo-600 text-indigo-600 font-extrabold shadow-xs active:scale-95' 
-                            : 'bg-slate-50/70 border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-800'
-                        }`}
-                      >
-                        {cat.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Filtering row choices */}
-              <div className="flex items-center justify-between gap-1 pt-1">
-                <div className="flex space-x-1 overflow-x-auto select-none no-scrollbar flex-1">
-                  <select 
-                    value={selectedCity} 
-                    onChange={(e) => setSelectedCity(e.target.value)}
-                    className="text-[10px] border border-slate-200 bg-white font-medium rounded-lg p-1.5 focus:ring-1 focus:ring-indigo-500 max-w-[80px]"
-                  >
-                    {cities.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-
-                  <button 
-                    onClick={() => setSelectedType(selectedType === 'All' ? 'PG' : selectedType === 'PG' ? 'Hotel' : 'All')}
-                    className={`text-[10px] font-bold border px-2.5 py-1 rounded-lg transition shrink-0 ${
-                      selectedType !== 'All' ? 'bg-indigo-50 border-indigo-200 text-indigo-700 font-extrabold' : 'bg-white border-slate-200 text-slate-600'
-                    }`}
-                  >
-                    {selectedType === 'All' ? 'All Formats' : selectedType === 'Hotel' ? '🏨 Hotels' : '🏠 PG living'}
-                  </button>
-
-                  <select 
-                    value={selectedSharing} 
-                    onChange={(e) => setSelectedSharing(e.target.value)}
-                    className="text-[10px] border border-slate-200 bg-white font-medium rounded-lg p-1.5 focus:ring-1 focus:ring-indigo-500"
-                  >
-                    <option value="All">All Sharings</option>
-                    <option value="Single">Single occupant</option>
-                    <option value="Double">Double (2 Sharing)</option>
-                    <option value="Triple">Triple (3 Sharing)</option>
-                    <option value="Four-Sharing">Four occupant</option>
-                  </select>
-                </div>
-
-                <div 
-                  onClick={() => setActiveTab('filters')}
-                  className="p-2 border rounded-lg transition shrink-0 bg-slate-50 border-slate-200 hover:border-slate-350 text-indigo-600 flex items-center gap-1 font-bold text-[10px] cursor-pointer no-uiverse"
-                  title="Configure advanced filters parameters"
-                >
-                  <SlidersHorizontal className="w-3.5 h-3.5" />
-                  <span>Filters</span>
-                </div>
               </div>
             </div>
 
@@ -2032,109 +2252,7 @@ export default function CustomerApp({
           </div>
         )}
 
-        {/* VIEW TAB 3: Digital Check-In */}
-        {activeTab === 'checkin' && (
-          <div id="customer-tab-checkin" className="space-y-4 animate-fade-in text-slate-800">
-            <h2 className="text-sm font-black font-display uppercase tracking-wide">KYC Verification Gate</h2>
-            <p className="text-[10.5px] text-slate-500 leading-relaxed">Instantly verify your biometric facial identity and legal files photo copy matching to expedite reception desk lobby keys collection.</p>
-            
-            {!currentUser ? (
-              <div className="bg-white border rounded-2xl p-6 text-center shadow-xs space-y-3">
-                <FileText className="w-10 h-10 mx-auto text-indigo-400" />
-                <p className="text-xs text-slate-650 font-bold">Log in to construct digital KYC record</p>
-                <button 
-                  onClick={() => setShowAuthModal(true)}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10.5px] font-extrabold rounded-xl px-5 py-2.5 transition mt-2"
-                >
-                  Configure Simulated Credentials
-                </button>
-              </div>
-            ) : (
-              <div className="bg-white rounded-2xl border border-slate-100 p-4 space-y-3.5 text-xs">
-                
-                {/* Document Type Picker */}
-                <div>
-                  <label className="text-[10px] font-bold text-slate-400 block uppercase mb-1">Government ID Format type</label>
-                  <select 
-                    value={documentType}
-                    onChange={(e) => setDocumentType(e.target.value as any)}
-                    className="w-full text-xs border border-slate-200 bg-white font-medium rounded-xl p-2 focus:ring-1 focus:ring-indigo-500"
-                  >
-                    <option value="Aadhaar">Aadhaar National Card (India)</option>
-                    <option value="Passport">Passport International Book</option>
-                    <option value="Driving License">Government Driving License</option>
-                  </select>
-                </div>
 
-                {/* 2-Column Responsive Layout for Upload Zones */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* ID select area */}
-                  <div 
-                    onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-                    onDragLeave={() => setIsDragOver(false)}
-                    onDrop={handleDocDrop}
-                    onClick={() => triggerManualFile('id')}
-                    className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition ${
-                      isDragOver ? 'border-indigo-500 bg-indigo-50' : 
-                      idFileUploaded ? 'border-emerald-500 bg-emerald-50/20 shadow-inner' : 'border-slate-200 hover:bg-slate-50'
-                    }`}
-                  >
-                    <UploadCloud className={`w-8 h-8 mx-auto mb-1.5 ${idFileUploaded ? 'text-emerald-500' : 'text-slate-400'}`} />
-                    <p className="text-[11px] font-bold text-slate-900">
-                      {idFileUploaded ? 'ID verification file recorded' : `Drag and drop front photo of your ${documentType}`}
-                    </p>
-                    <p className="text-[9.5px] text-slate-400 mt-1 font-light">Supports PNG, PDF up to 6MB limits. Click to simulator auto upload.</p>
-                    
-                    {idFileUploaded && (
-                      <span className="inline-flex items-center space-x-1 text-[9.5px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full mt-2 font-mono">
-                        <Check className="w-3 h-3" />
-                        <span>verified_{documentType.toLowerCase()}_scan.jpg</span>
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Selfie verification */}
-                  <div 
-                    onClick={() => triggerManualFile('selfie')}
-                    className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition ${
-                      selfieUploaded ? 'border-emerald-500 bg-emerald-50/20 shadow-inner' : 'border-slate-200 hover:bg-slate-50'
-                    }`}
-                  >
-                    <Camera className={`w-8 h-8 mx-auto mb-1.5 ${selfieUploaded ? 'text-emerald-500' : 'text-slate-400'}`} />
-                    <p className="text-[11px] font-bold text-slate-900">
-                      {selfieUploaded ? 'Facial identification selfie match secure' : 'Capture check-in portrait Selfie photo'}
-                    </p>
-                    <p className="text-[9.5px] text-slate-400 mt-1 font-light">Verify background has clear white ambient light. Tap to simulate portrait upload.</p>
-                    
-                    {selfieUploaded && (
-                      <span className="inline-flex items-center space-x-1 text-[9.5px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full mt-2 font-mono">
-                        <Check className="w-3 h-3" />
-                        <span>live_face_portrait_matching_100.png</span>
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <button 
-                  onClick={submitDigitalKycCheckIn}
-                  className="w-full bg-indigo-650 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black py-2.5 rounded-xl uppercase tracking-wide shadow-sm hover:shadow-indigo-100 transition active:scale-95 cursor-pointer pt-3"
-                >
-                  Submit Biometric Verification Data
-                </button>
-
-                {checkInStatusMessage && (
-                  <div className={`p-3 rounded-xl text-[10.5px] font-medium leading-relaxed border ${
-                    checkInStatusMessage.includes('Success') || checkInStatusMessage.includes('Approved') 
-                      ? 'bg-emerald-50 text-emerald-800 border-emerald-150' 
-                      : 'bg-slate-50 text-slate-800 border-slate-200'
-                  }`}>
-                    {checkInStatusMessage}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
 
         {/* VIEW TAB 4: Profile Desk Dashboard */}
         {activeTab === 'profile' && (
@@ -2162,7 +2280,7 @@ export default function CustomerApp({
                   </div>
                   
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-cyan-400 to-indigo-600 text-white flex items-center justify-center text-lg font-black font-mono shadow-md">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-400 to-indigo-600 text-white flex items-center justify-center text-lg font-black font-mono shadow-md">
                       {currentUser.name[0]}
                     </div>
                     <div>
@@ -2184,6 +2302,95 @@ export default function CustomerApp({
                       <Edit className="w-3.5 h-3.5" /> Edit details
                     </button>
                   </div>
+                </div>
+
+                {/* KYC Verification Gate */}
+                <div className="bg-white rounded-2xl border border-slate-100 p-4 space-y-3.5 shadow-xs">
+                  <div>
+                    <h4 className="font-bold text-slate-900 font-display">KYC Verification Gate</h4>
+                    <p className="text-[10px] text-slate-500 mt-0.5 leading-relaxed">Verify your biometric facial identity and government legal files matching.</p>
+                  </div>
+                  
+                  {/* Document Type Picker */}
+                  <div>
+                    <label className="text-[9.5px] font-bold text-slate-450 text-slate-400 block uppercase mb-1">Government ID Format type</label>
+                    <select 
+                      value={documentType}
+                      onChange={(e) => setDocumentType(e.target.value as any)}
+                      className="w-full text-xs border border-slate-200 bg-white font-semibold rounded-xl p-2 focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+                    >
+                      <option value="Aadhaar">Aadhaar National Card (India)</option>
+                      <option value="Passport">Passport International Book</option>
+                      <option value="Driving License">Government Driving License</option>
+                    </select>
+                  </div>
+
+                  {/* 2-Column Responsive Layout for Upload Zones */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    {/* ID select area */}
+                    <div 
+                      onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                      onDragLeave={() => setIsDragOver(false)}
+                      onDrop={handleDocDrop}
+                      onClick={() => triggerManualFile('id')}
+                      className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition ${
+                        isDragOver ? 'border-indigo-500 bg-indigo-50' : 
+                        idFileUploaded ? 'border-emerald-500 bg-emerald-50/20 shadow-inner' : 'border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <UploadCloud className={`w-7 h-7 mx-auto mb-1.5 ${idFileUploaded ? 'text-emerald-500' : 'text-slate-400'}`} />
+                      <p className="text-[10.5px] font-bold text-slate-900">
+                        {idFileUploaded ? 'ID verification file recorded' : `Upload Front Photo of ${documentType}`}
+                      </p>
+                      <p className="text-[9px] text-slate-400 mt-0.5 font-light">PDF/PNG up to 6MB. Click to simulate upload.</p>
+                      
+                      {idFileUploaded && (
+                        <span className="inline-flex items-center space-x-1 text-[9px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full mt-2 font-mono">
+                          <Check className="w-3.5 h-3.5" />
+                          <span>verified_{documentType.toLowerCase()}_scan.jpg</span>
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Selfie verification */}
+                    <div 
+                      onClick={() => triggerManualFile('selfie')}
+                      className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition ${
+                        selfieUploaded ? 'border-emerald-500 bg-emerald-50/20 shadow-inner' : 'border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <Camera className={`w-7 h-7 mx-auto mb-1.5 ${selfieUploaded ? 'text-emerald-500' : 'text-slate-400'}`} />
+                      <p className="text-[10.5px] font-bold text-slate-900">
+                        {selfieUploaded ? 'Selfie match secured' : 'Capture portrait Selfie photo'}
+                      </p>
+                      <p className="text-[9px] text-slate-400 mt-0.5 font-light">Clear ambient lighting required. Click to simulate capture.</p>
+                      
+                      {selfieUploaded && (
+                        <span className="inline-flex items-center space-x-1 text-[9px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full mt-2 font-mono">
+                          <Check className="w-3.5 h-3.5" />
+                          <span>live_face_portrait_matching_100.png</span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <button 
+                    type="button"
+                    onClick={submitDigitalKycCheckIn}
+                    className="w-full bg-indigo-650 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black py-2.5 rounded-xl uppercase tracking-wide shadow-sm hover:shadow-indigo-100 transition active:scale-95 cursor-pointer"
+                  >
+                    Submit KYC Verification Data
+                  </button>
+
+                  {checkInStatusMessage && (
+                    <div className={`p-3 rounded-xl text-[10.5px] font-medium leading-relaxed border ${
+                      checkInStatusMessage.includes('Success') || checkInStatusMessage.includes('Approved') 
+                        ? 'bg-emerald-50 text-emerald-800 border-emerald-150' 
+                        : 'bg-slate-50 text-slate-800 border-slate-200'
+                    }`}>
+                      {checkInStatusMessage}
+                    </div>
+                  )}
                 </div>
 
                 {/* Security & Password section */}
@@ -2238,193 +2445,8 @@ export default function CustomerApp({
           </div>
         )}
 
-        {/* VIEW TAB 5: Advanced Filter Engine Page */}
-        {activeTab === 'filters' && (
-          <div id="customer-tab-filters" className="space-y-4 animate-fade-in text-slate-800">
-            {/* Header */}
-            <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-xs flex justify-between items-center">
-              <div className="flex items-center space-x-2">
-                <SlidersHorizontal className="w-5 h-5 text-indigo-600 animate-pulse" />
-                <div>
-                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-900 leading-none">Advanced Filter Engine</h3>
-                  <p className="text-[10px] text-slate-405 mt-1">Refine your search results</p>
-                </div>
-              </div>
-              <div 
-                onClick={() => setActiveTab('home')} 
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 rounded-xl transition text-[10px] font-extrabold cursor-pointer no-uiverse"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>BACK</span>
-              </div>
-            </div>
-
-            {/* Filter controls */}
-            <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-xs space-y-5">
-              {/* PRICE SCALE SLIDER */}
-              <div className="space-y-1.5">
-                <label className="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Price Range (min to maximum)</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <span className="text-[9px] text-slate-500 uppercase tracking-tight">Minimum Price:</span>
-                    <input 
-                      type="number" 
-                      value={minPrice} 
-                      onChange={(e) => setMinPrice(Math.max(0, Number(e.target.value)))}
-                      className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 font-mono focus:border-indigo-500 focus:bg-white focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <span className="text-[9px] text-slate-500 uppercase tracking-tight">Maximum Price:</span>
-                    <input 
-                      type="number" 
-                      value={maxPrice} 
-                      onChange={(e) => setMaxPrice(Math.max(minPrice, Number(e.target.value)))}
-                      className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-800 font-mono focus:border-indigo-500 focus:bg-white focus:outline-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* ROOM TYPE CHECKBOXES */}
-              <div className="space-y-1.5">
-                <label className="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Room Type Selection</label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
-                  {['Standard', 'Deluxe', 'Suite', 'Dormitory', 'PGs'].map((roomType) => {
-                    const active = filterRoomTypes.includes(roomType);
-                    return (
-                      <div
-                        key={roomType}
-                        onClick={() => {
-                          if (active) {
-                            setFilterRoomTypes(filterRoomTypes.filter(x => x !== roomType));
-                          } else {
-                            setFilterRoomTypes([...filterRoomTypes, roomType]);
-                          }
-                        }}
-                        className={`p-2.5 rounded-xl text-left border transition text-[11px] font-bold flex items-center justify-between cursor-pointer no-uiverse ${
-                          active 
-                            ? 'bg-indigo-50 border-indigo-400 text-indigo-950 font-black' 
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                        }`}
-                      >
-                        <span>{roomType}</span>
-                        {active && <Check className="w-3.5 h-3.5 text-indigo-600 font-extrabold shrink-0 ml-1" />}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* SHARING TYPE CHECKBOXES */}
-              <div className="space-y-1.5">
-                <label className="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Sharing Type Configuration</label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
-                  {['Single sharing', 'Double sharing', 'Triple sharing'].map((sharing) => {
-                    const active = filterSharingTypes.includes(sharing);
-                    return (
-                      <div
-                        key={sharing}
-                        onClick={() => {
-                          if (active) {
-                            setFilterSharingTypes(filterSharingTypes.filter(x => x !== sharing));
-                          } else {
-                            setFilterSharingTypes([...filterSharingTypes, sharing]);
-                          }
-                        }}
-                        className={`p-2.5 rounded-xl text-left border transition text-[11px] font-bold flex items-center justify-between cursor-pointer no-uiverse ${
-                          active 
-                            ? 'bg-indigo-50 border-indigo-400 text-indigo-950 font-black' 
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                        }`}
-                      >
-                        <span>{sharing}</span>
-                        {active && <Check className="w-3.5 h-3.5 text-indigo-600 font-extrabold shrink-0 ml-1" />}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* AMENITIES CHECKBOXES */}
-              <div className="space-y-1.5">
-                <label className="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Amenities & Utilities Included</label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
-                  {['WiFi', 'AC', 'TV', 'Food', 'Laundry'].map((amenity) => {
-                    const active = filterAmenities.includes(amenity);
-                    return (
-                      <div
-                        key={amenity}
-                        onClick={() => {
-                          if (active) {
-                            setFilterAmenities(filterAmenities.filter(x => x !== amenity));
-                          } else {
-                            setFilterAmenities([...filterAmenities, amenity]);
-                          }
-                        }}
-                        className={`p-2.5 rounded-xl text-left border transition text-[11px] font-bold flex items-center justify-between cursor-pointer no-uiverse ${
-                          active 
-                            ? 'bg-indigo-50 border-indigo-400 text-indigo-950 font-black' 
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                        }`}
-                      >
-                        <span>{amenity}</span>
-                        {active && <Check className="w-3.5 h-3.5 text-indigo-600 font-extrabold shrink-0 ml-1" />}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* AVAILABILITY STATUS */}
-              <div className="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-150 flex items-center justify-between">
-                <div>
-                  <h4 className="text-[11.5px] font-black text-slate-800">Show Available Only</h4>
-                  <p className="text-[9.5px] text-slate-500 font-medium font-sans">Ignore fully occupied bookings matches</p>
-                </div>
-                <div
-                  onClick={() => setFilterShowOnlyAvailable(!filterShowOnlyAvailable)}
-                  className={`w-10 h-6 flex items-center rounded-full p-1 transition-colors duration-200 cursor-pointer no-uiverse ${
-                    filterShowOnlyAvailable ? 'bg-indigo-600' : 'bg-slate-300'
-                  }`}
-                >
-                  <div
-                    className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-200 ease-in-out ${
-                      filterShowOnlyAvailable ? 'translate-x-4' : 'translate-x-0'
-                    }`}
-                  />
-                </div>
-              </div>
-
-              {/* Reset/Apply Actions */}
-              <div className="flex gap-3 pt-2 font-bold text-xs uppercase font-sans">
-                <div
-                  onClick={() => {
-                    setFilterRoomTypes([]);
-                    setFilterSharingTypes([]);
-                    setFilterAmenities([]);
-                    setFilterShowOnlyAvailable(false);
-                    setMinPrice(0);
-                    setMaxPrice(65000);
-                  }}
-                  className="flex-1 py-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition text-center cursor-pointer no-uiverse"
-                >
-                  Reset All
-                </div>
-                <div
-                  onClick={() => {
-                    setActiveTab('home'); // focus search results
-                  }}
-                  className="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white transition tracking-wide text-center cursor-pointer no-uiverse"
-                >
-                  Apply ({sortedProperties.length} Matches)
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
       </main>
+    </div>
 
       {/* MODAL 1: Clicked Property Details Overlay */}
       <AnimatePresence>
@@ -2435,267 +2457,720 @@ export default function CustomerApp({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex flex-col justify-end"
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 overflow-y-auto"
           >
-            <motion.div 
-              id="property-details-sheet" 
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 20, stiffness: 120, mass: 0.9 }}
-              className="bg-white rounded-t-3xl max-h-[85%] overflow-y-auto p-4 space-y-4 text-slate-800"
-            >
-            
-            {/* Header section info */}
-            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-              <div>
-                <span className="text-[8px] font-black text-indigo-600 bg-indigo-50 border border-indigo-150 px-2 py-0.5 rounded-md uppercase tracking-widest block w-max">
-                  {selectedProperty.type} Details Listing
-                </span>
-                <h3 className="text-sm font-black font-display text-slate-950 mt-1">{selectedProperty.name}</h3>
-              </div>
-              <button 
-                onClick={() => setSelectedProperty(null)}
-                className="p-1.5 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Campaign Announcement Bar */}
-            {selectedProperty.campaignText && (
-              <div className="p-3 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl text-[10.5px] font-bold text-white shadow-xs flex items-center gap-2 animate-pulse">
-                <Sparkles className="w-4 h-4 shrink-0 text-amber-300 animate-spin" style={{ animationDuration: '3s' }} />
-                <span>🎉 Special Offer: {selectedProperty.campaignText} active now!</span>
-              </div>
-            )}
-
-            {/* Gallery Thumbnail Carousel */}
-            <div className="space-y-1.5">
-              <div className="h-40 w-full rounded-xl overflow-hidden bg-slate-100 relative shadow-sm border border-slate-105">
-                <img 
-                  src={activeImgIdx === 0 && selectedProperty.imageUrl ? selectedProperty.imageUrl : ((PROPERTY_IMAGES[selectedProperty.id] || [])[activeImgIdx] || selectedProperty.imageUrl || 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600')} 
-                  alt={selectedProperty.name}
-                  className="w-full h-full object-cover transition duration-300"
-                />
-                <span className="absolute bottom-2.5 right-2.5 bg-slate-950/60 text-white text-[8px] font-mono font-black px-2 py-0.5 rounded-full">
-                  PHOTO {activeImgIdx + 1} OF 4
-                </span>
-              </div>
+            {/* The Outer Wrapper */}
+            <div className="min-h-screen bg-[#f8fafc] text-slate-800 flex flex-col font-sans">
               
-              {/* Sliders buttons layout */}
-              <div className="flex flex-wrap gap-1.5 justify-center py-1">
-                {(() => {
-                  const imgs = [...(PROPERTY_IMAGES[selectedProperty.id] || [])];
-                  if (selectedProperty.imageUrl) {
-                    if (imgs.length > 0) {
-                      imgs[0] = selectedProperty.imageUrl;
-                    } else {
-                      imgs.push(selectedProperty.imageUrl);
-                    }
-                  }
-                  return imgs.map((img, idx) => (
-                    <button 
-                      key={idx}
-                      onClick={() => setActiveImgIdx(idx)}
-                      className={`w-6 h-6 rounded-md overflow-hidden border-2 transition ${activeImgIdx === idx ? 'border-indigo-600 scale-105' : 'border-transparent opacity-60'}`}
-                    >
-                      <img src={img} alt="thumbnail" className="w-full h-full object-cover" />
-                    </button>
-                  ));
-                })()}
-              </div>
-            </div>
-
-            {/* Address parameters details */}
-            <p className="text-[10px] text-slate-500 leading-relaxed font-light flex items-start gap-1">
-              <MapPin className="w-4 h-4 text-slate-350 shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <span><strong>Explicit Location Address:</strong> {selectedProperty.address}</span>
-                {selectedProperty.locationLink && (
-                  <a 
-                    href={selectedProperty.locationLink} 
-                    target="_blank" 
-                    rel="noreferrer" 
-                    className="text-indigo-600 hover:underline font-extrabold text-[9.5px] mt-1.5 flex items-center gap-1 w-max"
-                  >
-                    <span>🗺️ View on Google Maps</span>
-                  </a>
-                )}
-              </div>
-            </p>
-
-            {/* Display Common Facilities */}
-            <div>
-              <h4 className="text-[10px] font-bold text-slate-450 uppercase tracking-wider mb-1.5">Spot Shared Amenities</h4>
-              <div className="flex flex-wrap gap-1">
-                {(selectedProperty.amenities || []).map((item, idx) => (
-                  <span key={idx} className="bg-slate-100 border border-slate-150 text-[9.5px] text-slate-700 px-2 py-0.5 rounded-lg font-medium">
-                    {item}
+              {/* TOP BAR */}
+              <div className="bg-indigo-900 text-white/90 text-[11px] py-2.5 px-4 sm:px-8 flex flex-col sm:flex-row justify-between items-center gap-2 border-b border-white/10 select-none">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                  <span className="flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-indigo-300" />
+                    <span>{selectedProperty.adminPhone || "(000) 000-0000"}</span>
                   </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Matrix Rule details */}
-            <div>
-              <h4 className="text-[10px] font-bold text-slate-450 uppercase tracking-wider mb-1.5">Spot Stay Guidelines & Conduct</h4>
-              <ul className="text-[10px] text-slate-600 space-y-1 pl-4 list-disc mb-1 leading-relaxed">
-                {(selectedProperty.rules || []).map((rule, idx) => (
-                  <li key={idx}>{rule}</li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Dynamic Ratings & Reviews and Submission Form */}
-            <div className="space-y-2 pt-2 border-t border-slate-100">
-              <div className="flex justify-between items-center text-slate-905">
-                <h4 className="text-[10px] font-bold text-slate-450 uppercase tracking-wider">Property Reviews FEED & RATINGS</h4>
-                <div className="flex items-center space-x-1 font-bold text-xs text-amber-500">
-                  <Star className="w-4.5 h-4.5 fill-amber-500" />
-                  <span>4.8 Ratings</span>
+                  <span className="flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-indigo-300" />
+                    <span>{selectedProperty.adminEmail || "example@gmail.com"}</span>
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-indigo-300" />
+                    <span>{selectedProperty.address || "2464 Royal Ln. Mesa, New Jersey 45463"}</span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-indigo-300 transition">
+                    <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M9 8H7v3H5v2h2v7h3v-7h3V11h-3V9c0-.5.5-1 1-1h2V6H9v2z"/></svg>
+                  </a>
+                  <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-indigo-300 transition">
+                    <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.48.75 2.78 1.9 3.55-.7 0-1.35-.2-1.94-.53v.05c0 2.05 1.46 3.75 3.39 4.14-.36.1-.73.15-1.12.15-.27 0-.54-.03-.8-.08.54 1.68 2.1 2.9 3.96 2.94-1.45 1.14-3.29 1.82-5.27 1.82-.34 0-.68-.02-1.02-.06C3.04 20.37 5.3 21 7.7 21 15.65 21 20 14.4 20 8.69v-.56c.85-.6 1.57-1.37 2.16-2.25z"/></svg>
+                  </a>
+                  <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-indigo-300 transition">
+                    <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051C.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+                  </a>
+                  <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-indigo-300 transition">
+                    <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                  </a>
                 </div>
               </div>
 
-              {/* Individual reviews stack list */}
-              <div className="space-y-2.5 max-h-[170px] overflow-y-auto no-scrollbar pr-1">
-                {reviewsList.filter(r => r.propertyId === selectedProperty.id).map(rev => (
-                  <div key={rev.id} className="bg-slate-50 border border-slate-150/50 p-2.5 rounded-xl space-y-1">
-                    <div className="flex justify-between items-start text-[10px]">
-                      <span className="font-extrabold text-slate-950 font-display flex items-center gap-1">
-                        <User className="w-3 h-3 text-slate-400 inline" /> {rev.userName}
-                      </span>
-                      <div className="flex space-x-0.5 items-center">
-                        <span className="text-slate-400 font-mono text-[9px] mr-1">{rev.date}</span>
-                        {Array.from({ length: rev.rating }).map((_, i) => (
-                          <Star key={i} className="w-2.5 h-2.5 fill-amber-500 text-amber-400" />
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-[9.5px] text-slate-605 leading-relaxed text-slate-600 font-light italic">
-                      "{rev.comment}"
-                    </p>
-                    <div className="text-[8px] font-mono text-slate-400 flex items-center gap-1 pt-1 border-t border-slate-200/40">
-                      <ThumbsUp className="w-2.5 h-2.5 text-indigo-400" /> Was review helpful? ({rev.helpfulCount + (rev.id.includes('dyn') ? 1 : 0)} agree)
-                    </div>
+              {/* NAV BAR */}
+              <header className="bg-white/70 backdrop-blur-md border-b border-slate-100 py-3.5 px-4 sm:px-8 flex justify-between items-center select-none sticky top-0 z-40">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-sm">
+                    <Building className="w-4 h-4" />
                   </div>
-                ))}
+                  <div>
+                    <h1 className="font-serif font-black text-base text-indigo-900 tracking-wide leading-none">{selectedProperty.name}</h1>
+                    <span className="text-[9px] text-indigo-500 font-mono uppercase tracking-widest font-extrabold">Royelle Premium</span>
+                  </div>
+                </div>
+                <div>
+                  <button 
+                    onClick={() => setSelectedProperty(null)}
+                    className="curved-orange-border-btn text-[10px] font-extrabold uppercase px-5 py-2.5 rounded-xl transition active:scale-95 tracking-widest shadow-xs flex items-center gap-1 cursor-pointer"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5 animate-pulse" />
+                    <span>Back to Search</span>
+                  </button>
+                </div>
+              </header>
+
+              {/* HERO BANNER SECTION */}
+              <div className="relative h-[220px] bg-slate-900 overflow-hidden flex items-center justify-center select-none">
+                <img 
+                  src={selectedProperty.imageUrl || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1600'} 
+                  alt="Hero Banner" 
+                  className="absolute inset-0 w-full h-full object-cover opacity-40 blur-xs scale-105"
+                />
+                <div className="relative text-center z-10 space-y-1">
+                  <h2 className="font-serif text-3xl sm:text-4xl text-white font-bold tracking-wide">Room Details</h2>
+                  <div className="text-[10px] text-white/70 uppercase tracking-widest font-mono">
+                    <span>Home</span> &bull; <span>Room Details</span>
+                  </div>
+                </div>
               </div>
 
-              {/* Review submit subform */}
-              {currentUser ? (
-                <form onSubmit={handleSubmitReview} className="bg-slate-50 border border-slate-150 p-3 rounded-xl space-y-2 text-xs">
-                  <span className="text-[10px] font-extrabold uppercase text-slate-500 block">Post Guest Experience</span>
+              {/* MAIN CONTENT AREA */}
+              <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-8 space-y-8">
+                
+                {/* GALLERY SECTION (MEDIA GRID) */}
+                {(() => {
+                  const galleryImages = [
+                    selectedProperty.imageUrl,
+                    ...(PROPERTY_IMAGES[selectedProperty.id] || [])
+                  ].filter(Boolean);
+                  while (galleryImages.length < 4) {
+                    galleryImages.push('https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600');
+                  }
                   
-                  <div className="flex items-center space-x-2">
-                    <span className="text-[9.5px] text-slate-500">Service Rating:</span>
-                    <select 
-                      value={userRating} 
-                      onChange={(e) => setUserRating(Number(e.target.value))}
-                      className="text-[10px] border border-slate-200 bg-white p-1 rounded-md max-w-[60px]"
-                    >
-                      <option value="5">5 ★★★★★</option>
-                      <option value="4">4 ★★★★</option>
-                      <option value="3">3 ★★★</option>
-                      <option value="2">2 ★★</option>
-                      <option value="1">1 ★</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <textarea 
-                      value={userComment}
-                      onChange={(e) => setUserComment(e.target.value)}
-                      placeholder="Comment on room sizes, food service board, hygiene, etc..."
-                      className="w-full text-[10px] border border-slate-200 bg-white p-1.5 rounded-lg font-mono focus:outline-none focus:ring-1 focus:ring-indigo-500 h-11"
-                    />
-                    <button 
-                      type="submit"
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1 px-3.5 rounded-md text-[9px] transition active:scale-95 cursor-pointer block"
-                    >
-                      Submit Feedback Review
-                    </button>
-                  </div>
-
-                  {reviewStatus && (
-                    <p className="text-[8.5px] font-bold text-center text-emerald-700 uppercase tracking-widest bg-emerald-50 border border-emerald-100 p-1 rounded-sm animate-pulse">
-                      {reviewStatus}
-                    </p>
-                  )}
-                </form>
-              ) : (
-                <p className="text-[9px] text-slate-400 text-center italic bg-slate-50 p-2 rounded-xl">
-                  Sign in stays companion session to write a review.
-                </p>
-              )}
-            </div>
-
-            {/* Inventory listing matrix */}
-            <div className="pt-2 border-t border-slate-100">
-              <h4 className="text-[10.5px] font-bold text-slate-800 mb-2 uppercase tracking-wide">Available Units Room Inventory</h4>
-              <div className="space-y-2">
-                {propertyRooms.map(rm => (
-                  <div 
-                    key={rm.id}
-                    className={`p-3 border rounded-xl flex justify-between items-center text-xs transition ${
-                      rm.occupancyStatus === 'Maintenance' ? 'bg-slate-50/70 border-slate-200 opacity-60 pointer-events-none' : 'bg-white border-slate-150 hover:border-indigo-400 shadow-xs'
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center space-x-1.5">
-                        <span className="font-extrabold text-slate-900 font-display">Unit {rm.roomNumber}</span>
-                        <span className="text-[8.5px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md font-mono">{rm.type} Cap</span>
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      {/* Left stack of thumbnails (desktop only) */}
+                      <div className="hidden md:flex flex-col gap-3 h-[380px] w-full">
+                        {galleryImages.slice(0, 4).map((img, idx) => (
+                          <div 
+                            key={idx}
+                            onClick={() => setActiveImgIdx(idx)}
+                            className={`relative flex-1 rounded-xl overflow-hidden cursor-pointer border-2 transition duration-200 ${
+                              activeImgIdx === idx ? 'border-indigo-600 scale-[1.02]' : 'border-transparent opacity-85 hover:opacity-100'
+                            }`}
+                          >
+                            <img src={img} alt={`thumbnail-${idx}`} className="w-full h-full object-cover" />
+                            {idx === 3 && (
+                              <div className="absolute inset-0 bg-indigo-900/65 backdrop-blur-xs flex items-center justify-center text-white text-[10px] uppercase font-bold tracking-wider text-center p-1 leading-tight">
+                                <span>View All Photos</span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
-                      <div className="text-[9.5px] text-slate-400 mt-1">Floor No. {rm.floor} &bull; {(rm.amenities || []).slice(0, 2).join(', ')}</div>
+                      
+                      {/* Right large display image */}
+                      <div className="md:col-span-3 h-[380px] rounded-2xl overflow-hidden bg-slate-100 relative shadow-sm border border-slate-200">
+                        <img 
+                          src={galleryImages[activeImgIdx] || selectedProperty.imageUrl} 
+                          alt={selectedProperty.name}
+                          className="w-full h-full object-cover transition-all duration-300"
+                        />
+                        
+                        {/* Left Edge Scroll Arrow */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveImgIdx((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
+                          }}
+                          className="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/85 hover:bg-white text-slate-850 rounded-full shadow-md flex items-center justify-center transition active:scale-90 cursor-pointer z-30"
+                          title="Previous Image"
+                        >
+                          <ChevronLeft className="w-5 h-5 text-slate-700" />
+                        </button>
+
+                        {/* Right Edge Scroll Arrow */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveImgIdx((prev) => (prev + 1) % galleryImages.length);
+                          }}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/85 hover:bg-white text-slate-850 rounded-full shadow-md flex items-center justify-center transition active:scale-90 cursor-pointer z-30"
+                          title="Next Image"
+                        >
+                          <ChevronRight className="w-5 h-5 text-slate-700" />
+                        </button>
+
+                        {/* Image Counter Badge */}
+                        <span className="absolute bottom-4 right-4 bg-slate-950/70 text-white text-[9px] font-mono font-bold px-2.5 py-1 rounded-full tracking-wider select-none">
+                          PHOTO {activeImgIdx + 1} OF {galleryImages.length}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* TWO COLUMN GRID DETAILS AND BOOKING FORM */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                  
+                  {/* LEFT COLUMN: details, overview, amenities, rules, map */}
+                  <div className="lg:col-span-2 space-y-8">
+                    
+                    {/* Header parameters card */}
+                    <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-xs space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-serif text-2xl font-bold text-indigo-900">{selectedProperty.type === 'Hotel' ? 'Standard Rooms' : selectedProperty.name}</h3>
+                            <span className="bg-indigo-600 text-white text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider text-indigo-150">
+                              {selectedProperty.type === 'Hotel' ? 'Luxury Rooms' : 'Premium PG'}
+                            </span>
+                          </div>
+                          
+                          <p className="text-xs text-slate-500 font-medium flex items-center gap-1">
+                            <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span>{selectedProperty.address}</span>
+                          </p>
+                        </div>
+
+                        {/* Star review ratings */}
+                        <div className="flex items-center gap-1.5 self-start sm:self-center font-bold text-xs text-amber-500 bg-amber-50 border border-amber-200/40 px-2.5 py-1.5 rounded-lg select-none">
+                          <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                          <span>4.9 (245 Reviews)</span>
+                        </div>
+                      </div>
+
+                      {/* Pricing block */}
+                      <div className="pt-2 border-t border-slate-100 flex items-baseline gap-1 select-none">
+                        <span className="font-serif text-3xl font-black text-indigo-900">
+                          ₹{(bookingRoom ? (selectedProperty.type === 'PG' ? bookingRoom.pricePerMonth : bookingRoom.pricePerDay) : 1500).toLocaleString('en-IN')}
+                        </span>
+                        <span className="text-xs text-slate-400 font-medium font-sans">/ {selectedProperty.type === 'PG' ? 'month' : 'night'}</span>
+                      </div>
+
+                      {/* Room details specs line */}
+                      <div className="flex flex-wrap items-center gap-y-2 gap-x-4 pt-4 border-t border-slate-100 text-xs font-semibold text-slate-500 select-none">
+                        <span className="flex items-center gap-1.5">
+                          <BedIcon className="w-4 h-4 text-slate-400" />
+                          <span>{bookingRoom?.type || "Single"} sharing</span>
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <Bath className="w-4 h-4 text-slate-400" />
+                          <span>1 Bath</span>
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <Maximize className="w-4 h-4 text-slate-400" />
+                          <span>300 sqft</span>
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <Users className="w-4 h-4 text-slate-400" />
+                          <span>Max {bookingRoom?.type === 'Single' ? '1' : bookingRoom?.type === 'Double' ? '2' : '3'} Guests</span>
+                        </span>
+                        
+                        {/* Share link button */}
+                        <button 
+                          onClick={() => {
+                            navigator.clipboard.writeText(window.location.href);
+                            alert("Listing link copied to clipboard!");
+                          }}
+                          className="ml-auto flex items-center gap-1 text-slate-500 hover:text-indigo-600 transition border border-slate-200 px-3 py-1.5 rounded-lg text-[10px] uppercase font-bold tracking-wider cursor-pointer"
+                          type="button"
+                        >
+                          <Share2 className="w-3.5 h-3.5" />
+                          <span>Share</span>
+                        </button>
+                      </div>
                     </div>
 
-                    <div className="text-right">
-                      {(() => {
-                        const roomDiscountPct = selectedProperty.discountType === 'all' 
-                          ? (selectedProperty.discountPercentage || 0) 
-                          : (rm.discountPercentage || 0);
-                        const originalPrice = selectedProperty.type === 'PG' ? rm.pricePerMonth : rm.pricePerDay;
-                        const discountedPrice = Math.round(originalPrice * (1 - roomDiscountPct / 100));
+                    {/* Overview text details */}
+                    <div className="space-y-2">
+                      <h4 className="font-serif text-lg font-bold text-indigo-950">Overview</h4>
+                      <p className="text-xs text-slate-650 leading-relaxed font-normal">
+                        Welcome to {selectedProperty.name}, where modern elegance meets comfort. Located in the heart of {selectedProperty.city}, this property offers state-of-the-art infrastructure, fully-furnished spaces, and superior hygiene. Designed to provide a luxurious residential experience for student scholars and working professionals alike.
+                      </p>
+                    </div>
 
-                        return roomDiscountPct > 0 ? (
-                          <div className="space-y-0.5">
-                            <div className="text-[9.5px] text-slate-400 line-through font-mono">
-                              ₹{originalPrice.toLocaleString('en-IN')}
-                            </div>
-                            <div className="font-black text-indigo-600 text-[12px] font-mono leading-none flex items-center justify-end gap-1">
-                              <span className="text-[8px] bg-rose-50 text-rose-700 px-1 py-0.2 rounded-md font-sans font-bold">-{roomDiscountPct}%</span>
-                              <span>₹{discountedPrice.toLocaleString('en-IN')}</span>
-                              <span className="text-[8.5px] text-slate-400 font-mono font-light">/{selectedProperty.type === 'PG' ? 'mo' : 'day'}</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="font-black text-slate-950 text-[12px] font-mono leading-none">
-                            ₹{originalPrice.toLocaleString('en-IN')}
-                            <span className="text-[8.5px] text-slate-400 font-mono font-light">/{selectedProperty.type === 'PG' ? 'mo' : 'day'}</span>
+                    {/* Room Amenities Grid cards */}
+                    <div className="space-y-3">
+                      <div>
+                        <h4 className="font-serif text-lg font-bold text-indigo-950">Room Amenities</h4>
+                        <p className="text-[11px] text-slate-400 font-medium">Designed to provide you the ultimate level of comfort and convenience.</p>
+                      </div>
+
+                      {(() => {
+                        const getAmenityIcon = (name: string) => {
+                          const n = name.toLowerCase();
+                          if (n.includes('wifi') || n.includes('internet')) return <Wifi className="w-4.5 h-4.5 text-indigo-600" />;
+                          if (n.includes('ac') || n.includes('air conditioning')) return <Wind className="w-4.5 h-4.5 text-indigo-600" />;
+                          if (n.includes('tv') || n.includes('television') || n.includes('flat-screen')) return <Tv className="w-4.5 h-4.5 text-indigo-600" />;
+                          if (n.includes('safe') || n.includes('locker')) return <Lock className="w-4.5 h-4.5 text-indigo-600" />;
+                          if (n.includes('sound') || n.includes('speaker') || n.includes('music')) return <Volume2 className="w-4.5 h-4.5 text-indigo-600" />;
+                          if (n.includes('bath') || n.includes('shower') || n.includes('bathtub')) return <Bath className="w-4.5 h-4.5 text-indigo-600" />;
+                          if (n.includes('sofa') || n.includes('seating') || n.includes('chair')) return <Sofa className="w-4.5 h-4.5 text-indigo-600" />;
+                          if (n.includes('food') || n.includes('meal') || n.includes('menu')) return <Utensils className="w-4.5 h-4.5 text-indigo-600" />;
+                          if (n.includes('cctv') || n.includes('security')) return <ShieldCheck className="w-4.5 h-4.5 text-indigo-600" />;
+                          if (n.includes('clock') || n.includes('alarm')) return <Clock className="w-4.5 h-4.5 text-indigo-600" />;
+                          return <CheckCircle2 className="w-4.5 h-4.5 text-indigo-600" />;
+                        };
+
+                        const defaultAmenityList = [
+                          "Air Conditioning", "Flat-Screen TV", "High-Speed Wi-Fi", 
+                          "Electronic Safe", "Sound System", "Vanity mirror", 
+                          "Bathtubs", "Seating area", "Alarm clock"
+                        ];
+                        const amenitiesToRender = selectedProperty.amenities && selectedProperty.amenities.length > 0 
+                          ? selectedProperty.amenities 
+                          : defaultAmenityList;
+
+                        return (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            {amenitiesToRender.map((amenity, idx) => (
+                              <div 
+                                key={idx}
+                                className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl hover:border-indigo-600/30 hover:shadow-xs transition duration-200"
+                              >
+                                <div className="w-9 h-9 bg-slate-50 rounded-lg flex items-center justify-center text-indigo-600 shrink-0 border border-slate-100">
+                                  {getAmenityIcon(amenity)}
+                                </div>
+                                <span className="text-xs font-semibold text-slate-700">{amenity}</span>
+                              </div>
+                            ))}
                           </div>
                         );
                       })()}
+                    </div>
+
+                    {/* Booking Rules Checklist */}
+                    <div className="space-y-3">
+                      <h4 className="font-serif text-lg font-bold text-indigo-955">Booking Rules</h4>
                       
-                      {rm.occupancyStatus === 'Maintenance' ? (
-                        <span className="text-[8px] uppercase font-bold text-rose-500 font-mono block mt-1">Maintenance</span>
+                      {(() => {
+                        const rules = selectedProperty.rules || [];
+                        const half = Math.ceil(rules.length / 2);
+                        const leftRules = rules.slice(0, half);
+                        const rightRules = rules.slice(half);
+
+                        return (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2 select-none">
+                            <div className="space-y-2.5">
+                              <h5 className="text-xs font-black text-slate-900 uppercase tracking-wide">Check In</h5>
+                              <ul className="space-y-2 text-xs text-slate-650 font-semibold">
+                                {leftRules.map((rule, idx) => (
+                                  <li key={idx} className="flex items-start gap-2.5">
+                                    <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                                    <span>{rule}</span>
+                                  </li>
+                                ))}
+                                {leftRules.length === 0 && (
+                                  <>
+                                    <li className="flex items-start gap-2.5"><CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" /> <span>Check-in time starts at 12:00 PM</span></li>
+                                    <li className="flex items-start gap-2.5"><CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" /> <span>Original KYC documents mandatory for security check</span></li>
+                                    <li className="flex items-start gap-2.5"><CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" /> <span>Standard security deposit is 1 month rent equivalent</span></li>
+                                  </>
+                                )}
+                              </ul>
+                            </div>
+                            
+                            <div className="space-y-2.5">
+                              <h5 className="text-xs font-black text-slate-900 uppercase tracking-wide">Check Out</h5>
+                              <ul className="space-y-2 text-xs text-slate-655 font-semibold">
+                                {rightRules.map((rule, idx) => (
+                                  <li key={idx} className="flex items-start gap-2.5">
+                                    <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                                    <span>{rule}</span>
+                                  </li>
+                                ))}
+                                {rightRules.length === 0 && (
+                                  <>
+                                    <li className="flex items-start gap-2.5"><CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" /> <span>Check-out time is by 11:00 AM</span></li>
+                                    <li className="flex items-start gap-2.5"><CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" /> <span>Ensure utility dues cleared before exit clearance</span></li>
+                                    <li className="flex items-start gap-2.5"><CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" /> <span>Notify management 30 days prior to checkout</span></li>
+                                  </>
+                                )}
+                              </ul>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Location simulated Map */}
+                    <div className="space-y-3">
+                      <h4 className="font-serif text-lg font-bold text-indigo-950">Location</h4>
+                      
+                      <div className="w-full h-64 bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 relative shadow-inner select-none">
+                        <svg className="w-full h-full opacity-60" viewBox="0 0 800 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect x="0" y="0" width="800" height="300" fill="#f1f5f9"/>
+                          <path d="M50 0 C100 50, 150 50, 200 0 L250 0 C300 100, 200 200, 100 300 L0 300 Z" fill="#e2e8f0"/>
+                          <circle cx="650" cy="100" r="80" fill="#cbd5e1" opacity="0.5"/>
+                          
+                          <path d="M0 80 H800" stroke="white" strokeWidth="16" />
+                          <path d="M0 80 H800" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="6 6" />
+                          
+                          <path d="M300 0 V300" stroke="white" strokeWidth="16" />
+                          <path d="M300 0 V300" stroke="#cbd5e1" strokeWidth="2" strokeDasharray="6 6" />
+                          
+                          <path d="M0 240 L800 120" stroke="white" strokeWidth="16" />
+                          
+                          <text x="40" y="70" fill="#94a3b8" fontSize="10" fontWeight="bold" fontFamily="sans-serif">Worth St.</text>
+                          <text x="320" y="280" fill="#94a3b8" fontSize="10" fontWeight="bold" fontFamily="sans-serif">Leonard St.</text>
+                          <text x="600" y="160" fill="#94a3b8" fontSize="10" fontWeight="bold" fontFamily="sans-serif">W Broadway</text>
+                        </svg>
+                        
+                        <div className="absolute top-1/2 left-[300px] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+                          <div className="w-10 h-10 bg-indigo-600 rounded-full border-2 border-white flex items-center justify-center shadow-lg text-white animate-bounce">
+                            <Building className="w-5 h-5" />
+                          </div>
+                          <div className="bg-indigo-600 text-white text-[9px] font-bold px-2.5 py-0.5 rounded shadow-sm mt-1 whitespace-nowrap">
+                            {selectedProperty.name}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Reviews section inside Left Column */}
+                    <div className="space-y-4 pt-6 border-t border-slate-100">
+                      <div className="flex justify-between items-center text-slate-900">
+                        <h4 className="font-serif text-lg font-bold text-indigo-950">Property Reviews Feed & Ratings</h4>
+                        <div className="flex items-center space-x-1.5 font-bold text-sm text-amber-500 bg-amber-50 border border-amber-200/50 px-2.5 py-1 rounded-lg">
+                          <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                          <span>4.8 Ratings</span>
+                        </div>
+                      </div>
+
+                      {/* Individual reviews stack list */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto no-scrollbar pr-1">
+                        {reviewsList.filter(r => r.propertyId === selectedProperty.id).map(rev => (
+                          <div key={rev.id} className="bg-slate-50 border border-slate-150 p-4 rounded-xl space-y-2 flex flex-col justify-between">
+                            <div>
+                              <div className="flex justify-between items-start text-xs">
+                                <span className="font-extrabold text-slate-900 flex items-center gap-1.5">
+                                  <User className="w-3.5 h-3.5 text-slate-400 inline" /> {rev.userName}
+                                </span>
+                                <div className="flex space-x-0.5 items-center">
+                                  <span className="text-slate-400 text-[9px] mr-1">{rev.date}</span>
+                                  {Array.from({ length: rev.rating }).map((_, i) => (
+                                    <Star key={i} className="w-3 h-3 fill-amber-500 text-amber-400" />
+                                  ))}
+                                </div>
+                              </div>
+                              <p className="text-xs text-slate-605 leading-relaxed font-light italic mt-2">
+                                "{rev.comment}"
+                              </p>
+                            </div>
+                            <div className="text-[9px] font-mono text-slate-400 flex items-center gap-1 pt-2 border-t border-slate-200/40 mt-2">
+                              <ThumbsUp className="w-3 h-3 text-indigo-600" /> Was review helpful? ({rev.helpfulCount + (rev.id.includes('dyn') ? 1 : 0)} agree)
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Review submit subform */}
+                      {currentUser ? (
+                        <form onSubmit={handleSubmitReview} className="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3 text-xs max-w-xl">
+                          <span className="text-xs font-black uppercase text-slate-700 tracking-wider block">Post Guest Experience</span>
+                          
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs font-semibold text-slate-650">Service Rating:</span>
+                            <select 
+                              value={userRating} 
+                              onChange={(e) => setUserRating(Number(e.target.value))}
+                              className="text-xs border border-slate-200 bg-white p-1.5 rounded-lg max-w-[80px] focus:outline-none"
+                            >
+                              <option value="5">5 ★★★★★</option>
+                              <option value="4">4 ★★★★</option>
+                              <option value="3">3 ★★★</option>
+                              <option value="2">2 ★★</option>
+                              <option value="1">1 ★</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-2">
+                            <textarea 
+                              value={userComment}
+                              onChange={(e) => setUserComment(e.target.value)}
+                              placeholder="Comment on room sizes, food service board, hygiene, etc..."
+                              className="w-full text-xs border border-slate-200 bg-white p-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 h-16 resize-none font-medium"
+                            />
+                            <button 
+                              type="submit"
+                              className="curved-orange-border-btn font-bold py-2 px-4 rounded-xl text-xs transition active:scale-95 cursor-pointer block"
+                            >
+                              Submit Feedback Review
+                            </button>
+                          </div>
+
+                          {reviewStatus && (
+                            <p className={`text-[10px] font-bold text-center uppercase tracking-widest p-2 rounded-lg ${
+                              reviewStatus.includes('mandatory') ? 'text-rose-700 bg-rose-50 border border-rose-100' : 'text-emerald-700 bg-emerald-50 border border-emerald-100'
+                            }`}>
+                              {reviewStatus}
+                            </p>
+                          )}
+                        </form>
                       ) : (
-                        <button 
-                          onClick={() => handleOpenBooking(rm)}
-                          className="bg-indigo-650 bg-indigo-600 hover:bg-indigo-700 text-white text-[8.5px] uppercase tracking-wide font-black px-3 py-1.5 rounded-lg mt-1.5 transition active:scale-95 cursor-pointer inline-block"
-                        >
-                          Book Unit
-                        </button>
+                        <p className="text-xs text-slate-400 text-center italic bg-slate-50 p-3 rounded-2xl max-w-xl">
+                          Sign in stays companion session to write a review.
+                        </p>
                       )}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
 
+                  {/* RIGHT COLUMN: STICKY BOOKING FORM CARD */}
+                  <div className="lg:sticky lg:top-20">
+                    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-md space-y-5">
+                      <div className="text-center">
+                        <h4 className="font-serif text-xl font-bold text-indigo-900 tracking-wide">Book Room</h4>
+                        <div className="h-0.5 w-12 bg-indigo-500 mx-auto mt-2 rounded-full"></div>
+                      </div>
+
+                      {bookingSuccessMode && lastCreatedBooking ? (
+                        /* Inline Booking Confirmation Ticket Details */
+                        <div className="space-y-4 py-2 animate-scale-up">
+                          <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto">
+                            <CheckCircle className="w-8 h-8" />
+                          </div>
+                          <div className="text-center">
+                            <h5 className="text-xs font-black uppercase tracking-wider text-slate-900">Stay Registration Request Complete!</h5>
+                            <p className="text-[10.5px] text-slate-500 mt-1.5 leading-relaxed">
+                              Pending approval from hostel admin. View invoice bill breakdown details and make simulated payments to confirm instantly.
+                            </p>
+                          </div>
+                          
+                          {/* visual companion receipt ticket wrapper */}
+                          <div className="border border-dashed border-slate-200 rounded-xl p-3 bg-slate-50 space-y-2 text-xs leading-relaxed font-sans">
+                            <div className="flex justify-between font-bold">
+                              <span>Stay Unit:</span> <span className="font-mono">Rm {lastCreatedBooking.roomNumber}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Invoice Bill:</span> <strong className="text-indigo-700">₹{lastCreatedBooking.totalAmount.toLocaleString('en-IN')}</strong>
+                            </div>
+                            <div className="flex justify-between text-[10px] text-slate-400 font-mono">
+                              <span>Reference ID:</span> <span>STAY-{lastCreatedBooking.id.split('-')[1]}</span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <button 
+                              onClick={() => {
+                                setSelectedProperty(null);
+                                setBookingRoom(null);
+                                setBookingSuccessMode(false);
+                                setActiveInvoice(lastCreatedBooking);
+                                setActiveTab('bookings');
+                              }}
+                              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold uppercase py-3 rounded-xl transition cursor-pointer text-center block tracking-wider"
+                            >
+                              View in My Bookings
+                            </button>
+                            <button 
+                              onClick={() => {
+                                setBookingSuccessMode(false);
+                                setSelectedProperty(null);
+                              }}
+                              className="w-full border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-extrabold uppercase py-2.5 rounded-xl transition cursor-pointer text-center block tracking-wider"
+                            >
+                              Back to Search
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        /* Inline Booking Inputs form */
+                        <form onSubmit={handleConfirmReservation} className="space-y-4 text-xs font-sans">
+                          {/* Name Input */}
+                          <div className="space-y-1.5">
+                            <label className="block font-bold text-slate-700">Your Name *</label>
+                            <input 
+                              type="text" 
+                              placeholder="Ex. John Doe"
+                              value={bookingName}
+                              onChange={(e) => setBookingName(e.target.value)}
+                              className="w-full text-xs border border-slate-200 bg-white p-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 font-medium"
+                              required
+                            />
+                          </div>
+
+                          {/* Phone Input */}
+                          <div className="space-y-1.5">
+                            <label className="block font-bold text-slate-700">Phone Number *</label>
+                            <input 
+                              type="tel" 
+                              placeholder="Enter Phone Number"
+                              value={bookingPhone}
+                              onChange={(e) => setBookingPhone(e.target.value)}
+                              className="w-full text-xs border border-slate-200 bg-white p-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 font-medium"
+                              required
+                            />
+                          </div>
+
+                          {/* Check in / Check out row */}
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                              <label className="block font-bold text-slate-700">Check-in Date *</label>
+                              <input 
+                                type="date"
+                                value={checkInDate}
+                                onChange={(e) => setCheckInDate(e.target.value)}
+                                className="w-full text-xs border border-slate-200 bg-white p-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 font-mono font-medium"
+                                required
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="block font-bold text-slate-700">Check-out Date *</label>
+                              <input 
+                                type="date"
+                                value={checkOutDate}
+                                onChange={(e) => setCheckOutDate(e.target.value)}
+                                className="w-full text-xs border border-slate-200 bg-white p-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 font-mono font-medium"
+                                required
+                              />
+                            </div>
+                          </div>
+
+                          {/* Adults / Children row */}
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                              <label className="block font-bold text-slate-700">Adult *</label>
+                              <select 
+                                value={bookingAdults} 
+                                onChange={(e) => setBookingAdults(e.target.value)}
+                                className="w-full text-xs border border-slate-200 bg-white p-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 font-medium"
+                              >
+                                <option value="1">1 Adult</option>
+                                <option value="2">2 Adults</option>
+                                <option value="3">3 Adults</option>
+                                <option value="4">4+ Adults</option>
+                              </select>
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="block font-bold text-slate-700">Children *</label>
+                              <select 
+                                value={bookingChildren} 
+                                onChange={(e) => setBookingChildren(e.target.value)}
+                                className="w-full text-xs border border-slate-200 bg-white p-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 font-medium"
+                              >
+                                <option value="0">0 Children</option>
+                                <option value="1">1 Child</option>
+                                <option value="2">2 Children</option>
+                                <option value="3">3+ Children</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Room Type dropdown select */}
+                          <div className="space-y-1.5">
+                            <label className="block font-bold text-slate-700">Room Type *</label>
+                            <select 
+                              value={bookingRoom?.id || ""} 
+                              onChange={(e) => {
+                                const rm = propertyRooms.find(r => r.id === e.target.value);
+                                if (rm) setBookingRoom(rm);
+                              }}
+                              className="w-full text-xs border border-slate-200 bg-white p-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 font-medium"
+                              required
+                            >
+                              <option value="">Select a Room Unit</option>
+                              {propertyRooms.map(rm => (
+                                <option key={rm.id} value={rm.id}>
+                                  Unit {rm.roomNumber} ({rm.type} - {selectedProperty.type === 'PG' ? '₹' + rm.pricePerMonth + '/mo' : '₹' + rm.pricePerDay + '/day'})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Number of Rooms select */}
+                          <div className="space-y-1.5">
+                            <label className="block font-bold text-slate-700">Number of Rooms *</label>
+                            <select 
+                              value={bookingNumRooms} 
+                              onChange={(e) => setBookingNumRooms(e.target.value)}
+                              className="w-full text-xs border border-slate-200 bg-white p-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 font-medium"
+                            >
+                              <option value="1">1 Room</option>
+                              <option value="2">2 Rooms</option>
+                              <option value="3">3 Rooms</option>
+                            </select>
+                          </div>
+
+                          {/* Live Dynamic Pricing breakdown */}
+                          {bookingRoom && (
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2 select-none">
+                              <div className="flex justify-between text-slate-500 font-medium">
+                                <span>Base Rate ({costBreakdown.meal > 0 ? 'inc meal' : 'room only'}):</span>
+                                <span className="font-mono text-slate-700 font-bold">₹{costBreakdown.baseOriginal.toLocaleString('en-IN')}</span>
+                              </div>
+                              {costBreakdown.discount > 0 && (
+                                <div className="flex justify-between text-rose-600 font-semibold">
+                                  <span>Discount Applied:</span>
+                                  <span className="font-mono">-₹{costBreakdown.discount.toLocaleString('en-IN')}</span>
+                                </div>
+                              )}
+                              <div className="flex justify-between text-slate-500 font-medium">
+                                <span>GST Tax (18%):</span>
+                                <span className="font-mono text-slate-700 font-bold">₹{costBreakdown.tax.toLocaleString('en-IN')}</span>
+                              </div>
+                              <div className="border-t border-slate-200/80 pt-2 flex justify-between font-black text-slate-900 text-sm">
+                                <span>Total Pricing:</span>
+                                <span className="font-mono text-indigo-900 text-[15px]">₹{costBreakdown.final.toLocaleString('en-IN')}</span>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Promo code inputs */}
+                          <div className="space-y-1.5">
+                            <label className="block font-bold text-slate-700">Apply Promo Code</label>
+                            <div className="flex gap-2">
+                              <input 
+                                type="text" 
+                                placeholder="PROMO CODE"
+                                value={couponCodeInput}
+                                onChange={(e) => setCouponCodeInput(e.target.value)}
+                                className="flex-1 text-xs border border-slate-200 bg-white px-2.5 py-2 rounded-lg uppercase font-mono font-bold focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                              />
+                              <button 
+                                type="button" 
+                                onClick={handleApplyBookingCoupon}
+                                className="curved-orange-border-btn text-xs font-bold px-3 py-2 rounded-xl transition shrink-0 cursor-pointer"
+                              >
+                                Apply
+                              </button>
+                            </div>
+                            {couponMessage && (
+                              <p className={`text-[10px] font-semibold mt-1 ${couponMessage.includes('Successful') ? 'text-emerald-700' : 'text-rose-600'}`}>
+                                {couponMessage}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Submit Booking Now button */}
+                          <button 
+                            type="submit"
+                            className="curved-orange-border-btn w-full py-3 rounded-xl font-bold transition active:scale-[0.98] uppercase tracking-wider text-xs shadow-xs cursor-pointer select-none"
+                          >
+                            Book Now
+                          </button>
+                          
+                          {/* Authentication note */}
+                          {!currentUser && (
+                            <p className="text-[10px] text-center text-slate-400 italic bg-amber-50/50 border border-amber-100 p-2 rounded-lg mt-2">
+                              Note: You will be asked to sign in or complete guest profile registration to complete the reservation.
+                            </p>
+                          )}
+                        </form>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+              
+              {/* Footer Spacer */}
+              <footer className="bg-slate-900 py-6 text-center text-slate-500 text-[10px] select-none mt-12 border-t border-slate-850">
+                <p>&copy; {new Date().getFullYear()} {selectedProperty.name} &bull; StayHub Customer Console. All rights reserved.</p>
+              </footer>
+
+            </div>
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
 
       {/* MODAL 2: Dynamic booking Wizard configuration form */}
       {showBookingModal && bookingRoom && selectedProperty && (
@@ -2857,7 +3332,7 @@ export default function CustomerApp({
                     <button 
                       type="button"
                       onClick={handleApplyBookingCoupon}
-                      className="bg-indigo-650 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3.5 rounded-lg text-[10px] transition cursor-pointer"
+                      className="curved-orange-border-btn font-bold py-2 px-3.5 rounded-xl text-[10px] transition cursor-pointer"
                     >
                       Apply Code
                     </button>
@@ -3277,67 +3752,7 @@ export default function CustomerApp({
         />
       )}
 
-      {/* Bottom Safe Area Phone Navigation Tab Bar */}
-      <nav id="customer-bottom-nav" className="no-uiverse fixed bottom-0 inset-x-0 max-w-7xl mx-auto bg-white/95 backdrop-blur-md border-t border-slate-150 p-2 pb-5 flex justify-around items-center text-slate-500 z-40 shadow-lg select-none leading-none">
-        <button 
-          onClick={() => {
-            setActiveTab('home');
-            setShowFooterFiltersModal(false);
-          }}
-          className={`flex flex-col items-center space-y-1.5 transition px-2.5 py-1 ${activeTab === 'home' ? 'text-indigo-600 font-black scale-105' : 'hover:text-slate-800'}`}
-        >
-          <Search className="w-4.5 h-4.5" />
-          <span className="text-[8.5px] uppercase tracking-wider">Search Hub</span>
-        </button>
 
-        <button 
-          onClick={() => {
-            setActiveTab('bookings');
-            setShowFooterFiltersModal(false);
-          }}
-          className={`flex flex-col items-center space-y-1.5 transition px-2.5 py-1 relative ${activeTab === 'bookings' ? 'text-indigo-600 font-black scale-105' : 'hover:text-slate-800'}`}
-        >
-          <Calendar className="w-4.5 h-4.5" />
-          <span className="text-[8.5px] uppercase tracking-wider">Your Stays</span>
-          {userBookings.length > 0 && (
-            <span className="absolute top-1 right-2.5 w-1.5 h-1.5 bg-indigo-600 rounded-full animate-ping"></span>
-          )}
-        </button>
-
-        <button 
-          onClick={() => {
-            setActiveTab('checkin');
-            setShowFooterFiltersModal(false);
-          }}
-          className={`flex flex-col items-center space-y-1.5 transition px-2.5 py-1 ${activeTab === 'checkin' ? 'text-indigo-600 font-black scale-105' : 'hover:text-slate-800'}`}
-        >
-          <FileText className="w-4.5 h-4.5" />
-          <span className="text-[8.5px] uppercase tracking-wider">KYC Upload</span>
-        </button>
-
-        <button 
-          onClick={() => {
-            setActiveTab('filters');
-            setShowFooterFiltersModal(false);
-          }}
-          className={`flex flex-col items-center space-y-1.5 transition px-2.5 py-1 ${activeTab === 'filters' ? 'text-indigo-600 font-black scale-105' : 'hover:text-slate-800 animate-pulse'}`}
-          title="Adjust Price, Room type, Sharing type, Amenities & Availability"
-        >
-          <SlidersHorizontal className="w-4.5 h-4.5 text-indigo-500" />
-          <span className="text-[8.5px] uppercase tracking-wider font-extrabold text-indigo-950">Filters</span>
-        </button>
-
-        <button 
-          onClick={() => {
-            setActiveTab('profile');
-            setShowFooterFiltersModal(false);
-          }}
-          className={`flex flex-col items-center space-y-1.5 transition px-2.5 py-1 ${activeTab === 'profile' ? 'text-indigo-600 font-black scale-105' : 'hover:text-slate-800'}`}
-        >
-          <User className="w-4.5 h-4.5" />
-          <span className="text-[8.5px] uppercase tracking-wider">Profile</span>
-        </button>
-      </nav>
 
     </div>
   );

@@ -234,7 +234,7 @@ export default function App() {
     <IonApp>
       <IonPage>
         <IonContent 
-          scrollY={true} 
+          scrollY={activePortal === null} 
           style={activePortal === 'superadmin' && !superAdminSession ? { '--background': 'transparent' } as React.CSSProperties : undefined}
         >
           <div className={`min-h-screen ${
