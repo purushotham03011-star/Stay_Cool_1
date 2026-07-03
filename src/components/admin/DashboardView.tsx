@@ -114,6 +114,10 @@ export default function DashboardView({
   const [whatsAppReminderInvoice, setWhatsAppReminderInvoice] = useState<any | null>(null);
   const [whatsAppReminderText, setWhatsAppReminderText] = useState<string>('');
 
+  const [selectedApproveBooking, setSelectedApproveBooking] = useState<Booking | null>(null);
+  const [selectedApproveRoomId, setSelectedApproveRoomId] = useState<string>('');
+  const [selectedApproveBedId, setSelectedApproveBedId] = useState<string>('');
+
   const handleOpenReminderWhatsApp = (inv: any) => {
     setWhatsAppReminderInvoice(inv);
     setWhatsAppReminderText(`Dear ${inv.tenantName || 'Resident'},\n\nKindly note that your payment for ${inv.type} (${inv.month}) totaling ₹${inv.amount.toLocaleString('en-IN')} is outstanding. Please complete the transaction at your earliest. If already paid, please ignore this message.\n\nThank you!`);
@@ -377,62 +381,164 @@ export default function DashboardView({
 
   // Convert Booking to ACTIVE directly from dashboard queue
   const handleApproveBookingDirect = (bk: Booking) => {
-    const availableRm = propertyRooms.find(r => r.occupancyStatus === 'Available');
-    if (!availableRm) {
-      alert('Error: All inventory slots are currently full. Allocate rooms or checkout co-livers first.');
-      return;
+    setSelectedApproveBooking(bk);
+    // Find first available room of the requested type, or default to first room
+    const matchingRooms = propertyRooms.filter(r => r.type === bk.requestedRoomType && r.occupancyStatus !== 'Full');
+    const firstRoom = matchingRooms[0] || propertyRooms[0];
+    if (firstRoom) {
+      setSelectedApproveRoomId(firstRoom.id);
+      const availableBed = beds.find(b => b.roomId === firstRoom.id && !b.isOccupied);
+      if (availableBed) {
+        setSelectedApproveBedId(availableBed.id);
+      } else {
+        setSelectedApproveBedId('');
+      }
+    } else {
+      setSelectedApproveRoomId('');
+      setSelectedApproveBedId('');
     }
-
-    const availableBed = beds.find(b => b.roomId === availableRm.id && !b.isOccupied);
-    if (!availableBed) {
-      alert('No unoccupied physical bed found. Review bed layouts.');
-      return;
-    }
-
-    const newTenant: Tenant = {
-      id: `tenant-${Date.now()}`,
-      name: bk.customerName,
-      email: bk.customerEmail,
-      phone: bk.customerPhone,
-      gender: 'Male',
-      docType: 'Aadhaar',
-      docUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400',
-      emergencyContactName: 'Guardian Support',
-      emergencyContactPhone: bk.customerPhone,
-      roomId: availableRm.id,
-      roomNumber: availableRm.roomNumber,
-      bedId: availableBed.id,
-      bedNumber: availableBed.bedNumber,
-      propertyId: selectedPropertyId,
-      propertyName: currentProperty ? currentProperty.name : 'StayHub Guest',
-      status: 'Active',
-      joinedDate: new Date().toISOString().split('T')[0],
-    };
-
-    const updatedBeds = beds.map(b => b.id === availableBed.id ? { ...b, isOccupied: true, occupantTenantId: newTenant.id } : b);
-    const roomBeds = updatedBeds.filter(b => b.roomId === availableRm.id);
-    const allFull = roomBeds.every(b => b.isOccupied);
-    const updatedRooms = rooms.map(r => r.id === availableRm.id ? { ...r, occupancyStatus: (allFull ? 'Full' : 'Available') as any } : r);
-    const updatedBookings = bookings.map(b => b.id === bk.id ? { ...b, status: 'Confirmed' as const, roomId: availableRm.id, roomNumber: availableRm.roomNumber, bedId: availableBed.id, bedNumber: availableBed.bedNumber } : b);
-
-    setBookings(updatedBookings);
-    localStorage.setItem('hotel_pg_bookings', JSON.stringify(updatedBookings));
-
-    syncRoomsAndBeds(updatedRooms, updatedBeds);
-    syncTenants([...tenants, newTenant]);
-
-    onAddAuditLog(`Approved booking ${bk.id} and checked in ${bk.customerName} (Room ${availableRm.roomNumber})`, 'Tenants');
   };
 
-  const handleRejectBookingDirect = (bk: Booking) => {
+  const handleConfirmApproveAllocation = async () => {
+    if (!selectedApproveBooking || !selectedApproveRoomId || !selectedApproveBedId) {
+      alert('Please select both a Room and a Bed to complete allocation.');
+      return;
+    }
+
+    const bk = selectedApproveBooking;
+    const targetRm = propertyRooms.find(r => r.id === selectedApproveRoomId);
+    const targetBed = beds.find(b => b.id === selectedApproveBedId);
+
+    if (!targetRm || !targetBed) return;
+
+    try {
+      const res = await fetch(`http://localhost:8000/api/bookings/${bk.id}/approve?room_id=${selectedApproveRoomId}&bed_id=${selectedApproveBedId}`, {
+        method: 'POST'
+      });
+
+      if (res.ok) {
+        const newTenant: Tenant = {
+          id: bk.tenantId || `tenant-${Date.now()}`,
+          name: bk.customerName,
+          email: bk.customerEmail,
+          phone: bk.customerPhone,
+          gender: 'Male',
+          docType: 'Aadhaar',
+          docUrl: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400',
+          emergencyContactName: 'Guardian Support',
+          emergencyContactPhone: bk.customerPhone,
+          roomId: targetRm.id,
+          roomNumber: targetRm.roomNumber,
+          bedId: targetBed.id,
+          bedNumber: targetBed.bedNumber,
+          propertyId: selectedPropertyId,
+          propertyName: currentProperty ? currentProperty.name : 'StayHub Guest',
+          status: 'Active',
+          joinedDate: new Date().toISOString().split('T')[0],
+        };
+
+        const updatedBeds = beds.map(b => b.id === targetBed.id ? { ...b, isOccupied: true, occupantTenantId: newTenant.id } : b);
+        const roomBeds = updatedBeds.filter(b => b.roomId === targetRm.id);
+        const allFull = roomBeds.every(b => b.isOccupied);
+        const updatedRooms = rooms.map(r => r.id === targetRm.id ? { ...r, occupancyStatus: (allFull ? 'Full' : 'Available') as any } : r);
+
+        syncRoomsAndBeds(updatedRooms, updatedBeds);
+        syncTenants([...tenants, newTenant]);
+
+        // Sync bookings
+        const resBookings = await fetch('http://localhost:8000/api/bookings');
+        if (resBookings.ok) {
+          const data = await resBookings.json();
+          const mapped = data.map((b: any) => ({
+            id: b.id,
+            propertyId: b.property_id,
+            propertyName: b.property?.name || 'StayHub',
+            roomId: b.room_id,
+            roomNumber: b.room?.room_number || '',
+            bedId: b.bed_id,
+            bedNumber: b.bed?.bed_number || '',
+            tenantId: b.tenant_id,
+            customerName: b.tenant?.name || b.customer_name || 'Guest',
+            customerEmail: b.tenant?.email || b.customer_email || '',
+            customerPhone: b.tenant?.phone || b.customer_phone || '',
+            checkInDate: b.check_in_date,
+            checkOutDate: b.check_out_date,
+            totalAmount: b.total_amount,
+            status: b.status,
+            mealPlan: b.meal_plan || 'None',
+            requestedRoomType: b.requested_room_type || 'Double'
+          }));
+          setBookings(mapped);
+          localStorage.setItem('hotel_pg_bookings', JSON.stringify(mapped));
+        }
+
+        const newInvoice: Invoice = {
+          id: `inv-${Date.now()}`,
+          tenantId: newTenant.id,
+          tenantName: newTenant.name,
+          month: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }),
+          amount: bk.totalAmount,
+          status: 'Unpaid',
+          type: 'Rent',
+          generatedAt: new Date().toISOString()
+        };
+        if (syncInvoices) {
+          syncInvoices([...invoices, newInvoice]);
+        }
+
+        onAddAuditLog(`Approved booking ${bk.id} and allocated bed ${targetBed.bedNumber} in Room ${targetRm.roomNumber}`, 'Tenants');
+        setSelectedApproveBooking(null);
+      } else {
+        const errorData = await res.json();
+        alert(`Error: ${errorData.detail || 'Failed to approve booking request on database server.'}`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error connecting to backend server.');
+    }
+  };
+
+  const handleRejectBookingDirect = async (bk: Booking) => {
     if (!window.confirm(`Are you sure you want to reject the booking request from ${bk.customerName}?`)) return;
 
-    const updatedBookings = bookings.map(b => b.id === bk.id ? { ...b, status: 'Rejected' as const } : b);
-
-    setBookings(updatedBookings);
-    localStorage.setItem('hotel_pg_bookings', JSON.stringify(updatedBookings));
-
-    onAddAuditLog(`Rejected booking request ${bk.id} from ${bk.customerName}`, 'Bookings');
+    try {
+      const res = await fetch(`http://localhost:8000/api/bookings/${bk.id}/reject`, {
+        method: 'POST'
+      });
+      if (res.ok) {
+        const resBookings = await fetch('http://localhost:8000/api/bookings');
+        if (resBookings.ok) {
+          const data = await resBookings.json();
+          const mapped = data.map((b: any) => ({
+            id: b.id,
+            propertyId: b.property_id,
+            propertyName: b.property?.name || 'StayHub',
+            roomId: b.room_id,
+            roomNumber: b.room?.room_number || '',
+            bedId: b.bed_id,
+            bedNumber: b.bed?.bed_number || '',
+            tenantId: b.tenant_id,
+            customerName: b.tenant?.name || b.customer_name || 'Guest',
+            customerEmail: b.tenant?.email || b.customer_email || '',
+            customerPhone: b.tenant?.phone || b.customer_phone || '',
+            checkInDate: b.check_in_date,
+            checkOutDate: b.check_out_date,
+            totalAmount: b.total_amount,
+            status: b.status,
+            mealPlan: b.meal_plan || 'None',
+            requestedRoomType: b.requested_room_type || 'Double'
+          }));
+          setBookings(mapped);
+          localStorage.setItem('hotel_pg_bookings', JSON.stringify(mapped));
+        }
+        onAddAuditLog(`Rejected booking request ${bk.id} from ${bk.customerName}`, 'Bookings');
+      } else {
+        alert('Failed to reject booking request on database server.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error connecting to backend server.');
+    }
   };
 
   return (
@@ -756,6 +862,85 @@ export default function DashboardView({
       </div>
 
       {/* ==================== INLINE FLOATING QUICK MODALS SYSTEM ==================== */}
+
+      {/* BED ALLOCATION MODAL FOR APPROVAL */}
+      {selectedApproveBooking && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 z-[999] animate-scaleUp text-left text-slate-805">
+          <div className="bg-white rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl relative">
+            <button 
+              onClick={() => setSelectedApproveBooking(null)}
+              className="absolute top-4 right-4 p-1 hover:bg-slate-100 border rounded-full transition"
+            >
+              <X className="w-4 h-4 text-slate-400" />
+            </button>
+
+            <div>
+              <h3 className="font-extrabold text-sm text-slate-950">Allocate Bed for {selectedApproveBooking.customerName}</h3>
+              <p className="text-[10px] text-slate-400 mt-0.5">Choose a Room and Bed matching the requested type: <strong className="text-slate-600">{selectedApproveBooking.requestedRoomType} Bed sharing layout</strong></p>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-slate-500 mb-1 text-[11px]">Select Room</label>
+                <select
+                  value={selectedApproveRoomId}
+                  onChange={(e) => {
+                    const rId = e.target.value;
+                    setSelectedApproveRoomId(rId);
+                    const availableBed = beds.find(b => b.roomId === rId && !b.isOccupied);
+                    setSelectedApproveBedId(availableBed ? availableBed.id : '');
+                  }}
+                  className="w-full border rounded-xl p-2.5 bg-slate-50 font-medium"
+                >
+                  <option value="">-- Choose Room --</option>
+                  {propertyRooms
+                    .filter(r => r.type === selectedApproveBooking.requestedRoomType)
+                    .map(r => (
+                      <option key={r.id} value={r.id}>
+                        Room {r.roomNumber} ({r.type} - {beds.filter(b => b.roomId === r.id && !b.isOccupied).length} beds free)
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-slate-500 mb-1 text-[11px]">Select Bed</label>
+                <select
+                  value={selectedApproveBedId}
+                  onChange={(e) => setSelectedApproveBedId(e.target.value)}
+                  className="w-full border rounded-xl p-2.5 bg-slate-50 font-medium"
+                  disabled={!selectedApproveRoomId}
+                >
+                  <option value="">-- Choose Bed --</option>
+                  {beds
+                    .filter(b => b.roomId === selectedApproveRoomId && !b.isOccupied)
+                    .map(b => (
+                      <option key={b.id} value={b.id}>
+                        Bed {b.bedNumber}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => setSelectedApproveBooking(null)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold p-2.5 rounded-xl transition text-center border"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmApproveAllocation}
+                disabled={!selectedApproveRoomId || !selectedApproveBedId}
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 text-white font-extrabold p-2.5 rounded-xl transition text-center shadow-md shadow-indigo-600/10"
+              >
+                Confirm & Allocate
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 0. STATS DETAILS INTERACTIVE MODAL */}
       {detailsModal && (

@@ -71,6 +71,7 @@ class RoomBase(BaseModel):
     sharing_type: str
     price_daily: float = 0.0
     price_weekly: float = 0.0
+    price_seasonal: float = 0.0
     price_monthly: float = 0.0
     status: str = "Available"
 

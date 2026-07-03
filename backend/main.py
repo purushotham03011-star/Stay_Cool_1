@@ -165,6 +165,7 @@ def create_room(room: schemas.RoomCreate, db: Session = Depends(get_db)):
         sharing_type=room.sharing_type,
         price_daily=room.price_daily,
         price_weekly=room.price_weekly,
+        price_seasonal=room.price_seasonal,
         price_monthly=room.price_monthly,
         status=room.status
     )
@@ -374,6 +375,63 @@ def process_checkout(id: str, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_booking)
     return db_booking
+
+@app.post("/api/bookings/{id}/reject", response_model=schemas.Booking)
+def reject_booking(id: str, db: Session = Depends(get_db)):
+    db_booking = db.query(models.Booking).filter(models.Booking.id == id).first()
+    if not db_booking:
+        raise HTTPException(status_code=404, detail="Booking request not found")
+
+    db_booking.status = "Rejected"
+
+    # Add audit log
+    db_log = models.AuditLog(
+        id=make_id("log"),
+        user_email="manager@stayhub.co",
+        role="Admin",
+        action=f"Rejected booking request {id}",
+        module="Bookings"
+    )
+    db.add(db_log)
+
+    db.commit()
+    db.refresh(db_booking)
+    return db_booking
+
+@app.post("/api/bookings/{id}/cancel", response_model=schemas.Booking)
+def cancel_booking(id: str, db: Session = Depends(get_db)):
+    db_booking = db.query(models.Booking).filter(models.Booking.id == id).first()
+    if not db_booking:
+        raise HTTPException(status_code=404, detail="Booking request not found")
+
+    db_booking.status = "Cancelled"
+
+    # Release sleeping bed if it was allocated
+    if db_booking.bed_id:
+        db_bed = db.query(models.Bed).filter(models.Bed.id == db_booking.bed_id).first()
+        if db_bed:
+            db_bed.status = "Available"
+
+    # Update room status
+    if db_booking.room_id:
+        db_room = db.query(models.Room).filter(models.Room.id == db_booking.room_id).first()
+        if db_room:
+            db_room.status = "Available"
+
+    # Add audit log
+    db_log = models.AuditLog(
+        id=make_id("log"),
+        user_email="guest@stayhub.co",
+        role="Customer",
+        action=f"Cancelled booking {id}",
+        module="Bookings"
+    )
+    db.add(db_log)
+
+    db.commit()
+    db.refresh(db_booking)
+    return db_booking
+
 
 # --- INVOICES & BILLING ---
 @app.get("/api/invoices", response_model=List[schemas.Invoice])

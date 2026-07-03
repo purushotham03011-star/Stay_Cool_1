@@ -15,7 +15,8 @@ import {
 } from '../types';
 import { 
   getLocalStorageData, 
-  setLocalStorageData 
+  setLocalStorageData,
+  syncAllFromBackend
 } from '../mockData';
 import { 
   LayoutGrid, 
@@ -112,7 +113,7 @@ export default function AdminPanel({ propertyId, onAddAuditLog, onLogoutAdmin }:
   };
 
   useEffect(() => {
-    reloadAdminData();
+    syncAllFromBackend().then(reloadAdminData);
 
     // Reactively reload when tenants or bookings are updated from customer portal
     const handleDataUpdate = (e: Event) => {
@@ -122,7 +123,15 @@ export default function AdminPanel({ propertyId, onAddAuditLog, onLogoutAdmin }:
       }
     };
     window.addEventListener('stayhub-data-updated', handleDataUpdate);
-    return () => window.removeEventListener('stayhub-data-updated', handleDataUpdate);
+
+    const pollInterval = setInterval(() => {
+      syncAllFromBackend().then(reloadAdminData);
+    }, 5000);
+
+    return () => {
+      window.removeEventListener('stayhub-data-updated', handleDataUpdate);
+      clearInterval(pollInterval);
+    };
   }, []);
 
   const [unreadChatCount, setUnreadChatCount] = useState<number>(0);
@@ -662,11 +671,6 @@ export default function AdminPanel({ propertyId, onAddAuditLog, onLogoutAdmin }:
             <div className="text-left sm:text-right pt-2.5 sm:pt-0 shrink-0 space-y-1">
               <span className="font-mono text-[9px] font-black uppercase text-slate-400 block tracking-wider">Real-Time Sync active</span>
               <span className="text-[10px] block">Status: <strong className="text-emerald-500 font-black uppercase inline-flex items-center gap-1">● Online & secured</strong></span>
-              {currentPropertyObj?.adminId && (
-                <span className="inline-flex items-center gap-1 bg-orange-50 border border-orange-200 text-orange-700 px-2 py-0.5 rounded-md font-mono text-[9px] font-black tracking-wider">
-                  🔑 Admin ID: {currentPropertyObj.adminId}
-                </span>
-              )}
               {currentPropertyObj && (
                 <span className="inline-flex items-center gap-1 bg-slate-100 border border-slate-200 text-slate-600 px-2 py-0.5 rounded-md font-mono text-[9px] font-black tracking-wider">
                   🏢 Prop ID: {currentPropertyObj.id}
@@ -725,6 +729,7 @@ export default function AdminPanel({ propertyId, onAddAuditLog, onLogoutAdmin }:
                 beds={beds}
                 tenants={tenants}
                 invoices={invoices}
+                bookings={bookings}
                 syncRoomsAndBeds={syncRoomsAndBeds}
                 syncTenants={syncTenants}
                 selectedPropertyId={selectedPropertyId}
@@ -771,6 +776,7 @@ export default function AdminPanel({ propertyId, onAddAuditLog, onLogoutAdmin }:
                 beds={beds}
                 tenants={tenants}
                 housekeeping={housekeeping}
+                bookings={bookings}
                 syncRoomsAndBeds={syncRoomsAndBeds}
                 syncTenants={syncTenants}
                 selectedPropertyId={selectedPropertyId}

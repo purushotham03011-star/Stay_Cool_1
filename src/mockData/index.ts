@@ -163,7 +163,8 @@ async function propagateToBackend(key: string, value: any, oldValueStr: string |
             category: item.type === 'Single' ? 'Standard' : item.type === 'Double' ? 'Deluxe' : 'Suite',
             sharing_type: item.type,
             price_daily: item.pricePerDay || 0,
-            price_weekly: (item.pricePerDay || 0) * 7,
+            price_weekly: item.priceWeekly || (item.pricePerDay || 0) * 7,
+            price_seasonal: item.priceSeasonal || (item.pricePerMonth || 0) * 3,
             price_monthly: item.pricePerMonth || 0,
             status: item.occupancyStatus || 'Available'
           })
@@ -427,6 +428,8 @@ export async function syncAllFromBackend() {
           type: r.sharing_type,
           pricePerMonth: r.price_monthly,
           pricePerDay: r.price_daily,
+          priceWeekly: r.price_weekly,
+          priceSeasonal: r.price_seasonal,
           occupancyStatus: r.status
         }));
         localStorage.setItem('hotel_pg_rooms', JSON.stringify(mappedRooms));

@@ -384,6 +384,7 @@ export default function CustomerApp({
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [bookingRoom, setBookingRoom] = useState<Room | null>(null);
   const [stayDurationOption, setStayDurationOption] = useState<string>('day');
+  const [customDaysCount, setCustomDaysCount] = useState<number>(1);
 
   // Auto scroll gallery images for 2 seconds
   useEffect(() => {
@@ -425,6 +426,22 @@ export default function CustomerApp({
   const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'Card' | 'Cash' | 'NetBanking'>('UPI');
   const [bookingSuccessMode, setBookingSuccessMode] = useState<boolean>(false);
   const [lastCreatedBooking, setLastCreatedBooking] = useState<Booking | null>(null);
+
+  useEffect(() => {
+    if (!checkInDate) return;
+    const start = new Date(checkInDate);
+    if (isNaN(start.getTime())) return;
+    
+    let daysToAdd = 1;
+    if (stayDurationOption === 'day') daysToAdd = customDaysCount;
+    else if (stayDurationOption === 'week') daysToAdd = 7;
+    else if (stayDurationOption === 'month') daysToAdd = 30;
+    else if (stayDurationOption === 'seasonal') daysToAdd = 90;
+    
+    const end = new Date(start.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+    const endStr = end.toISOString().split('T')[0];
+    setCheckOutDate(endStr);
+  }, [checkInDate, stayDurationOption, customDaysCount]);
 
   // Coupon application state
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
@@ -469,6 +486,7 @@ export default function CustomerApp({
   const [authWizardInitialView, setAuthWizardInitialView] = useState<'login' | 'register'>('login');
   const [localAuthView, setLocalAuthView] = useState<'login' | 'register' | null>(initialAuthView);
   const [activeInvoice, setActiveInvoice] = useState<Booking | null>(null);
+  const [selectedViewBooking, setSelectedViewBooking] = useState<Booking | null>(null);
 
   // System Notifications Bell Overlay list
   const [showNotificationsOverlay, setShowNotificationsOverlay] = useState<boolean>(false);
@@ -815,7 +833,7 @@ export default function CustomerApp({
 
   // Calculate booking stays and coupons variables
   const calculateBookingCosts = () => {
-    if (!bookingRoom || !selectedProperty) return { base: 0, meal: 0, discount: 0, tax: 0, final: 0, baseOriginal: 0 };
+    if (!bookingRoom || !selectedProperty) return { base: 0, meal: 0, discount: 0, tax: 0, final: 0, baseOriginal: 0, diffDays: 1, calculatedDayCost: 1200, priceDay: 1200, numRooms: 1, numAdults: 1 };
     const start = new Date(checkInDate);
     const end = new Date(checkOutDate);
     const diffTime = Math.max(0, end.getTime() - start.getTime());
@@ -870,7 +888,19 @@ export default function CustomerApp({
     const tax = Math.round(priceAfterReduct * 0.18);
     const final = priceAfterReduct + tax;
 
-    return { base: baseRate, meal: mealSurcharge, discount, tax, final, baseOriginal: baseOriginalRate };
+    return { 
+      base: baseRate, 
+      meal: mealSurcharge, 
+      discount, 
+      tax, 
+      final, 
+      baseOriginal: baseOriginalRate,
+      diffDays,
+      calculatedDayCost: Math.round(calculatedDayCost),
+      priceDay: Math.round(priceDay),
+      numRooms,
+      numAdults
+    };
   };
 
   const costBreakdown = calculateBookingCosts();
@@ -931,34 +961,6 @@ export default function CustomerApp({
     setBookings(updatedBookings);
     setLocalStorageData('bookings', updatedBookings);
 
-    const currentTenants = getLocalStorageData<Tenant[]>('tenants', []);
-    const matchedIdx = currentTenants.findIndex(t => t.email?.toLowerCase() === currentUser.email.toLowerCase());
-    if (matchedIdx !== -1) {
-      currentTenants[matchedIdx].propertyId = selectedProperty.id;
-      currentTenants[matchedIdx].propertyName = selectedProperty.name;
-      currentTenants[matchedIdx].roomId = bookingRoom.id;
-      currentTenants[matchedIdx].roomNumber = bookingRoom.roomNumber;
-      setLocalStorageData('tenants', currentTenants);
-    } else {
-      const newTenant: Tenant = {
-        id: `tenant-${Date.now()}`,
-        name: currentUser.name,
-        email: currentUser.email,
-        phone: currentUser.phone,
-        gender: 'Male',
-        emergencyContactName: '',
-        emergencyContactPhone: '',
-        propertyId: selectedProperty.id,
-        propertyName: selectedProperty.name,
-        roomId: bookingRoom.id,
-        roomNumber: bookingRoom.roomNumber,
-        status: 'Active',
-        joinedDate: new Date().toISOString().split('T')[0]
-      };
-      currentTenants.push(newTenant);
-      setLocalStorageData('tenants', currentTenants);
-    }
-
     // Dynamic state notifications
     const newNotif: Notification = {
       id: `notif-${Date.now()}`,
@@ -977,6 +979,40 @@ export default function CustomerApp({
     onAddAuditLog(`Created Booking Reservation for '${selectedProperty.name}' Room ${bookingRoom.roomNumber}`, 'Bookings');
     setLastCreatedBooking(newBooking);
     setBookingSuccessMode(true);
+  };
+
+  const handleCancelBooking = async (bookingId: string) => {
+    if (!window.confirm('Are you sure you want to cancel this booking?')) return;
+    try {
+      const res = await fetch(`http://localhost:8000/api/bookings/${bookingId}/cancel`, {
+        method: 'POST'
+      });
+      if (res.ok) {
+        await syncAllFromBackend();
+        const updated = getLocalStorageData<Booking[]>('bookings', []);
+        setBookings(updated);
+        
+        if (currentUser) {
+          const newNotif: Notification = {
+            id: `notif-${Date.now()}`,
+            userId: currentUser.email,
+            title: 'Booking Cancelled',
+            message: `Your booking has been successfully cancelled.`,
+            date: new Date().toISOString().split('T')[0],
+            isRead: false,
+            type: 'Billing'
+          };
+          const notifications = getLocalStorageData<Notification[]>('notifications', []);
+          notifications.unshift(newNotif);
+          setLocalStorageData('notifications', notifications);
+        }
+      } else {
+        alert('Failed to cancel the booking request on the server.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error connecting to the booking companion server.');
+    }
   };
 
   // Simulated Document checking uploading
@@ -2161,7 +2197,11 @@ export default function CustomerApp({
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {userBookings.map(bk => (
-                  <div key={bk.id} className="bg-white rounded-2xl border border-slate-150 shadow-xs overflow-hidden hover:border-slate-305 hover:shadow-md transition duration-200">
+                  <div 
+                    key={bk.id} 
+                    onClick={() => setSelectedViewBooking(bk)}
+                    className="bg-white rounded-2xl border border-slate-150 shadow-xs overflow-hidden hover:border-slate-305 hover:shadow-md transition duration-200 cursor-pointer"
+                  >
                     <div className="p-3 space-y-2.5">
                       <div className="flex justify-between items-start gap-1">
                         <div>
@@ -2170,11 +2210,15 @@ export default function CustomerApp({
                         </div>
                         <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider block shrink-0 ${
                           bk.status === 'Confirmed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                          bk.status === 'Pending' ? 'bg-amber-50 text-amber-700 border border-amber-200 animate-pulse' :
+                          bk.status === 'Pending' ? 'bg-amber-50 text-amber-705 border border-amber-200 animate-pulse' :
                           bk.status === 'Completed' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' :
+                          bk.status === 'Rejected' ? 'bg-rose-50 text-rose-700 border border-rose-200' :
                           'bg-slate-100 text-slate-600 border border-slate-200'
                         }`}>
-                          {bk.status === 'Pending' ? 'UNPAID - PENDING' : bk.status}
+                          {bk.status === 'Confirmed' ? 'ADMIN APPROVED' :
+                           bk.status === 'Pending' ? 'PENDING APPROVAL' :
+                           bk.status === 'Rejected' ? 'REJECTED' :
+                           bk.status === 'Cancelled' ? 'CANCELLED' : bk.status}
                         </span>
                       </div>
 
@@ -2188,6 +2232,40 @@ export default function CustomerApp({
                           <span className="font-extrabold text-slate-900">Room Number {bk.roomNumber || 'Awaiting'}</span>
                         </div>
                       </div>
+
+                      {(() => {
+                        const start = new Date(bk.checkInDate);
+                        const end = new Date(bk.checkOutDate);
+                        const diffTime = Math.max(0, end.getTime() - start.getTime());
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+                        
+                        const total = bk.totalAmount || 0;
+                        const baseOriginal = Math.round(total / 1.18);
+                        const calculatedDayCost = Math.round(baseOriginal / diffDays);
+                        const gst = total - baseOriginal;
+
+                        return (
+                          <div className="bg-slate-50/70 border border-slate-150 p-2.5 rounded-xl text-[9.5px] space-y-1.5 font-medium font-sans">
+                            <span className="text-[9px] font-bold text-slate-400 uppercase block mb-1">Stay Breakdown Bill:</span>
+                            <div className="flex justify-between">
+                              <span className="text-slate-500">Stay Duration:</span>
+                              <span className="text-slate-800 font-semibold font-mono">{bk.checkInDate} to {bk.checkOutDate} ({diffDays} Days)</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-slate-500">Day Rate:</span>
+                              <span className="text-slate-800 font-semibold font-mono">₹{calculatedDayCost.toLocaleString('en-IN')} * {diffDays} = ₹{baseOriginal.toLocaleString('en-IN')}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-slate-550">GST Tax (18%):</span>
+                              <span className="text-slate-700 font-mono">₹{gst.toLocaleString('en-IN')}</span>
+                            </div>
+                            <div className="flex justify-between border-t border-slate-200/85 pt-1 font-bold text-slate-905">
+                              <span>Total Pricing:</span>
+                              <span className="text-indigo-650 font-mono">₹{total.toLocaleString('en-IN')}</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
 
                       {bk.mealPlan !== 'None' && (
                         <div className="flex items-center space-x-1.5 text-[9.5px] text-slate-600 bg-indigo-50/60 p-1.5 rounded-lg border border-indigo-100/50">
@@ -2204,12 +2282,22 @@ export default function CustomerApp({
                         <strong className="text-indigo-605 font-bold text-indigo-700">₹{bk.totalAmount.toLocaleString('en-IN')}</strong>
                       </div>
 
-                      <button 
-                        onClick={() => setActiveInvoice(bk)}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[9px] px-3 py-1.5 rounded-lg uppercase tracking-wide transition active:scale-95 cursor-pointer flex items-center space-x-0.5"
-                      >
-                        <span>Invoice & UPI QR</span>
-                      </button>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {bk.status === 'Pending' && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleCancelBooking(bk.id); }}
+                            className="bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 font-extrabold text-[9px] px-3 py-1.5 rounded-lg uppercase tracking-wide transition active:scale-95 cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setActiveInvoice(bk); }}
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[9px] px-3 py-1.5 rounded-lg uppercase tracking-wide transition active:scale-95 cursor-pointer flex items-center space-x-0.5"
+                        >
+                          <span>Invoice & UPI QR</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -2973,28 +3061,16 @@ export default function CustomerApp({
                             />
                           </div>
 
-                          {/* Check in / Check out row */}
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="space-y-1.5">
-                              <label className="block font-bold text-slate-700">Check-in Date *</label>
-                              <input 
-                                type="date"
-                                value={checkInDate}
-                                onChange={(e) => setCheckInDate(e.target.value)}
-                                className="w-full text-xs border border-slate-200 bg-white p-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 font-mono font-medium"
-                                required
-                              />
-                            </div>
-                            <div className="space-y-1.5">
-                              <label className="block font-bold text-slate-700">Check-out Date *</label>
-                              <input 
-                                type="date"
-                                value={checkOutDate}
-                                onChange={(e) => setCheckOutDate(e.target.value)}
-                                className="w-full text-xs border border-slate-200 bg-white p-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 font-mono font-medium"
-                                required
-                              />
-                            </div>
+                          {/* Check in row */}
+                          <div className="space-y-1.5">
+                            <label className="block font-bold text-slate-700">Check-in Date *</label>
+                            <input 
+                              type="date"
+                              value={checkInDate}
+                              onChange={(e) => setCheckInDate(e.target.value)}
+                              className="w-full text-xs border border-slate-200 bg-white p-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 font-mono font-medium"
+                              required
+                            />
                           </div>
 
                           {/* Stay Duration scheme selection */}
@@ -3005,21 +3081,44 @@ export default function CustomerApp({
                             const pSeasonal = bookingRoom?.priceSeasonal || pMonth * 1.2;
 
                             return (
-                              <div className="space-y-1.5">
-                                <label className="block font-bold text-slate-700">Stay Duration *</label>
-                                <select 
-                                  id="stay-duration"
-                                  value={stayDurationOption} 
-                                  onChange={(e) => setStayDurationOption(e.target.value)}
-                                  className="w-full text-xs border border-slate-200 bg-white p-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 font-medium font-sans"
-                                  required
-                                >
-                                  <option value="day">Day - ₹{pDay.toLocaleString('en-IN')}</option>
-                                  <option value="week">Week - ₹{pWeek.toLocaleString('en-IN')}</option>
-                                  <option value="month">Month - ₹{pMonth.toLocaleString('en-IN')}</option>
-                                  <option value="seasonal">Seasonal - ₹{pSeasonal.toLocaleString('en-IN')}</option>
-                                </select>
-                              </div>
+                               <div className="space-y-1.5">
+                                 <label className="block font-bold text-slate-700">Stay Duration *</label>
+                                 <div className="flex gap-2">
+                                   <select 
+                                     id="stay-duration"
+                                     value={stayDurationOption} 
+                                     onChange={(e) => setStayDurationOption(e.target.value)}
+                                     className="flex-1 text-xs border border-slate-200 bg-white p-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 font-medium font-sans"
+                                     required
+                                   >
+                                     <option value="day">Day - ₹{pDay.toLocaleString('en-IN')}</option>
+                                     <option value="week">Week - ₹{pWeek.toLocaleString('en-IN')}</option>
+                                     <option value="month">Month - ₹{pMonth.toLocaleString('en-IN')}</option>
+                                     <option value="seasonal">Seasonal - ₹{pSeasonal.toLocaleString('en-IN')}</option>
+                                   </select>
+                                   {stayDurationOption === 'day' && (
+                                     <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white shrink-0">
+                                       <button 
+                                         type="button"
+                                         onClick={() => setCustomDaysCount(prev => Math.max(1, prev - 1))}
+                                         className="px-3 py-2 text-slate-500 hover:bg-slate-50 font-black transition text-sm cursor-pointer select-none"
+                                       >
+                                         -
+                                       </button>
+                                       <span className="px-2 font-mono font-bold text-xs text-slate-800 min-w-[2.5rem] text-center">
+                                         {customDaysCount} Day{customDaysCount > 1 ? 's' : ''}
+                                       </span>
+                                       <button 
+                                         type="button"
+                                         onClick={() => setCustomDaysCount(prev => prev + 1)}
+                                         className="px-3 py-2 text-slate-505 hover:bg-slate-50 font-black transition text-sm cursor-pointer select-none"
+                                       >
+                                         +
+                                       </button>
+                                     </div>
+                                   )}
+                                 </div>
+                               </div>
                             );
                           })()}
 
@@ -3076,52 +3175,42 @@ export default function CustomerApp({
                           {/* Live Dynamic Pricing breakdown */}
                           {bookingRoom && (
                             <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2 select-none">
-                              <div className="flex justify-between text-slate-500 font-medium">
-                                <span>Base Rate ({costBreakdown.meal > 0 ? 'inc meal' : 'room only'}):</span>
-                                <span className="font-mono text-slate-700 font-bold">₹{costBreakdown.baseOriginal.toLocaleString('en-IN')}</span>
+                              <div className="flex justify-between text-slate-500 font-medium pb-1.5 border-b border-slate-200">
+                                <span className="font-bold text-slate-700">Billing details (Formula breakdown):</span>
                               </div>
-                              {costBreakdown.discount > 0 && (
-                                <div className="flex justify-between text-rose-600 font-semibold">
-                                  <span>Discount Applied:</span>
-                                  <span className="font-mono">-₹{costBreakdown.discount.toLocaleString('en-IN')}</span>
+                              <div className="text-[10.5px] text-slate-500 leading-normal space-y-1 font-medium pb-1.5 border-b border-slate-200">
+                                <div>
+                                  <span className="font-semibold text-slate-600">Stay Duration:</span> {checkInDate} to {checkOutDate} ({costBreakdown.diffDays} Day{costBreakdown.diffDays > 1 ? 's' : ''})
                                 </div>
-                              )}
-                              <div className="flex justify-between text-slate-500 font-medium">
-                                <span>GST Tax (18%):</span>
-                                <span className="font-mono text-slate-700 font-bold">₹{costBreakdown.tax.toLocaleString('en-IN')}</span>
+                                <div>
+                                  <span className="font-semibold text-slate-600">Rate formula:</span> ₹{costBreakdown.calculatedDayCost.toLocaleString('en-IN')} * {costBreakdown.diffDays} day{costBreakdown.diffDays > 1 ? 's' : ''} = <span className="font-mono font-bold text-slate-800">₹{costBreakdown.baseOriginal.toLocaleString('en-IN')}</span>
+                                </div>
                               </div>
-                              <div className="border-t border-slate-200/80 pt-2 flex justify-between font-black text-slate-900 text-sm">
-                                <span>Total Pricing:</span>
-                                <span className="font-mono text-indigo-900 text-[15px]">₹{costBreakdown.final.toLocaleString('en-IN')}</span>
+                              
+                              <div className="space-y-1.5">
+                                <div className="flex justify-between text-slate-500 font-medium">
+                                  <span>Base Rate ({costBreakdown.meal > 0 ? 'inc meal' : 'room only'}):</span>
+                                  <span className="font-mono text-slate-700 font-bold">₹{costBreakdown.baseOriginal.toLocaleString('en-IN')}</span>
+                                </div>
+                                {costBreakdown.discount > 0 && (
+                                  <div className="flex justify-between text-rose-600 font-semibold">
+                                    <span>Discount Applied:</span>
+                                    <span className="font-mono">-₹{costBreakdown.discount.toLocaleString('en-IN')}</span>
+                                  </div>
+                                )}
+                                <div className="flex justify-between text-slate-500 font-medium">
+                                  <span>GST Tax (18%):</span>
+                                  <span className="font-mono text-slate-700 font-bold">₹{costBreakdown.tax.toLocaleString('en-IN')}</span>
+                                </div>
+                                <div className="border-t border-slate-200/80 pt-2 flex justify-between font-black text-slate-900 text-sm">
+                                  <span>Total Pricing:</span>
+                                  <span className="font-mono text-indigo-900 text-[15px]">₹{costBreakdown.final.toLocaleString('en-IN')}</span>
+                                </div>
                               </div>
                             </div>
                           )}
 
-                          {/* Promo code inputs */}
-                          <div className="space-y-1.5">
-                            <label className="block font-bold text-slate-700">Apply Promo Code</label>
-                            <div className="flex gap-2">
-                              <input 
-                                type="text" 
-                                placeholder="PROMO CODE"
-                                value={couponCodeInput}
-                                onChange={(e) => setCouponCodeInput(e.target.value)}
-                                className="flex-1 text-xs border border-slate-200 bg-white px-2.5 py-2 rounded-lg uppercase font-mono font-bold focus:outline-none focus:ring-1 focus:ring-indigo-600"
-                              />
-                              <button 
-                                type="button" 
-                                onClick={handleApplyBookingCoupon}
-                                className="curved-orange-border-btn text-xs font-bold px-3 py-2 rounded-xl transition shrink-0 cursor-pointer"
-                              >
-                                Apply
-                              </button>
-                            </div>
-                            {couponMessage && (
-                              <p className={`text-[10px] font-semibold mt-1 ${couponMessage.includes('Successful') ? 'text-emerald-700' : 'text-rose-600'}`}>
-                                {couponMessage}
-                              </p>
-                            )}
-                          </div>
+
 
                           {/* Submit Booking Now button */}
                           <button 
@@ -3217,27 +3306,16 @@ export default function CustomerApp({
               <form onSubmit={handleConfirmReservation} className="space-y-3.5 text-xs">
                 
                 {/* Multi date input rows */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Check-in Date</label>
-                    <input 
-                      type="date" 
-                      value={checkInDate}
-                      onChange={(e) => setCheckInDate(e.target.value)}
-                      className="w-full border border-slate-200 bg-white font-mono rounded-lg p-2 text-slate-800"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Check-out Date</label>
-                    <input 
-                      type="date" 
-                      value={checkOutDate}
-                      onChange={(e) => setCheckOutDate(e.target.value)}
-                      className="w-full border border-slate-200 bg-white font-mono rounded-lg p-2 text-slate-800"
-                      required
-                    />
-                  </div>
+                {/* Date input row */}
+                <div>
+                  <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Check-in Date</label>
+                  <input 
+                    type="date" 
+                    value={checkInDate}
+                    onChange={(e) => setCheckInDate(e.target.value)}
+                    className="w-full border border-slate-200 bg-white font-mono rounded-lg p-2 text-slate-800"
+                    required
+                  />
                 </div>
 
                 {/* Diet selections */}
@@ -3726,6 +3804,115 @@ export default function CustomerApp({
         }}
         onAddAuditLog={onAddAuditLog as any}
       />
+
+      {/* DETAILED BOOKING VIEW MODAL */}
+      {selectedViewBooking && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 z-[999] animate-scaleUp text-left text-slate-800">
+          <div className="bg-white rounded-3xl w-full max-w-sm p-6 space-y-4 shadow-2xl relative">
+            <button 
+              onClick={() => setSelectedViewBooking(null)}
+              className="absolute top-4 right-4 p-1 hover:bg-slate-100 border rounded-full transition"
+            >
+              <X className="w-4 h-4 text-slate-400" />
+            </button>
+
+            <div>
+              <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider block w-max mb-1.5 ${
+                selectedViewBooking.status === 'Confirmed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                selectedViewBooking.status === 'Pending' ? 'bg-amber-50 text-amber-705 border border-amber-200 animate-pulse' :
+                selectedViewBooking.status === 'Completed' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' :
+                selectedViewBooking.status === 'Rejected' ? 'bg-rose-50 text-rose-700 border border-rose-200' :
+                'bg-slate-100 text-slate-600 border border-slate-200'
+              }`}>
+                {selectedViewBooking.status === 'Confirmed' ? 'ADMIN APPROVED' :
+                 selectedViewBooking.status === 'Pending' ? 'PENDING APPROVAL' :
+                 selectedViewBooking.status === 'Rejected' ? 'REJECTED' :
+                 selectedViewBooking.status === 'Cancelled' ? 'CANCELLED' : selectedViewBooking.status}
+              </span>
+              <h3 className="font-extrabold text-sm text-slate-950">{selectedViewBooking.propertyName}</h3>
+              <p className="text-[10px] text-slate-400 mt-0.5">Booking ID: {selectedViewBooking.id}</p>
+            </div>
+
+            {selectedViewBooking.status === 'Confirmed' && (
+              <div className="space-y-3">
+                <div className="p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl space-y-1 text-xs">
+                  <div className="font-bold text-slate-800 text-[11px] uppercase tracking-wide">Stay Confirmation Details:</div>
+                  <div><span className="font-semibold text-slate-600">Check-in Date:</span> {selectedViewBooking.checkInDate}</div>
+                  <div><span className="font-semibold text-slate-600">Check-out Date:</span> {selectedViewBooking.checkOutDate}</div>
+                  <div><span className="font-semibold text-slate-600">Assigned Unit:</span> Room {selectedViewBooking.roomNumber || 'Awaiting Allocation'}</div>
+                  {selectedViewBooking.bedNumber && (
+                    <div><span className="font-semibold text-slate-600">Assigned Bed:</span> Bed {selectedViewBooking.bedNumber}</div>
+                  )}
+                </div>
+
+                {(() => {
+                  const start = new Date(selectedViewBooking.checkInDate);
+                  const end = new Date(selectedViewBooking.checkOutDate);
+                  const diffTime = Math.max(0, end.getTime() - start.getTime());
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+                  
+                  const total = selectedViewBooking.totalAmount || 0;
+                  const baseOriginal = Math.round(total / 1.18);
+                  const calculatedDayCost = Math.round(baseOriginal / diffDays);
+                  const gst = total - baseOriginal;
+
+                  return (
+                    <div className="bg-slate-50 border p-3.5 rounded-xl text-[11px] space-y-1.5 font-medium">
+                      <div className="font-bold text-slate-805 text-[10px] uppercase tracking-wider block mb-1">Billing Summary Breakdowns:</div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Day Rate:</span>
+                        <span className="text-slate-800 font-semibold font-mono">₹{calculatedDayCost.toLocaleString('en-IN')} * {diffDays} = ₹{baseOriginal.toLocaleString('en-IN')}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-550">GST Tax (18%):</span>
+                        <span className="text-slate-705 font-mono">₹{gst.toLocaleString('en-IN')}</span>
+                      </div>
+                      <div className="flex justify-between border-t pt-1.5 font-bold text-slate-900 text-xs">
+                        <span>Total Paid Amount:</span>
+                        <span className="text-indigo-650 font-mono text-[13px]">₹{total.toLocaleString('en-IN')}</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {selectedViewBooking.status === 'Rejected' && (
+              <div className="p-3.5 bg-rose-50 border border-rose-100 rounded-xl space-y-2 text-xs text-rose-700 leading-relaxed font-medium">
+                <div className="font-bold text-rose-800 text-[10px] uppercase tracking-wide">Notice of Reservation Rejection:</div>
+                <p>Apologies, your booking request has been rejected by the property administrator due to temporary capacity/occupancy constraints. Please try booking another room or property.</p>
+              </div>
+            )}
+
+            {selectedViewBooking.status === 'Pending' && (
+              <div className="space-y-3">
+                <div className="p-3.5 bg-amber-50/50 border border-amber-100 rounded-xl space-y-1 text-xs text-amber-800 font-medium">
+                  <div className="font-bold text-amber-900 text-[10px] uppercase tracking-wide">Pending Review:</div>
+                  <p>Your request is currently in queue. The hostel managers are mapping vacant beds and setting up invoices. You will be notified immediately upon approval.</p>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[9px] uppercase font-light">Duration:</span>
+                  <span className="font-extrabold text-slate-905">{selectedViewBooking.checkInDate} to {selectedViewBooking.checkOutDate}</span>
+                </div>
+              </div>
+            )}
+
+            {selectedViewBooking.status === 'Cancelled' && (
+              <div className="p-3.5 bg-slate-50 border rounded-xl text-xs text-slate-500 leading-relaxed font-medium">
+                <div className="font-bold text-slate-700 text-[10px] uppercase tracking-wide">Request Cancelled:</div>
+                <p>This booking request has been cancelled by you. No funds have been charged and any pending reservations were released.</p>
+              </div>
+            )}
+
+            <button
+              onClick={() => setSelectedViewBooking(null)}
+              className="w-full bg-slate-900 hover:bg-slate-950 text-white font-extrabold p-3 rounded-xl transition text-center text-xs uppercase tracking-wider"
+            >
+              Close View
+            </button>
+          </div>
+        </div>
+      )}
 
       {activeInvoice && (
         <InvoiceModal 

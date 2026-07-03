@@ -125,6 +125,7 @@ class Room(Base):
     sharing_type = Column(String(50), nullable=False)  # 'Single' | 'Double' | 'Triple' | 'Dormitory'
     price_daily = Column(Float, default=0.0)
     price_weekly = Column(Float, default=0.0)
+    price_seasonal = Column(Float, default=0.0)
     price_monthly = Column(Float, default=0.0)
     status = Column(String(50), default="Available")  # 'Available' | 'Occupied' | 'Reserved' | 'Maintenance' | 'Cleaning'
 

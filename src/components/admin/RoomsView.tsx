@@ -4,7 +4,8 @@ import {
   Room, 
   Bed, 
   Tenant, 
-  HousekeepingTask 
+  HousekeepingTask,
+  Booking
 } from '../../types';
 import { 
   Plus, 
@@ -30,6 +31,7 @@ interface RoomsViewProps {
   beds: Bed[];
   tenants: Tenant[];
   housekeeping: HousekeepingTask[];
+  bookings?: Booking[];
   syncRoomsAndBeds: (rooms: Room[], beds: Bed[]) => void;
   syncTenants: (tenants: Tenant[]) => void;
   selectedPropertyId: string;
@@ -42,6 +44,7 @@ export default function RoomsView({
   beds,
   tenants,
   housekeeping,
+  bookings = [],
   syncRoomsAndBeds,
   syncTenants,
   selectedPropertyId,
@@ -51,6 +54,8 @@ export default function RoomsView({
   const propertyRooms = rooms.filter(r => r.propertyId === selectedPropertyId);
   const propertyBeds = beds.filter(b => propertyRooms.some(r => r.id === b.roomId));
   const propertyHousekeeping = housekeeping.filter(h => h.propertyId === selectedPropertyId);
+
+  const [selectedViewTenantBillId, setSelectedViewTenantBillId] = useState<string | null>(null);
 
   // Layout selection: 'grid' | 'table'
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
@@ -182,6 +187,8 @@ export default function RoomsView({
   const [formFloor, setFormFloor] = useState<number>(1);
   const [formType, setFormType] = useState<Room['type']>('Double');
   const [formPriceMonth, setFormPriceMonth] = useState<number>(12000);
+  const [formPriceWeekly, setFormPriceWeekly] = useState<number>(3000);
+  const [formPriceSeasonal, setFormPriceSeasonal] = useState<number>(35000);
   const [formPriceDay, setFormPriceDay] = useState<number>(600);
   const [formAmenities, setFormAmenities] = useState<string>('A/C, Study Table, Wi-Fi');
   const [formStatus, setFormStatus] = useState<Room['occupancyStatus']>('Available');
@@ -206,26 +213,28 @@ export default function RoomsView({
     return matchesSearch && matchesType && matchesFloor && matchesStatus;
   });
 
-  // Edit action initializer
   const triggerEditRoomMode = (rm: Room) => {
     setFormRoomId(rm.id);
     setFormRoomNum(rm.roomNumber);
     setFormFloor(rm.floor);
     setFormType(rm.type);
     setFormPriceMonth(rm.pricePerMonth);
+    setFormPriceWeekly(rm.priceWeekly || Math.round(rm.pricePerMonth / 4));
+    setFormPriceSeasonal(rm.priceSeasonal || Math.round(rm.pricePerMonth * 3));
     setFormPriceDay(rm.pricePerDay);
     setFormAmenities(rm.amenities.join(', '));
     setFormStatus(rm.occupancyStatus);
     setViewState('edit');
   };
 
-  // Trigger Add Room mode
   const triggerAddRoomMode = () => {
     setFormRoomId('');
     setFormRoomNum('');
     setFormFloor(1);
     setFormType('Double');
     setFormPriceMonth(10000);
+    setFormPriceWeekly(2500);
+    setFormPriceSeasonal(28000);
     setFormPriceDay(500);
     setFormAmenities('Attached Bath, Wi-Fi, Storage Wardrobe');
     setFormStatus('Available');
@@ -252,6 +261,8 @@ export default function RoomsView({
         type: formType,
         pricePerMonth: Number(formPriceMonth),
         pricePerDay: Number(formPriceDay),
+        priceWeekly: Number(formPriceWeekly),
+        priceSeasonal: Number(formPriceSeasonal),
         amenities: formAmenities.split(',').map(item => item.trim()).filter(Boolean),
         occupancyStatus: 'Available'
       };
@@ -286,6 +297,8 @@ export default function RoomsView({
             type: formType,
             pricePerMonth: Number(formPriceMonth),
             pricePerDay: Number(formPriceDay),
+            priceWeekly: Number(formPriceWeekly),
+            priceSeasonal: Number(formPriceSeasonal),
             amenities: formAmenities.split(',').map(item => item.trim()).filter(Boolean),
             occupancyStatus: formStatus
           };
@@ -468,7 +481,11 @@ export default function RoomsView({
                 };
 
                 return (
-                  <div key={rm.id} className="bg-white border border-slate-100 rounded-3xl p-5 shadow-sm space-y-4 hover:shadow-md transition">
+                  <div 
+                    key={rm.id} 
+                    onClick={() => setActiveDetailsRoomId(rm.id)}
+                    className="bg-white border border-slate-100 rounded-3xl p-5 shadow-sm space-y-4 hover:shadow-md transition cursor-pointer"
+                  >
                     <div className="flex justify-between items-start">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
@@ -478,7 +495,7 @@ export default function RoomsView({
                         <span className="text-slate-400 text-[11px] font-medium block">Floor {rm.floor} &bull; Room ID: {rm.id.split('-').pop()}</span>
                       </div>
 
-                      <div className="flex gap-1.5">
+                      <div className="flex gap-1.5" onClick={(e) => e.stopPropagation()}>
                         <button 
                           onClick={() => setActiveDetailsRoomId(rm.id)}
                           className="bg-slate-50 hover:bg-slate-100 text-slate-700 border p-1.5 rounded-xl transition"
@@ -537,7 +554,7 @@ export default function RoomsView({
                         {rm.occupancyStatus}
                       </span>
 
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
                         {occupiedCount > 0 && (
                           <button
                             onClick={() => {
@@ -755,6 +772,32 @@ export default function RoomsView({
               </div>
 
               <div>
+                <label className="block text-slate-500 mb-1 text-[11px]">Weekly License Rent (₹)</label>
+                <input 
+                  type="number" 
+                  value={formPriceWeekly}
+                  onChange={(e) => setFormPriceWeekly(Number(e.target.value))}
+                  min="1"
+                  className="w-full border rounded-xl p-2.5 bg-slate-5 focus:bg-white"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-slate-500 mb-1 text-[11px]">Seasonal License Rent (₹)</label>
+                <input 
+                  type="number" 
+                  value={formPriceSeasonal}
+                  onChange={(e) => setFormPriceSeasonal(Number(e.target.value))}
+                  min="1"
+                  className="w-full border rounded-xl p-2.5 bg-slate-5 focus:bg-white"
+                  required
+                />
+              </div>
+
+              <div>
                 <label className="block text-slate-500 mb-1 text-[11px]">Daily Contract Rental (₹)</label>
                 <input 
                   type="number" 
@@ -858,17 +901,88 @@ export default function RoomsView({
                 <div className="space-y-3">
                   <h4 className="text-[10px] uppercase font-bold tracking-wider text-slate-400 font-mono">Current Occupants ({roomOccupants.length})</h4>
                   <div className="space-y-2">
-                    {roomOccupants.map(occ => (
-                      <div key={occ.id} className="p-3 bg-slate-50 rounded-xl space-y-1">
-                        <div className="flex justify-between font-bold">
-                          <span className="text-slate-900 text-[11px]">{occ.name}</span>
-                          <span className="text-slate-500 text-[10px] font-mono">{occ.phone}</span>
+                    {roomOccupants.map(occ => {
+                      const isExpanded = selectedViewTenantBillId === occ.id;
+                      const bk = bookings.find(b => 
+                        (b.tenantId && b.tenantId === occ.id) || 
+                        (b.customerEmail && b.customerEmail.toLowerCase() === occ.email.toLowerCase())
+                      );
+
+                      let checkIn = occ.joinedDate || '2026-06-01';
+                      let checkOut = '2026-06-05';
+                      let diffDays = 4;
+                      let dayRate = 1200;
+                      let baseOriginal = 4800;
+                      let gst = 864;
+                      let total = 5664;
+
+                      if (bk) {
+                        checkIn = bk.checkInDate;
+                        checkOut = bk.checkOutDate;
+                        const start = new Date(bk.checkInDate);
+                        const end = new Date(bk.checkOutDate);
+                        const diffTime = Math.max(0, end.getTime() - start.getTime());
+                        diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+                        total = bk.totalAmount || 0;
+                        baseOriginal = Math.round(total / 1.18);
+                        dayRate = Math.round(baseOriginal / diffDays);
+                        gst = total - baseOriginal;
+                      } else {
+                        const room = rooms.find(r => r.id === occ.roomId || r.roomNumber === occ.roomNumber);
+                        dayRate = room ? (room.pricePerDay || 1200) : 1200;
+                        baseOriginal = dayRate * diffDays;
+                        gst = Math.round(baseOriginal * 0.18);
+                        total = baseOriginal + gst;
+                      }
+
+                      return (
+                        <div 
+                          key={occ.id} 
+                          onClick={() => setSelectedViewTenantBillId(isExpanded ? null : occ.id)}
+                          className="p-3 bg-slate-50 border hover:border-slate-300 rounded-xl space-y-1.5 cursor-pointer transition select-none text-left"
+                        >
+                          <div className="flex justify-between font-bold">
+                            <span className="text-slate-900 text-[11.5px]">{occ.name}</span>
+                            <span className="text-slate-500 text-[10px] font-mono">{occ.phone}</span>
+                          </div>
+                          <div className="text-[10px] text-slate-400 font-medium flex justify-between">
+                            <span>Email: {occ.email}</span>
+                            <span>Check-in: <strong className="font-mono text-slate-600">{checkIn}</strong></span>
+                          </div>
+                          
+                          {isExpanded && (
+                            <div className="border-t border-slate-200 pt-2 mt-2 space-y-1.5 text-[10px] font-medium text-slate-650 bg-slate-100/50 p-2 rounded-lg">
+                              <div className="font-bold text-slate-700 uppercase text-[9px] tracking-wider mb-0.5 font-mono">Stay Contract & Billing breakdown:</div>
+                              <div className="flex justify-between">
+                                <span>Check-in / Check-out:</span>
+                                <span className="font-mono text-slate-800 font-bold">{checkIn} to {checkOut}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Stay Duration:</span>
+                                <span className="font-mono text-slate-800 font-bold">{diffDays} Day{diffDays > 1 ? 's' : ''}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Day Rate:</span>
+                                <span className="font-mono text-slate-800 font-bold">₹{dayRate.toLocaleString('en-IN')} * {diffDays} = ₹{baseOriginal.toLocaleString('en-IN')}</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>GST Tax (18%):</span>
+                                <span className="font-mono text-slate-700 font-bold">₹{gst.toLocaleString('en-IN')}</span>
+                              </div>
+                              <div className="flex justify-between border-t pt-1 font-bold text-indigo-750 text-xs">
+                                <span>Total Booking Bill:</span>
+                                <span>₹{total.toLocaleString('en-IN')}</span>
+                              </div>
+                            </div>
+                          )}
+                          {!isExpanded && (
+                            <div className="text-[9.5px] text-slate-400 italic text-right mt-1 font-mono">
+                              Click card to audit stay contract bill &rarr;
+                            </div>
+                          )}
                         </div>
-                        <div className="text-[10px] text-slate-400 font-medium">
-                          Email: {occ.email} &bull; Check-in: <strong className="font-mono">{occ.joinedDate}</strong>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}

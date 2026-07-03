@@ -5,7 +5,8 @@ import {
   Room, 
   Bed, 
   Tenant, 
-  Invoice 
+  Invoice,
+  Booking
 } from '../../types';
 import { 
   X, 
@@ -36,6 +37,7 @@ interface TenantsViewProps {
   beds: Bed[];
   tenants: Tenant[];
   invoices: Invoice[];
+  bookings?: Booking[];
   syncRoomsAndBeds: (rooms: Room[], beds: Bed[]) => void;
   syncTenants: (tenants: Tenant[]) => void;
   selectedPropertyId: string;
@@ -48,6 +50,7 @@ export default function TenantsView({
   beds,
   tenants,
   invoices,
+  bookings = [],
   syncRoomsAndBeds,
   syncTenants,
   selectedPropertyId,
@@ -522,6 +525,72 @@ export default function TenantsView({
                 </div>
               </div>
 
+              {/* Stay Contract & Billing Breakdown */}
+              {(() => {
+                const bk = bookings.find(b => 
+                  (b.tenantId && b.tenantId === selectedTenantObj.id) || 
+                  (b.customerEmail && b.customerEmail.toLowerCase() === selectedTenantObj.email.toLowerCase())
+                );
+
+                let checkIn = selectedTenantObj.joinedDate || '2026-06-01';
+                let checkOut = '2026-06-05';
+                let diffDays = 4;
+                let dayRate = 1200;
+                let baseOriginal = 4800;
+                let gst = 864;
+                let total = 5664;
+
+                if (bk) {
+                  checkIn = bk.checkInDate;
+                  checkOut = bk.checkOutDate;
+                  const start = new Date(bk.checkInDate);
+                  const end = new Date(bk.checkOutDate);
+                  const diffTime = Math.max(0, end.getTime() - start.getTime());
+                  diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+                  total = bk.totalAmount || 0;
+                  baseOriginal = Math.round(total / 1.18);
+                  dayRate = Math.round(baseOriginal / diffDays);
+                  gst = total - baseOriginal;
+                } else {
+                  const room = rooms.find(r => r.id === selectedTenantObj.roomId || r.roomNumber === selectedTenantObj.roomNumber);
+                  dayRate = room ? (room.pricePerDay || 1200) : 1200;
+                  baseOriginal = dayRate * diffDays;
+                  gst = Math.round(baseOriginal * 0.18);
+                  total = baseOriginal + gst;
+                }
+
+                return (
+                  <div className="space-y-2.5">
+                    <h4 className="text-[10px] uppercase font-bold tracking-wider text-slate-400 font-mono flex items-center gap-1">
+                      <FileCheck className="w-3.5 h-3.5 text-indigo-500" />
+                      <span>Stay Contract & Billing Formula</span>
+                    </h4>
+                    <div className="p-3.5 bg-slate-50 border rounded-xl text-[11px] space-y-1.5 font-medium">
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Check-in / Check-out:</span>
+                        <span className="text-slate-800 font-extrabold font-mono">{checkIn} to {checkOut}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Stay Duration:</span>
+                        <span className="text-slate-800 font-extrabold font-mono">{diffDays} Day{diffDays > 1 ? 's' : ''}</span>
+                      </div>
+                      <div className="flex justify-between border-t pt-1.5 mt-1">
+                        <span className="text-slate-500">Day Rate:</span>
+                        <span className="text-slate-800 font-extrabold font-mono">₹{dayRate.toLocaleString('en-IN')} * {diffDays} = ₹{baseOriginal.toLocaleString('en-IN')}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-555">GST Tax (18%):</span>
+                        <span className="text-slate-700 font-mono font-bold">₹{gst.toLocaleString('en-IN')}</span>
+                      </div>
+                      <div className="flex justify-between border-t border-slate-200 pt-1.5 font-bold text-slate-900">
+                        <span>Total Pricing:</span>
+                        <span className="text-indigo-650 font-mono font-bold">₹{total.toLocaleString('en-IN')}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Roommates lookup list */}
               <div className="space-y-2.5">
                 <h4 className="text-[10px] uppercase font-bold tracking-wider text-slate-400 font-mono flex items-center gap-1">
@@ -555,7 +624,7 @@ export default function TenantsView({
                     <div key={inv.id} className="p-2.5 bg-slate-50/50 border rounded-xl flex justify-between items-center text-[11px]">
                       <div>
                         <strong className="text-slate-900 block font-semibold">{inv.month} - {inv.type}</strong>
-                        <span className="text-[9px] text-slate-400 font-mono italic">Raised At: {inv.generatedAt.split('T')[0]}</span>
+                        <span className="text-[9px] text-slate-400 font-mono italic">Raised At: {inv.generatedAt ? inv.generatedAt.split('T')[0] : '2026-06-01'}</span>
                       </div>
 
                       <div className="text-right">
