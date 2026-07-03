@@ -26,12 +26,15 @@ class Property(Base):
     admin_email = Column(String(100), nullable=True)
     admin_phone = Column(String(50), nullable=True)
     admin_password = Column(String(100), nullable=True)
+    admin_id = Column(String(100), nullable=True)
     location_link = Column(Text, nullable=True)
     image_url = Column(Text, nullable=True)
+    status = Column(String(50), default="Active")
     
     _amenities = Column("amenities", Text, nullable=True)
     _rules = Column("rules", Text, nullable=True)
     _locks = Column("locks", Text, nullable=True)
+    _images = Column("images", Text, nullable=True)
 
 
     @property
@@ -87,6 +90,25 @@ class Property(Base):
             self._locks = json.dumps(value)
         else:
             self._locks = None
+
+
+    @property
+    def images(self):
+        import json
+        if self._images:
+            try:
+                return json.loads(self._images)
+            except Exception:
+                return []
+        return []
+
+    @images.setter
+    def images(self, value):
+        import json
+        if value is not None:
+            self._images = json.dumps(value)
+        else:
+            self._images = None
 
 
     organization = relationship("Organization", back_populates="properties")

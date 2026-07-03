@@ -28,11 +28,14 @@ class PropertyBase(BaseModel):
     admin_email: Optional[str] = None
     admin_phone: Optional[str] = None
     admin_password: Optional[str] = None
+    admin_id: Optional[str] = None
     location_link: Optional[str] = None
     amenities: Optional[List[str]] = None
     rules: Optional[List[str]] = None
     locks: Optional[dict] = None
     image_url: Optional[str] = None
+    images: Optional[List[str]] = None
+    status: Optional[str] = "Active"
 
 
 class PropertyCreate(PropertyBase):
@@ -125,6 +128,8 @@ class Booking(BookingBase):
     tenant_id: str
     created_at: datetime.datetime
     tenant: Optional[Tenant] = None
+    property: Optional[Property] = None
+    room: Optional[Room] = None
     class Config:
         from_attributes = True
 

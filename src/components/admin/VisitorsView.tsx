@@ -221,7 +221,7 @@ export default function VisitorsView({
                     <div className="flex items-center gap-1.5 w-max">
                       <span>{v.phone}</span>
                       <a 
-                        href={`tel:${v.phone.replace(/\s+/g, '')}`}
+                        href={`tel:${(v.phone || '').replace(/\s+/g, '')}`}
                         className="p-1 text-indigo-600 hover:bg-indigo-50 border border-indigo-100 rounded-lg transition inline-flex items-center justify-center shrink-0"
                         title={`Call ${v.visitorName}`}
                       >

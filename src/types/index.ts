@@ -47,6 +47,7 @@ export interface Property {
   discountType?: 'all' | 'custom';
   discountPercentage?: number;
   campaignText?: string;
+  images?: string[];
 }
 
 export interface Room {

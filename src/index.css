@@ -618,7 +618,7 @@ body {
 }
 
 /* Curved rectangle buttons with black text and orange border */
-#customer-container .curved-orange-border-btn {
+.curved-orange-border-btn {
   border-radius: 12px !important;
   border: 2px solid #f25a24 !important;
   background-color: #ffffff !important;
@@ -627,8 +627,33 @@ body {
   font-weight: 700 !important;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
 }
-#customer-container .curved-orange-border-btn:hover {
+.curved-orange-border-btn:hover {
   background-color: #fff7ed !important;
   background: #fff7ed !important;
   border-color: #ea580c !important;
+}
+
+/* Increase shadow effects for customer portal sections and cards */
+#customer-container .shadow-xs,
+#customer-container .shadow-sm,
+#customer-container .shadow-2xs {
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04) !important;
+}
+
+#customer-container .shadow-md,
+#customer-container #customer-header,
+#customer-container aside,
+#customer-container .bg-white.rounded-2xl {
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.06) !important;
+}
+
+#customer-container .shadow-lg,
+#customer-container .shadow-xl,
+#customer-container .modal-content,
+#customer-container .bg-white.border.rounded-2xl {
+  box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.15), 0 8px 20px -4px rgba(0, 0, 0, 0.08) !important;
+}
+
+#customer-container .lets-go-btn {
+  border-radius: 12px !important;
 }

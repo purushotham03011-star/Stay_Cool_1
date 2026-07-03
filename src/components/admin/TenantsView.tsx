@@ -26,7 +26,8 @@ import {
   AlertCircle,
   Edit,
   ShieldCheck,
-  MessageSquare
+  MessageSquare,
+  Trash2
 } from 'lucide-react';
 
 interface TenantsViewProps {
@@ -112,7 +113,7 @@ export default function TenantsView({
 
   const handleSendWhatsApp = () => {
     if (!whatsAppTenant) return;
-    const cleanedPhone = whatsAppTenant.phone.replace(/[^0-9]/g, '');
+    const cleanedPhone = (whatsAppTenant.phone || '').replace(/[^0-9]/g, '');
     const url = `https://api.whatsapp.com/send?phone=${cleanedPhone}&text=${encodeURIComponent(whatsAppText)}`;
     mobileOpen(url);
     setWhatsAppTenant(null);
@@ -146,6 +147,42 @@ export default function TenantsView({
   const tenantInvoices = selectedTenantObj 
     ? invoices.filter(i => i.tenantId === selectedTenantObj.id) 
     : [];
+
+  const handleDeleteTenant = (tenant: Tenant) => {
+    if (!window.confirm(`Are you sure you want to permanently delete the resident profile for ${tenant.name}?`)) return;
+
+    const updatedBeds = beds.map(b => {
+      if (tenant.bedId && b.id === tenant.bedId) {
+        return {
+          ...b,
+          isOccupied: false,
+          occupantTenantId: undefined
+        };
+      }
+      return b;
+    });
+
+    const updatedRooms = rooms.map(r => {
+      if (tenant.roomId && r.id === tenant.roomId) {
+        return {
+          ...r,
+          occupancyStatus: 'Available' as const
+        };
+      }
+      return r;
+    });
+
+    const updatedTenants = tenants.filter(t => t.id !== tenant.id);
+
+    syncRoomsAndBeds(updatedRooms, updatedBeds);
+    syncTenants(updatedTenants);
+
+    onAddAuditLog(`Permanently deleted resident ${tenant.name} from records`, 'Tenants');
+
+    if (selectedTenantProfileId === tenant.id) {
+      setSelectedTenantProfileId(null);
+    }
+  };
 
   // Execute checkout deallocation action
   const handleCheckOutTenant = (tenant: Tenant) => {
@@ -284,10 +321,13 @@ export default function TenantsView({
 
                   <div className="flex-grow min-w-0 space-y-1 block">
                     <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-black text-slate-900 truncate font-display">{tenant.name}</h4>
+                      <div className="flex flex-col">
+                        <h4 className="text-sm font-black text-slate-900 truncate font-display">{tenant.name}</h4>
+                        <span className="text-[8.5px] font-mono font-black text-orange-650 tracking-wider">Customer ID: {tenant.id}</span>
+                      </div>
                       <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-mono font-black leading-none uppercase ${
                         tenant.status === 'Active' ? 'bg-teal-50 text-teal-700 border border-teal-100' :
-                        tenant.status === 'Checked-Out' ? 'bg-slate-100 text-slate-500 border border-slate-200' : 'bg-blue-50 text-blue-705 border border-blue-100'
+                        tenant.status === 'Checked-Out' ? 'bg-slate-100 text-slate-500 border border-slate-200' : 'bg-blue-50 text-blue-750 border border-blue-100'
                       }`}>
                         {tenant.status}
                       </span>
@@ -301,7 +341,7 @@ export default function TenantsView({
                         </span>
                         <div className="flex items-center gap-1 shrink-0">
                           <a 
-                            href={`tel:${tenant.phone.replace(/\s+/g, '')}`}
+                            href={`tel:${(tenant.phone || '').replace(/\s+/g, '')}`}
                             className="py-0.5 px-2 text-[10px] text-indigo-700 hover:bg-slate-100 border border-slate-200 rounded-md transition inline-flex items-center gap-1 font-bold font-sans uppercase shrink-0"
                             title={`Call ${tenant.name}`}
                           >
@@ -386,6 +426,14 @@ export default function TenantsView({
 
                 {/* Footer Controls Row with edit & profile audit triggers */}
                 <div className="bg-slate-100/60 border-t border-slate-150 p-3.5 flex items-center justify-between gap-2.5 shrink-0">
+                  <button 
+                    onClick={() => handleDeleteTenant(tenant)}
+                    className="bg-white hover:bg-rose-50 border border-rose-250 text-rose-600 rounded-xl p-2 transition inline-flex items-center justify-center shrink-0 cursor-pointer"
+                    title="Delete Resident Permanently"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-rose-650" />
+                  </button>
+
                   <button 
                     onClick={() => {
                       setEditTenantForm(tenant);

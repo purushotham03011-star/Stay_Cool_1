@@ -77,7 +77,7 @@ export default function StaffView({
 
   const handleSendWhatsAppStaff = () => {
     if (!whatsAppStaff) return;
-    const cleanedPhone = whatsAppStaff.phone.replace(/[^0-9]/g, '');
+    const cleanedPhone = (whatsAppStaff.phone || '').replace(/[^0-9]/g, '');
     const url = `https://api.whatsapp.com/send?phone=${cleanedPhone}&text=${encodeURIComponent(whatsAppStaffText)}`;
     mobileOpen(url);
     setWhatsAppStaff(null);
@@ -344,7 +344,7 @@ export default function StaffView({
                       </span>
                       <div className="flex items-center gap-1 shrink-0">
                         <a 
-                          href={`tel:${st.phone.replace(/\s+/g, '')}`}
+                          href={`tel:${(st.phone || '').replace(/\s+/g, '')}`}
                           className="py-0.5 px-2 text-[10px] text-indigo-650 hover:bg-slate-100 border border-slate-205 rounded-md transition inline-flex items-center gap-1 font-bold font-sans uppercase shrink-0"
                           title={`Call ${st.fullName}`}
                         >

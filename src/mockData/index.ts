@@ -33,11 +33,28 @@ export function setLocalStorageData<T>(key: string, value: T): void {
     const oldValueStr = localStorage.getItem(`hotel_pg_${key}`);
     localStorage.setItem(`hotel_pg_${key}`, JSON.stringify(value));
     
+    // Dispatch a custom DOM event so all active portals can reactively reload
+    window.dispatchEvent(new CustomEvent('stayhub-data-updated', { detail: { key, value } }));
+
     // Propagate changes asynchronously to backend FastAPI server
     propagateToBackend(key, value, oldValueStr);
   } catch (error) {
     console.warn(`Error writing localStorage key "${key}":`, error);
   }
+}
+
+/** Generate a unique Admin ID */
+export function generateAdminId(): string {
+  const ts = Date.now().toString(36).toUpperCase();
+  const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `ADMIN-${ts}-${rand}`;
+}
+
+/** Generate a unique Customer ID */
+export function generateCustomerId(): string {
+  const ts = Date.now().toString(36).toUpperCase();
+  const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `CUST-${ts}-${rand}`;
 }
 
 async function propagateToBackend(key: string, value: any, oldValueStr: string | null) {
@@ -111,11 +128,14 @@ async function propagateToBackend(key: string, value: any, oldValueStr: string |
             admin_email: item.adminEmail || '',
             admin_phone: item.adminPhone || '',
             admin_password: item.adminPassword || '',
+            admin_id: item.adminId || '',
             location_link: item.locationLink || '',
             image_url: item.imageUrl || '',
             amenities: item.amenities || [],
             rules: item.rules || [],
-            locks: item.locks || {}
+            locks: item.locks || {},
+            images: item.images || [],
+            status: item.status || 'Active'
           })
         });
 
@@ -381,11 +401,14 @@ export async function syncAllFromBackend() {
           adminEmail: p.admin_email || '',
           adminPhone: p.admin_phone || '',
           adminPassword: p.admin_password || '',
+          adminId: p.admin_id || '',
           locationLink: p.location_link || '',
           imageUrl: p.image_url || '',
           amenities: p.amenities || [],
           rules: p.rules || [],
-          locks: p.locks || {}
+          locks: p.locks || {},
+          images: p.images || [],
+          status: p.status || 'Active'
         }));
 
         localStorage.setItem('hotel_pg_properties', JSON.stringify(mapped));
@@ -464,14 +487,18 @@ export async function syncAllFromBackend() {
         const mapped = data.map((b: any) => ({
           id: b.id,
           propertyId: b.property_id,
+          propertyName: b.property?.name || 'StayHub Property',
           roomId: b.room_id,
+          roomNumber: b.room?.room_number || b.room?.roomNumber || '101',
           bedId: b.bed_id,
           customerName: b.tenant?.name || 'Aarav Mehta',
           customerEmail: b.tenant?.email || b.tenant_id,
+          customerPhone: b.tenant?.phone || '+91 99999 88888',
           checkInDate: b.check_in_date,
           checkOutDate: b.check_out_date,
           status: b.status === 'Active' ? 'Confirmed' : b.status,
-          totalAmount: b.total_amount
+          totalAmount: b.total_amount,
+          requestedRoomType: b.room?.type || 'Double'
         }));
         localStorage.setItem('hotel_pg_bookings', JSON.stringify(mapped));
       }

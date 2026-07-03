@@ -82,7 +82,7 @@ export default function BillingView({
   const handleSendWhatsAppSubmit = () => {
     if (!whatsAppInvoice) return;
     const resident = tenants.find(t => t.id === whatsAppInvoice.tenantId);
-    const phoneNum = resident ? resident.phone : '';
+    const phoneNum = (resident && resident.phone) ? resident.phone : '';
     const cleanedPhone = phoneNum.replace(/[^0-9]/g, '');
     const url = `https://api.whatsapp.com/send?phone=${cleanedPhone}&text=${encodeURIComponent(whatsAppText)}`;
     mobileOpen(url);
@@ -358,12 +358,12 @@ export default function BillingView({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
             
             {/* Left side: Residents billing status directory */}
-            <div className="lg:col-span-4 bg-slate-900/40 border border-slate-800 rounded-3xl p-5 shadow-lg flex flex-col justify-between space-y-4">
+            <div className="lg:col-span-4 bg-white border border-slate-200/80 rounded-3xl p-5 shadow-xs flex flex-col justify-between space-y-4">
               <div className="space-y-3">
-                <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                <div className="flex justify-between items-center border-b border-slate-150 pb-2">
                   <div>
-                    <h3 className="text-sm font-black text-white font-display">Co-Liver Directories</h3>
-                    <p className="text-[10px] text-slate-400 font-medium font-sans">Directory of residents and fees schedule</p>
+                    <h3 className="text-sm font-black text-slate-900 font-display">Co-Liver Directories</h3>
+                    <p className="text-[10px] text-slate-500 font-medium font-sans">Directory of residents and fees schedule</p>
                   </div>
                 </div>
 
@@ -376,18 +376,18 @@ export default function BillingView({
                         onClick={() => setSelectedResidentId(isSelected ? null : t.id)}
                         className={`p-3 rounded-2xl border transition duration-200 cursor-pointer select-none flex flex-col gap-1.5 ${
                           isSelected
-                            ? 'bg-indigo-650 border-indigo-500 text-white shadow-md'
-                            : 'bg-slate-900/60 hover:bg-slate-900 border-slate-800 text-slate-350'
+                            ? 'bg-indigo-600 border-indigo-500 text-white shadow-md'
+                            : 'bg-slate-50 hover:bg-slate-100 border-slate-150 text-slate-700'
                         }`}
                       >
                         <div className="flex justify-between items-center">
-                          <strong className={`text-xs font-black tracking-tight ${isSelected ? 'text-white' : 'text-slate-100'}`}>
+                          <strong className={`text-xs font-black tracking-tight ${isSelected ? 'text-white' : 'text-slate-800'}`}>
                             {t.name}
                           </strong>
                           <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase font-mono ${
                             t.status === 'Active'
-                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                              : 'bg-slate-800 text-slate-400 border border-slate-700'
+                              ? isSelected ? 'bg-white/20 text-white border border-white/30' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              : isSelected ? 'bg-white/10 text-white/80 border border-white/20' : 'bg-slate-200 text-slate-500 border border-slate-300'
                           }`}>
                             {t.status}
                           </span>
@@ -406,7 +406,7 @@ export default function BillingView({
               {(() => {
                 const selectedResident = allPropertyTenants.find(t => t.id === selectedResidentId);
                 if (!selectedResident) return (
-                  <div className="p-4 bg-slate-900/20 border border-dashed border-slate-800 rounded-2xl text-center text-slate-400 italic">
+                  <div className="p-4 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-center text-slate-400 italic">
                     Click a resident from the directory to review joining and payment terms.
                   </div>
                 );
@@ -416,13 +416,13 @@ export default function BillingView({
                 const latestPaidBill = tenantBills.filter(i => i.status === 'Paid').sort((a,b) => b.dueDate.localeCompare(a.dueDate))[0];
 
                 return (
-                  <div className="p-4 bg-slate-950/80 border border-slate-800 rounded-2.5xl space-y-3 animate-fadeIn text-slate-300">
-                    <div className="flex justify-between items-center border-b border-slate-800 pb-2">
-                      <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest font-mono">Resident Billing Card</h4>
+                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-2.5xl space-y-3 animate-fadeIn text-slate-600">
+                    <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                      <h4 className="text-[10px] font-black text-indigo-650 uppercase tracking-widest font-mono">Resident Billing Card</h4>
                       {selectedResidentId && (
                         <button
                           onClick={() => setSelectedResidentId(null)}
-                          className="text-[10px] text-indigo-400 hover:text-indigo-300 underline font-bold cursor-pointer"
+                          className="text-[10px] text-indigo-600 hover:text-indigo-750 underline font-bold cursor-pointer"
                         >
                           Clear Selection
                         </button>
@@ -432,17 +432,17 @@ export default function BillingView({
                     <div className="space-y-3">
                       <div>
                         <span className="text-slate-400 block text-[9px] uppercase font-mono font-bold">Resident Name:</span>
-                        <strong className="text-white text-xs font-black">{selectedResident.name}</strong>
+                        <strong className="text-slate-800 text-xs font-black">{selectedResident.name}</strong>
                       </div>
 
                       <div className="grid grid-cols-2 gap-3.5">
                         <div>
                           <span className="text-slate-400 block text-[9px] uppercase font-mono font-bold">Joining Date:</span>
-                          <strong className="text-slate-100 font-extrabold text-[11px] font-mono">{selectedResident.joinedDate || '2025-02-10'}</strong>
+                          <strong className="text-slate-700 font-extrabold text-[11px] font-mono">{selectedResident.joinedDate || '2025-02-10'}</strong>
                         </div>
                         <div>
                           <span className="text-slate-400 block text-[9px] uppercase font-mono font-bold">Fees Paying Date:</span>
-                          <strong className="text-indigo-400 font-extrabold text-[11px] font-mono">
+                          <strong className="text-indigo-650 font-extrabold text-[11px] font-mono">
                             {unpaidBills.length > 0 
                               ? unpaidBills[0].dueDate 
                               : latestPaidBill 
@@ -452,9 +452,9 @@ export default function BillingView({
                         </div>
                       </div>
 
-                      <div className="pt-2 border-t border-slate-800 flex justify-between items-center">
+                      <div className="pt-2 border-t border-slate-200 flex justify-between items-center">
                         <span className="text-slate-400 text-[9px] font-bold">Invoices Issued:</span>
-                        <span className="bg-slate-800 px-2 py-0.5 rounded-md text-white font-mono font-black">{tenantBills.length}</span>
+                        <span className="bg-slate-200 px-2 py-0.5 rounded-md text-slate-800 font-mono font-black">{tenantBills.length}</span>
                       </div>
                     </div>
                   </div>
@@ -500,7 +500,7 @@ export default function BillingView({
                                   <span className="text-[10px] text-slate-500 font-mono font-medium">{resident.phone}</span>
                                   <div className="flex items-center gap-1">
                                     <a 
-                                      href={`tel:${resident.phone.replace(/\s+/g, '')}`}
+                                      href={`tel:${(resident.phone || '').replace(/\s+/g, '')}`}
                                       className="p-0.5 text-indigo-700 hover:bg-slate-100 border border-slate-200 rounded transition inline-flex items-center justify-center shrink-0"
                                       title={`Call ${inv.tenantName}`}
                                     >
@@ -656,7 +656,7 @@ export default function BillingView({
               <button 
                 onClick={() => {
                   const resident = tenants.find(t => t.id === selectedInvoicedReceiptObj.tenantId);
-                  const phoneNum = resident ? resident.phone : '';
+                  const phoneNum = (resident && resident.phone) ? resident.phone : '';
                   const cleanedPhone = phoneNum.replace(/[^0-9]/g, '');
                   const shareText = `Dear ${selectedInvoicedReceiptObj.tenantName},\n\nHere is your receipt for StayHub:\nInvoice ID: ${selectedInvoicedReceiptObj.id}\nProperty: ${selectedInvoicedReceiptObj.propertyName}\nType: ${selectedInvoicedReceiptObj.type} (${selectedInvoicedReceiptObj.month})\nAmount Paid: ₹${selectedInvoicedReceiptObj.amount.toLocaleString('en-IN')}\nStatus: ${selectedInvoicedReceiptObj.status.toUpperCase()}${selectedInvoicedReceiptObj.paymentMethod ? `\nPayment Method: ${selectedInvoicedReceiptObj.paymentMethod}` : ''}\n\nThank you!`;
                   const url = `https://api.whatsapp.com/send?phone=${cleanedPhone}&text=${encodeURIComponent(shareText)}`;

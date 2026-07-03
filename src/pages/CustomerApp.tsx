@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Property, Room, Bed, Booking, Notification, Tenant } from '../types';
 import { 
   getLocalStorageData, 
-  setLocalStorageData 
+  setLocalStorageData,
+  generateCustomerId
 } from '../mockData';
 import { 
   Search, 
@@ -261,7 +262,7 @@ export default function CustomerApp({
       const matchedIdx = currentTenants.findIndex(t => t.email?.toLowerCase() === wizardEmail.toLowerCase());
       
       const tenantData: Tenant = {
-        id: matchedIdx !== -1 ? currentTenants[matchedIdx].id : `tenant-${Date.now()}`,
+        id: matchedIdx !== -1 ? currentTenants[matchedIdx].id : generateCustomerId(),
         name: wizardName,
         email: wizardEmail,
         phone: wizardMobile,
@@ -315,7 +316,7 @@ export default function CustomerApp({
       tenantObj = currentTenants[matchedIdx];
     } else {
       tenantObj = {
-        id: user.id || `tenant-${Date.now()}`,
+        id: user.id || generateCustomerId(),
         name: user.name,
         email: user.email,
         phone: user.phone,
@@ -341,6 +342,10 @@ export default function CustomerApp({
 
 
   // Search, filter, and categorisation options
+  const [searchDates, setSearchDates] = useState('3 Jul - 6 Jul');
+  const [searchGuests, setSearchGuests] = useState(2);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showGuestPicker, setShowGuestPicker] = useState(false);
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [selectedCity, setSelectedCity] = useState('All');
   const [selectedType, setSelectedType] = useState<'All' | 'Hotel' | 'PG'>('All');
@@ -378,15 +383,18 @@ export default function CustomerApp({
   const [activeImgIdx, setActiveImgIdx] = useState<number>(0);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [bookingRoom, setBookingRoom] = useState<Room | null>(null);
+  const [stayDurationOption, setStayDurationOption] = useState<string>('day');
 
   // Auto scroll gallery images for 2 seconds
   useEffect(() => {
     if (!selectedProperty) return;
     
-    const galleryImages = [
+    const rawImages = [
+      ...(selectedProperty.images || []),
       selectedProperty.imageUrl,
       ...(PROPERTY_IMAGES[selectedProperty.id] || [])
     ].filter(Boolean);
+    const galleryImages = Array.from(new Set(rawImages));
     while (galleryImages.length < 4) {
       galleryImages.push('https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600');
     }
@@ -475,7 +483,7 @@ export default function CustomerApp({
   const [changePasswordSuccess, setChangePasswordSuccess] = useState<string>('');
 
   // Load Seed Database data
-  useEffect(() => {
+  const loadAppData = () => {
     const rawProperties = getLocalStorageData<Property[]>('properties', []);
     const deactivatedPropIds = getLocalStorageData<string[]>('deactivated_properties', []);
     const activeProperties = rawProperties.filter(
@@ -486,6 +494,20 @@ export default function CustomerApp({
     setBeds(getLocalStorageData<Bed[]>('beds', []));
     setBookings(getLocalStorageData<Booking[]>('bookings', []));
     setNotifications(getLocalStorageData<Notification[]>('notifications', []));
+  };
+
+  useEffect(() => {
+    loadAppData();
+
+    // Reactively reload when any portal writes new properties/data
+    const handleDataUpdate = (e: Event) => {
+      const { key } = (e as CustomEvent).detail || {};
+      if (['properties', 'rooms', 'beds', 'bookings', 'deactivated_properties'].includes(key)) {
+        loadAppData();
+      }
+    };
+    window.addEventListener('stayhub-data-updated', handleDataUpdate);
+    return () => window.removeEventListener('stayhub-data-updated', handleDataUpdate);
   }, []);
 
   // Sync Logged-In User changes
@@ -603,6 +625,7 @@ export default function CustomerApp({
 
   // Filter & sort query properties
   const filteredProperties = properties.filter(prop => {
+    if ((prop as any).status === 'Deleted') return false;
     // Search physically on property name, address, or city
     const matchesQuery = (prop.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
                          (prop.address || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -735,6 +758,10 @@ export default function CustomerApp({
 
   // Open specific property and configure detail values
   const handleViewProperty = (prop: Property) => {
+    if (prop.status === 'Deleted') {
+      alert("This property is permanently closed and no longer accepting reservations.");
+      return;
+    }
     setSelectedProperty(prop);
     const propRooms = rooms.filter(r => r.propertyId === prop.id);
     setPropertyRooms(propRooms);
@@ -798,18 +825,31 @@ export default function CustomerApp({
       ? (selectedProperty.discountPercentage || 0) 
       : (bookingRoom.discountPercentage || 0);
 
-    let baseOriginalRate = 0;
-    let baseRate = 0;
-    if (selectedProperty.type === 'PG') {
-      const months = Math.max(1, Math.round(diffDays / 30));
-      baseOriginalRate = bookingRoom.pricePerMonth * months;
-      const discountedMonthPrice = Math.round(bookingRoom.pricePerMonth * (1 - roomDiscountPct / 100));
-      baseRate = discountedMonthPrice * months;
-    } else {
-      baseOriginalRate = bookingRoom.pricePerDay * diffDays;
-      const discountedDayPrice = Math.round(bookingRoom.pricePerDay * (1 - roomDiscountPct / 100));
-      baseRate = discountedDayPrice * diffDays;
+    const numRooms = parseInt(bookingNumRooms as any) || 1;
+    const numAdults = parseInt(bookingAdults as any) || 1;
+
+    const priceDay = bookingRoom.pricePerDay || bookingRoom.price || 1200;
+    const priceWeek = bookingRoom.priceWeekly || priceDay * 7;
+    const priceMonth = bookingRoom.pricePerMonth || priceDay * 22;
+    const priceSeasonal = bookingRoom.priceSeasonal || priceMonth * 1.2;
+
+    let selectedRate = priceDay;
+    let optionDays = 1;
+    if (stayDurationOption === 'week') {
+      selectedRate = priceWeek;
+      optionDays = 7;
+    } else if (stayDurationOption === 'month') {
+      selectedRate = priceMonth;
+      optionDays = 30;
+    } else if (stayDurationOption === 'seasonal') {
+      selectedRate = priceSeasonal;
+      optionDays = 90;
     }
+
+    const calculatedDayCost = selectedRate / optionDays;
+    const baseOriginalRate = Math.round(calculatedDayCost * diffDays * numRooms * numAdults);
+    const discountedDayCost = calculatedDayCost * (1 - roomDiscountPct / 100);
+    const baseRate = Math.round(discountedDayCost * diffDays * numRooms * numAdults);
 
     let mealSurcharge = 0;
     if (mealPlan === 'Breakfast Only') mealSurcharge = 150 * diffDays;
@@ -1472,33 +1512,66 @@ export default function CustomerApp({
     }`}>
       
       {/* Primary Mobile Header Bar */}
-      <header id="customer-header" className="bg-white px-4 py-3 border-b border-slate-100 shadow-xs flex justify-between items-center relative z-20">
-        <div id="mobile-branding" className="flex items-center space-x-2">
-          <button 
-            type="button"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-800 transition active:scale-95 cursor-pointer mr-1 border border-slate-200"
-            title="Toggle Filter Sidebar"
-          >
-            <SlidersHorizontal className="w-4 h-4 text-indigo-600" />
-          </button>
-          <div className="bg-gradient-to-tr from-amber-500 to-indigo-600 p-1.5 rounded-xl text-white shadow-sm">
+      <header id="customer-header" className="bg-white px-4 py-2 border-b border-slate-100 shadow-md flex justify-between items-center relative z-40 gap-4">
+        {/* Left Brand Area */}
+        <div id="mobile-branding" className="flex items-center space-x-2 shrink-0">
+          <div className="bg-gradient-to-tr from-amber-500 to-[#f25a24] p-1.5 rounded-xl text-white shadow-sm">
             <Sparkles className="w-4 h-4" />
           </div>
           <div>
-            <h1 className="text-xs font-black font-display text-slate-950 hover:text-indigo-600 cursor-pointer" onClick={() => setActiveTab('home')}>StayHub</h1>
+            <h1 className="text-xs font-black font-display text-slate-950 hover:text-[#f25a24] cursor-pointer" onClick={() => setActiveTab('home')}>StayHub</h1>
             <p className="text-[9px] text-slate-400 uppercase font-bold tracking-widest font-mono">Mobile Hub</p>
           </div>
         </div>
 
+        {/* Unified Search component in the header (Desktop & Tablet) */}
+        <div className="hidden md:flex flex-1 max-w-2xl items-center bg-white border-2 border-[#b8d935] rounded-full px-4 py-1.5 shadow-sm hover:shadow-md transition relative gap-2 text-slate-700">
+          {/* Text input with Search icon */}
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <Search className="w-4 h-4 text-[#f25a24] shrink-0" />
+            <input 
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search your dream relocation stay or next adventure..."
+              className="w-full bg-transparent text-xs font-semibold focus:outline-none placeholder-slate-450 text-slate-800"
+            />
+          </div>
+
+          {/* Let's go Button (Curved Rectangle) */}
           <button 
-            onClick={() => onLogout?.()}
-            className="text-[10px] font-extrabold uppercase border border-slate-200 hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-xl transition cursor-pointer flex items-center gap-1 active:scale-95 shadow-2xs"
-            title="Return to main portal select screen"
+            type="button"
+            onClick={() => {
+              document.getElementById('customer-main-view')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="lets-go-btn bg-[#f25a24] hover:bg-[#ea580c] text-white rounded-xl px-4 py-1.5 text-xs font-black transition active:scale-95 cursor-pointer flex items-center gap-1.5 shrink-0"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Portal Select</span>
+            <span>Let's go!</span>
+            <ArrowRight className="w-3.5 h-3.5 text-white" />
           </button>
+        </div>
+
+        {/* Mobile View Search Input Fallback */}
+        <div className="md:hidden flex-1 relative max-w-[180px]">
+          <Search className="absolute left-2.5 top-2 w-3.5 h-3.5 text-slate-400" />
+          <input 
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search stays..."
+            className="w-full bg-slate-50 border border-slate-200 rounded-lg py-1.5 pl-7 pr-2 text-[10.5px] focus:outline-none focus:bg-white text-slate-800"
+          />
+        </div>
+
+        {/* Right Logout/Portal Selection Button */}
+        <button 
+          onClick={() => onLogout?.()}
+          className="text-[10px] font-extrabold uppercase border border-slate-200 hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-xl transition cursor-pointer flex items-center gap-1 active:scale-95 shadow-md shrink-0"
+          title="Return to main portal select screen"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Portal Select</span>
+        </button>
       </header>
 
       {/* Main Container viewport */}
@@ -1511,29 +1584,57 @@ export default function CustomerApp({
           />
         )}
 
+        {/* Pinned Vertical Toggle Bar on the left when sidebar is closed (mobile only) */}
+        {!sidebarOpen && (
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            className="fixed left-0 top-1/2 -translate-y-1/2 bg-[#f25a24] hover:bg-[#ea580c] text-white rounded-r-xl py-4 px-2 shadow-lg flex flex-col items-center gap-1.5 transition-all duration-300 z-30 group cursor-pointer border-y border-r border-orange-500 lg:hidden"
+            title="Open Filter Sidebar"
+          >
+            <SlidersHorizontal className="w-4 h-4 text-white group-hover:scale-110 transition" />
+            <ChevronRight className="w-3.5 h-3.5 text-white group-hover:translate-x-0.5 transition" />
+          </button>
+        )}
+
         {/* Collapsible Left Sidebar */}
-        <aside className={`bg-slate-50 border-r border-slate-200/60 w-80 shrink-0 flex flex-col justify-between transition-all duration-305 duration-300 z-35 absolute lg:static inset-y-0 left-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:w-0 lg:opacity-0 lg:-mr-80'
-        } h-full`}>
-          <div className="flex-1 overflow-y-auto p-5 space-y-6 no-scrollbar">
+        <aside className={`bg-slate-50 border-r border-slate-200/60 shrink-0 flex flex-col justify-between transition-all duration-300 z-35 absolute lg:static inset-y-0 left-0 h-full ${
+          sidebarOpen 
+            ? 'w-80 translate-x-0' 
+            : '-translate-x-full lg:translate-x-0 lg:w-16'
+        }`}>
+          <div className={`flex-1 overflow-y-auto space-y-6 no-scrollbar ${sidebarOpen ? 'p-5' : 'py-5 px-1.5'}`}>
             {/* Navigation Section */}
             <div className="space-y-2">
-              <label className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 block">Navigation</label>
-              <div className="space-y-1">
+              <div className={`flex ${sidebarOpen ? 'justify-between items-center' : 'justify-center'} py-1`}>
+                {sidebarOpen && <label className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 block">Navigation</label>}
+                <button
+                  type="button"
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="p-1 rounded-lg hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition cursor-pointer"
+                  title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
+                >
+                  {sidebarOpen ? <X className="w-4 h-4" /> : <ChevronRight className="w-4 h-4 text-[#f25a24]" />}
+                </button>
+              </div>
+              <div className="space-y-1.5">
                 <button
                   type="button"
                   onClick={() => {
                     setActiveTab('home');
                     if (window.innerWidth < 1024) setSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                  className={`flex items-center gap-3 rounded-xl text-xs font-bold transition cursor-pointer ${
+                    sidebarOpen ? 'w-full px-3 py-2.5' : 'justify-center w-10 h-10 mx-auto p-0'
+                  } ${
                     activeTab === 'home' 
                       ? 'curved-orange-border-btn shadow-xs' 
                       : 'text-slate-700 hover:bg-slate-200/50'
                   }`}
+                  title="Explore Stays"
                 >
-                  <Search className="w-4 h-4" />
-                  <span>Explore Stays</span>
+                  <Search className="w-4 h-4 shrink-0" />
+                  {sidebarOpen && <span>Explore Stays</span>}
                 </button>
                 <button
                   type="button"
@@ -1541,35 +1642,24 @@ export default function CustomerApp({
                     setActiveTab('bookings');
                     if (window.innerWidth < 1024) setSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                  className={`flex items-center gap-3 rounded-xl text-xs font-bold transition cursor-pointer ${
+                    sidebarOpen ? 'w-full px-3 py-2.5' : 'justify-center w-10 h-10 mx-auto p-0'
+                  } ${
                     activeTab === 'bookings' 
                       ? 'curved-orange-border-btn shadow-xs' 
                       : 'text-slate-700 hover:bg-slate-200/50'
                   }`}
+                  title="My Bookings"
                 >
-                  <Calendar className="w-4 h-4" />
-                  <span>My Bookings</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveTab('profile');
-                    if (window.innerWidth < 1024) setSidebarOpen(false);
-                  }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${
-                    activeTab === 'profile' 
-                      ? 'curved-orange-border-btn shadow-xs' 
-                      : 'text-slate-700 hover:bg-slate-200/50'
-                  }`}
-                >
-                  <User className="w-4 h-4" />
-                  <span>Profile & KYC</span>
+                  <Calendar className="w-4 h-4 shrink-0" />
+                  {sidebarOpen && <span>My Bookings</span>}
                 </button>
               </div>
             </div>
 
             {/* Filter Controls */}
-            <div className="space-y-5 pt-4 border-t border-slate-200/60">
+            {sidebarOpen && (
+              <div className="space-y-5 pt-4 border-t border-slate-200/60">
               <div className="flex justify-between items-center">
                 <label className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Search Filters</label>
                 <button 
@@ -1817,22 +1907,33 @@ export default function CustomerApp({
                 </div>
               </div>
             </div>
-          </div>
+          )}
+        </div>
 
           {/* User profile quick section at sidebar bottom */}
-          <div className="p-4 border-t border-slate-200 bg-slate-100/50 flex items-center justify-between shrink-0">
+          <div className={`p-4 border-t border-slate-200 bg-slate-100/50 flex ${
+            sidebarOpen ? 'items-center justify-between' : 'flex-col items-center gap-3'
+          } shrink-0`}>
             {currentUser ? (
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[11px] font-black font-mono shadow-xs">
+                <div className="w-8 h-8 rounded-full bg-indigo-650 bg-indigo-600 text-white flex items-center justify-center text-[11px] font-black font-mono shadow-xs shrink-0">
                   {currentUser.name[0]}
                 </div>
-                <div className="truncate max-w-[120px]">
-                  <p className="text-xs font-bold text-slate-900 leading-tight truncate">{currentUser.name}</p>
-                  <p className="text-[9px] text-slate-400 truncate">{currentUser.email}</p>
-                </div>
+                {sidebarOpen && (
+                  <div className="truncate max-w-[120px]">
+                    <p className="text-xs font-bold text-slate-900 leading-tight truncate">{currentUser.name}</p>
+                    <p className="text-[9px] text-slate-400 truncate">{currentUser.email}</p>
+                  </div>
+                )}
               </div>
             ) : (
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Guest Session</span>
+              sidebarOpen ? (
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Guest Session</span>
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-slate-250 text-slate-500 flex items-center justify-center text-[11px] font-black shrink-0 border border-slate-200" title="Guest Session">
+                  G
+                </div>
+              )
             )}
             <button 
               type="button"
@@ -1840,7 +1941,7 @@ export default function CustomerApp({
                 setActiveTab('profile');
                 if (window.innerWidth < 1024) setSidebarOpen(false);
               }}
-              className="p-1.5 rounded-xl hover:bg-slate-200 text-slate-650 hover:text-slate-900 transition cursor-pointer"
+              className="p-1.5 rounded-xl hover:bg-slate-200 text-slate-650 hover:text-slate-900 transition cursor-pointer shrink-0"
               title="Profile Settings"
             >
               <Settings className="w-4 h-4" />
@@ -1857,161 +1958,11 @@ export default function CustomerApp({
             
 
 
-            {/* Quick Search Hub Form */}
-            <div className="bg-white p-3.5 rounded-2xl shadow-xs border border-slate-100 space-y-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-2.5 w-4.5 h-4.5 text-slate-400" />
-                <input 
-                  type="text" 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Ask for property names, city, Wifi, features..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-9 pr-3 text-xs focus:ring-1 focus:ring-indigo-500 focus:bg-white outline-none text-slate-800"
-                />
-              </div>
-            </div>
 
-            {/* FEATURED HOTELS HORIZONTAL SECTION */}
-            <div className="space-y-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">🏨 Featured Boutique Hotels</h3>
-              <div className="flex space-x-3 overflow-x-auto no-scrollbar pb-1">
-                 {featuredHotels.map(prop => {
-                  const hotelRooms = rooms.filter(r => r.propertyId === prop.id);
-                  
-                  let maxDiscount = 0;
-                  if (prop.discountType === 'all') {
-                    maxDiscount = prop.discountPercentage || 0;
-                  } else if (prop.discountType === 'custom') {
-                    const discounts = hotelRooms.map(r => r.discountPercentage || 0);
-                    maxDiscount = discounts.length > 0 ? Math.max(...discounts) : 0;
-                  }
-
-                  const minOriginalPrice = hotelRooms.length > 0 ? hotelRooms[0].pricePerDay : 2200;
-                  let minDiscountedPrice = minOriginalPrice;
-                  if (hotelRooms.length > 0) {
-                    const discountPct = prop.discountType === 'all' ? (prop.discountPercentage || 0) : (hotelRooms[0].discountPercentage || 0);
-                    minDiscountedPrice = Math.round(minOriginalPrice * (1 - discountPct / 100));
-                  }
-
-                  return (
-                    <div 
-                      key={prop.id}
-                      onClick={() => handleViewProperty(prop)}
-                      className="bg-white rounded-xl border border-slate-150 p-2 min-w-[190px] max-w-[190px] text-left shrink-0 cursor-pointer shadow-xs hover:shadow-md hover:border-slate-300 transition relative"
-                    >
-                      <div className="h-24 w-full rounded-lg overflow-hidden bg-slate-105 relative">
-                        <img 
-                          src={prop.imageUrl || PROPERTY_IMAGES[prop.id]?.[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=300'} 
-                          alt={prop.name}
-                          className="w-full h-full object-cover"
-                        />
-                        <span className="absolute top-1.5 left-1.5 bg-indigo-650 bg-indigo-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-sm">
-                          HOTEL
-                        </span>
-                        {maxDiscount > 0 && (
-                          <span className="absolute top-1.5 right-1.5 bg-rose-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-sm flex items-center gap-0.5 animate-pulse">
-                            <Tag className="w-2.5 h-2.5 text-white" />
-                            {prop.discountType === 'all' ? `${maxDiscount}% OFF` : `Up to ${maxDiscount}%`}
-                          </span>
-                        )}
-                      </div>
-                      <h4 className="text-[11px] font-bold text-slate-900 truncate mt-1.5">{prop.name}</h4>
-                      <p className="text-[8.5px] text-slate-400 font-mono mt-0.5">{prop.city} &bull; Nearby Stay</p>
-                      <div className="flex justify-between items-center mt-2 pt-1 border-t border-slate-100 text-[10px]">
-                        <span className="text-slate-400 truncate">
-                          {maxDiscount > 0 ? (
-                            <span className="flex items-center gap-1">
-                              <span className="text-slate-450 line-through">₹{minOriginalPrice}</span>
-                              <span className="text-indigo-650 text-indigo-650 font-bold">₹{minDiscountedPrice}</span>
-                            </span>
-                          ) : (
-                            <span>From ₹{minOriginalPrice}</span>
-                          )}
-                        </span>
-                        <span className="text-amber-500 font-bold flex items-center space-x-0.5">
-                          <Star className="w-3 h-3 fill-amber-500 inline" />
-                          <span>4.8</span>
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* FEATURED PGS SEPARATOR */}
-            <div className="space-y-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">🏠 Premium Co-Living PGs</h3>
-              <div className="flex space-x-3 overflow-x-auto no-scrollbar pb-1">
-                 {featuredPGs.map(prop => {
-                  const pgRooms = rooms.filter(r => r.propertyId === prop.id);
-                  
-                  let maxDiscount = 0;
-                  if (prop.discountType === 'all') {
-                    maxDiscount = prop.discountPercentage || 0;
-                  } else if (prop.discountType === 'custom') {
-                    const discounts = pgRooms.map(r => r.discountPercentage || 0);
-                    maxDiscount = discounts.length > 0 ? Math.max(...discounts) : 0;
-                  }
-
-                  const minOriginalPrice = pgRooms.length > 0 ? pgRooms[0].pricePerMonth : 8500;
-                  let minDiscountedPrice = minOriginalPrice;
-                  if (pgRooms.length > 0) {
-                    const discountPct = prop.discountType === 'all' ? (prop.discountPercentage || 0) : (pgRooms[0].discountPercentage || 0);
-                    minDiscountedPrice = Math.round(minOriginalPrice * (1 - discountPct / 100));
-                  }
-
-                  return (
-                    <div 
-                      key={prop.id}
-                      onClick={() => handleViewProperty(prop)}
-                      className="bg-white rounded-xl border border-slate-150 p-2 min-w-[190px] max-w-[190px] text-left shrink-0 cursor-pointer shadow-xs hover:shadow-md hover:border-slate-300 transition relative"
-                    >
-                      <div className="h-24 w-full rounded-lg overflow-hidden bg-slate-105 relative">
-                        <img 
-                          src={prop.imageUrl || PROPERTY_IMAGES[prop.id]?.[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300'} 
-                          alt={prop.name}
-                          className="w-full h-full object-cover"
-                        />
-                        <span className="absolute top-1.5 left-1.5 bg-emerald-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-sm">
-                          CO-LIVING
-                        </span>
-                        {maxDiscount > 0 && (
-                          <span className="absolute top-1.5 right-1.5 bg-rose-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-sm flex items-center gap-0.5 animate-pulse">
-                            <Tag className="w-2.5 h-2.5 text-white" />
-                            {prop.discountType === 'all' ? `${maxDiscount}% OFF` : `Up to ${maxDiscount}%`}
-                          </span>
-                        )}
-                      </div>
-                      <h4 className="text-[11px] font-bold text-slate-900 truncate mt-1.5">{prop.name}</h4>
-                      <p className="text-[8.5px] text-slate-400 font-mono mt-0.5">{prop.city} &bull; Shared Nest</p>
-                      <div className="flex justify-between items-center mt-2 pt-1 border-t border-slate-100 text-[10px]">
-                        <span className="text-slate-400 truncate">
-                          {maxDiscount > 0 ? (
-                            <span className="flex items-center gap-1">
-                              <span className="text-slate-455 line-through">₹{minOriginalPrice}</span>
-                              <span className="text-indigo-650 font-bold">₹{minDiscountedPrice}</span>
-                            </span>
-                          ) : (
-                            <span>From ₹{minOriginalPrice}</span>
-                          )}
-                        </span>
-                        <span className="text-amber-500 font-bold flex items-center space-x-0.5">
-                          <Star className="w-3 h-3 fill-amber-500 inline" />
-                          <span>4.7</span>
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* CORE GRID LISTING ROW */}
+            {/* Unified Listing Section */}
             <div className="space-y-3.5 pt-2">
-              <div className="flex justify-between items-center">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">🗺️ Main Location Matches ({filteredProperties.length})</h3>
-                {(searchQuery || selectedCity !== 'All' || selectedType !== 'All') && (
+              {(searchQuery || selectedCity !== 'All' || selectedType !== 'All') && (
+                <div className="flex justify-end">
                   <button 
                     onClick={() => {
                       setSearchQuery('');
@@ -2020,20 +1971,20 @@ export default function CustomerApp({
                       setSelectedSharing('All');
                       setMaxPrice(30000);
                     }}
-                    className="text-[10px] text-indigo-650 font-bold hover:underline"
+                    className="text-[10px] text-indigo-655 font-bold hover:underline"
                   >
                     Wipe Filters
                   </button>
-                )}
-              </div>
+                </div>
+              )}
 
               {sortedProperties.length === 0 ? (
                 <div className="text-center py-10 bg-white rounded-2xl border border-dashed border-slate-200 px-6">
-                  <p className="text-xs text-slate-500 font-semibold">No results found matching listings.</p>
+                  <p className="text-xs text-slate-505 font-semibold">No results found matching listings.</p>
                   <p className="text-[10.5px] text-slate-400 mt-1">Try relaxing filters range or changing query strings.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 font-sans">
+                <div className="flex flex-col gap-4 font-sans">
                   {sortedProperties.map(prop => {
                     const propRooms = rooms.filter(r => r.propertyId === prop.id);
                     
@@ -2065,77 +2016,92 @@ export default function CustomerApp({
                       <div 
                         key={prop.id}
                         onClick={() => handleViewProperty(prop)}
-                        className="bg-white rounded-2xl border border-slate-150 overflow-hidden shadow-xs hover:border-slate-200 hover:shadow-md cursor-pointer transition-all duration-200 flex flex-col justify-between h-full relative"
+                        className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:border-slate-350 hover:shadow-md cursor-pointer transition duration-200 flex flex-col sm:flex-row p-4 gap-5 relative text-left"
                       >
-                        <div>
-                          {/* Top photo cover */}
-                          <div className="w-full h-44 bg-slate-100 relative shrink-0">
-                            <img 
-                              src={prop.imageUrl || PROPERTY_IMAGES[prop.id]?.[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500'} 
-                              alt={prop.name}
-                              className="w-full h-full object-cover"
-                            />
-                            <span className={`absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider text-white ${
-                              prop.type === 'Hotel' ? 'bg-indigo-600 shadow-xs' : 'bg-emerald-600 shadow-xs'
-                            }`}>
-                              {prop.type}
-                            </span>
-                            {maxDiscount > 0 && (
-                              <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider text-white bg-rose-600 shadow-xs flex items-center gap-0.5 animate-pulse">
-                                <Tag className="w-2.5 h-2.5 text-white" />
-                                {prop.discountType === 'all' ? `${maxDiscount}% OFF` : `Up to ${maxDiscount}% OFF`}
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Detail text columns */}
-                          <div className="p-4 space-y-2">
-                            <div className="flex justify-between items-start gap-1">
-                              <h4 className="text-sm font-bold text-slate-950 leading-snug line-clamp-1">{prop.name}</h4>
-                              <span className="bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded-sm text-[8px] font-black tracking-tight shrink-0 uppercase">
-                                Popular
-                              </span>
-                            </div>
-
-                            <p className="text-[10px] text-slate-505 font-mono flex items-center space-x-1">
-                              <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                              <span>{prop.city} &bull; {prop.address.split(',')[1] || 'Central Area'}</span>
-                            </p>
-
-                            {/* Amenities highlights */}
-                            <div className="flex flex-wrap gap-1 pt-1">
-                              {(prop.amenities || []).slice(0, 3).map((amenity, adIx) => (
-                                <span key={adIx} className="bg-slate-55 text-slate-600 border border-slate-105 text-[9px] px-2 py-0.5 rounded-md font-semibold">
-                                  {amenity}
-                                </span>
-                              ))}
-                              {(prop.amenities || []).length > 3 && (
-                                <span className="bg-slate-50 text-slate-400 text-[9px] px-1.5 py-0.5 rounded-md font-bold">+{(prop.amenities || []).length - 3}</span>
-                              )}
-                            </div>
+                        {/* Left Side: Thumbnail/Photo Carousel */}
+                        <div className="w-full sm:w-64 h-40 rounded-xl overflow-hidden bg-slate-100 relative shrink-0">
+                          <img 
+                            src={prop.imageUrl || PROPERTY_IMAGES[prop.id]?.[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500'} 
+                            alt={prop.name}
+                            className="w-full h-full object-cover"
+                          />
+                          {/* Carousel dots indicator overlay */}
+                          <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center space-x-1 select-none">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-white/60"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-white/60"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-white/60"></span>
                           </div>
                         </div>
 
-                        {/* Base invoice display banner */}
-                        <div className="bg-slate-50/50 border-t border-slate-150 p-4 pt-3 mt-1 flex justify-between items-center text-[10.5px] font-mono leading-none">
-                          <span className="text-slate-500 font-bold text-[9.5px]">
-                            {(prop as any).distance !== undefined ? (
-                              <span className="text-emerald-700 bg-emerald-50 border border-emerald-150 px-2 py-0.5 rounded-md font-sans">📍 {(prop as any).distance} km away</span>
-                            ) : (
-                              <span className="text-slate-450">Nearest Metro &bull; 1.2km</span>
-                            )}
-                          </span>
-                          <strong className="text-indigo-655 text-indigo-700 font-black">
-                            {hasDiscount && minDiscountedPrice < minOriginalPrice ? (
-                              <span className="flex items-center gap-1">
-                                <span className="text-slate-455 line-through font-normal text-[9.5px]">₹{minOriginalPrice.toLocaleString('en-IN')}</span>
-                                <span>₹{minDiscountedPrice.toLocaleString('en-IN')}</span>
+                        {/* Right Side Details Layout */}
+                        <div className="flex-1 flex flex-col sm:flex-row justify-between gap-4">
+                          {/* Details Info */}
+                          <div className="flex-1 flex flex-col justify-between">
+                            <div className="space-y-1">
+                              {/* Property Type Badge */}
+                              <div className="flex items-center gap-2">
+                                <span className="bg-rose-50 text-rose-700 border border-rose-100/50 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider block w-fit">
+                                  {prop.type}
+                                </span>
+                                {(prop as any).status === 'Deleted' && (
+                                  <span className="bg-red-50 text-red-700 border border-red-200 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider block w-fit">
+                                    Permanently Closed / Terminated
+                                  </span>
+                                )}
+                              </div>
+                              
+                              {/* Title */}
+                              <h3 className="text-base font-black text-slate-950 leading-snug tracking-tight">{prop.name}</h3>
+                              
+                              {/* Ratings Score Row */}
+                              <div className="flex items-center space-x-1 text-xs font-bold text-slate-700">
+                                <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                                <span>10 Superb</span>
+                                <span className="text-slate-400 font-normal">(3)</span>
+                              </div>
+                              
+                              {/* Distance */}
+                              <p className="text-[11px] text-slate-400 font-bold">
+                                {((prop as any).distance !== undefined ? `${(prop as any).distance}km` : '2.7km')} from city centre
+                              </p>
+                            </div>
+
+                            {/* Circular Amenities Icons List */}
+                            <div className="flex items-center gap-1.5 mt-3 select-none">
+                              <span className="w-6.5 h-6.5 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-indigo-600" title="Wifi"><Wifi className="w-3.5 h-3.5" /></span>
+                              <span className="w-6.5 h-6.5 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-indigo-600" title="TV"><Tv className="w-3.5 h-3.5" /></span>
+                              <span className="w-6.5 h-6.5 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-indigo-600" title="AC"><Wind className="w-3.5 h-3.5" /></span>
+                              <span className="w-6.5 h-6.5 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-indigo-600" title="Laundry/Safe"><CheckCircle2 className="w-3.5 h-3.5" /></span>
+                            </div>
+                          </div>
+
+                          {/* Pricing details and availability */}
+                          <div className="w-full sm:w-44 border-t sm:border-t-0 sm:border-l border-slate-100 pt-3 sm:pt-0 sm:pl-4 flex flex-col justify-end items-start sm:items-end text-left sm:text-right select-none">
+                            <div className="space-y-1 w-full">
+                              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
+                                {prop.type === 'PG' ? 'Dorms From' : 'Rooms From'}
                               </span>
-                            ) : (
-                              <span>From ₹{minOriginalPrice.toLocaleString('en-IN')}</span>
-                            )}
-                            <span className="text-slate-400 font-normal">/{prop.type === 'PG' ? 'mo' : 'day'}</span>
-                          </strong>
+                              
+                              <div className="flex items-center justify-start sm:justify-end gap-1.5">
+                                {maxDiscount > 0 && (
+                                  <span className="bg-rose-50 text-rose-600 border border-rose-100 px-1 py-0.5 rounded text-[10px] font-black">
+                                    -{maxDiscount}%
+                                  </span>
+                                )}
+                                {hasDiscount && minDiscountedPrice < minOriginalPrice ? (
+                                  <>
+                                    <span className="text-slate-400 line-through text-[11px] font-bold">₹{minOriginalPrice}</span>
+                                    <span className="text-slate-900 font-black text-lg">₹{minDiscountedPrice}</span>
+                                  </>
+                                ) : (
+                                  <span className="text-slate-900 font-black text-lg">₹{minOriginalPrice}</span>
+                                )}
+                              </div>
+
+                              <span className="text-[9.5px] text-slate-400 font-bold block pt-1">No Privates Available</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     );
@@ -2289,6 +2255,11 @@ export default function CustomerApp({
                         <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-sm shrink-0">Verified</span>
                       </h3>
                       <p className="text-[10px] text-slate-400 font-mono mt-0.5">{currentUser.email}</p>
+                      {(currentUser as any).id && (
+                        <span className="inline-block mt-1 bg-orange-50 border border-orange-100 text-orange-700 text-[8.5px] font-mono font-black tracking-wider px-1.5 py-0.5 rounded-md">
+                          🔒 Customer ID: {(currentUser as any).id}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -2536,10 +2507,12 @@ export default function CustomerApp({
                 
                 {/* GALLERY SECTION (MEDIA GRID) */}
                 {(() => {
-                  const galleryImages = [
+                  const rawImages = [
+                    ...(selectedProperty.images || []),
                     selectedProperty.imageUrl,
                     ...(PROPERTY_IMAGES[selectedProperty.id] || [])
                   ].filter(Boolean);
+                  const galleryImages = Array.from(new Set(rawImages));
                   while (galleryImages.length < 4) {
                     galleryImages.push('https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600');
                   }
@@ -3024,34 +2997,45 @@ export default function CustomerApp({
                             </div>
                           </div>
 
-                          {/* Adults / Children row */}
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="space-y-1.5">
-                              <label className="block font-bold text-slate-700">Adult *</label>
-                              <select 
-                                value={bookingAdults} 
-                                onChange={(e) => setBookingAdults(e.target.value)}
-                                className="w-full text-xs border border-slate-200 bg-white p-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 font-medium"
-                              >
-                                <option value="1">1 Adult</option>
-                                <option value="2">2 Adults</option>
-                                <option value="3">3 Adults</option>
-                                <option value="4">4+ Adults</option>
-                              </select>
-                            </div>
-                            <div className="space-y-1.5">
-                              <label className="block font-bold text-slate-700">Children *</label>
-                              <select 
-                                value={bookingChildren} 
-                                onChange={(e) => setBookingChildren(e.target.value)}
-                                className="w-full text-xs border border-slate-200 bg-white p-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 font-medium"
-                              >
-                                <option value="0">0 Children</option>
-                                <option value="1">1 Child</option>
-                                <option value="2">2 Children</option>
-                                <option value="3">3+ Children</option>
-                              </select>
-                            </div>
+                          {/* Stay Duration scheme selection */}
+                          {(() => {
+                            const pDay = bookingRoom?.pricePerDay || bookingRoom?.price || 1200;
+                            const pWeek = bookingRoom?.priceWeekly || pDay * 7;
+                            const pMonth = bookingRoom?.pricePerMonth || pDay * 22;
+                            const pSeasonal = bookingRoom?.priceSeasonal || pMonth * 1.2;
+
+                            return (
+                              <div className="space-y-1.5">
+                                <label className="block font-bold text-slate-700">Stay Duration *</label>
+                                <select 
+                                  id="stay-duration"
+                                  value={stayDurationOption} 
+                                  onChange={(e) => setStayDurationOption(e.target.value)}
+                                  className="w-full text-xs border border-slate-200 bg-white p-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 font-medium font-sans"
+                                  required
+                                >
+                                  <option value="day">Day - ₹{pDay.toLocaleString('en-IN')}</option>
+                                  <option value="week">Week - ₹{pWeek.toLocaleString('en-IN')}</option>
+                                  <option value="month">Month - ₹{pMonth.toLocaleString('en-IN')}</option>
+                                  <option value="seasonal">Seasonal - ₹{pSeasonal.toLocaleString('en-IN')}</option>
+                                </select>
+                              </div>
+                            );
+                          })()}
+
+                          {/* Adult Input selection (Full width, children removed) */}
+                          <div className="space-y-1.5">
+                            <label className="block font-bold text-slate-700">Adult *</label>
+                            <select 
+                              value={bookingAdults} 
+                              onChange={(e) => setBookingAdults(e.target.value)}
+                              className="w-full text-xs border border-slate-200 bg-white p-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 font-medium"
+                            >
+                              <option value="1">1 Adult</option>
+                              <option value="2">2 Adults</option>
+                              <option value="3">3 Adults</option>
+                              <option value="4">4+ Adults</option>
+                            </select>
                           </div>
 
                           {/* Room Type dropdown select */}

@@ -27,7 +27,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import { Property, Room, Bed as BedType, Tenant, Booking, Invoice, HousekeepingTask, Staff } from '../types';
-import { getLocalStorageData, setLocalStorageData } from '../mockData';
+import { getLocalStorageData, setLocalStorageData, generateAdminId } from '../mockData';
 
 const INDIAN_STATES = [
   'Andhra Pradesh',
@@ -91,7 +91,7 @@ export default function AdminSignupWizard({ onClose, onSignupSuccess }: AdminSig
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1); // Step 5 is Success Page
   const [errorText, setErrorText] = useState('');
   const [isSkeletonLoading, setIsSkeletonLoading] = useState(false);
-  const [seedDemoData, setSeedDemoData] = useState<boolean>(true);
+  const [seedDemoData, setSeedDemoData] = useState<boolean>(false);
 
   // Step 1: Admin Details State
   const [fullName, setFullName] = useState('');
@@ -117,7 +117,7 @@ export default function AdminSignupWizard({ onClose, onSignupSuccess }: AdminSig
   const [area, setArea] = useState('');
   const [street, setStreet] = useState('');
   const [houseNo, setHouseNo] = useState('');
-  const [propertyImgUrl, setPropertyImgUrl] = useState('');
+  const [propertyImages, setPropertyImages] = useState<string[]>(['', '', '', '']);
   const [locationLink, setLocationLink] = useState('');
 
   // Step 3: Room Setup Configuration (Expandable Floors)
@@ -245,6 +245,12 @@ export default function AdminSignupWizard({ onClose, onSignupSuccess }: AdminSig
 
     if (!/^\d{6}$/.test(pincode)) {
       setErrorText('Pin code must contain exactly 6 digits.');
+      return;
+    }
+
+    const uploadedCount = propertyImages.filter(img => img !== '').length;
+    if (uploadedCount < 4) {
+      setErrorText('You must upload at least 4 property images before proceeding.');
       return;
     }
 
@@ -402,9 +408,10 @@ export default function AdminSignupWizard({ onClose, onSignupSuccess }: AdminSig
         adminEmail: emailAddress,
         adminPhone: mobileNumber,
         adminPassword: password,
-        adminId: `admin-${Date.now()}`,
+        adminId: generateAdminId(),
         classification: propertyType === 'PG' ? 'Paying Guest' : 'Hotel residency',
-        imageUrl: propertyImgUrl || 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600',
+        imageUrl: propertyImages[0] || 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&q=80&w=600',
+        images: propertyImages.filter(Boolean),
         state: stateSearch,
         district: district,
         pincode: pincode,
@@ -693,15 +700,15 @@ export default function AdminSignupWizard({ onClose, onSignupSuccess }: AdminSig
   };
 
   return (
-    <div id="adm-root-wrapper" className="fixed inset-0 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-0 sm:p-4 z-50 overflow-y-auto pb-safe">
+    <div id="adm-root-wrapper" className="fixed inset-0 bg-slate-50 z-50 flex flex-col overflow-y-auto pb-safe">
       
       {/* Container simulating high end responsive wrapper */}
-      <div id="adm-card-container" className="bg-slate-50 w-full max-w-2xl text-slate-900 sm:rounded-3xl shadow-2xl border border-slate-200/40 flex flex-col overflow-hidden max-h-screen sm:max-h-[92vh]">
+      <div id="adm-card-container" className="bg-slate-50 w-full flex-1 flex flex-col overflow-y-auto">
         
         {/* Core Header section */}
         <div className="bg-white px-5 py-4 border-b border-slate-200 flex justify-between items-center shrink-0 pr-safe pl-safe pt-safe">
           <div className="flex items-center space-x-3">
-            <div className="bg-indigo-600 p-2 rounded-xl shadow-xs">
+            <div className="bg-[#f25a24] p-2 rounded-xl shadow-xs">
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -725,46 +732,46 @@ export default function AdminSignupWizard({ onClose, onSignupSuccess }: AdminSig
             <div className="flex flex-col items-center flex-1">
               <div className="flex items-center w-full justify-center">
                 <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
-                  step >= 1 ? 'bg-indigo-600 text-white font-mono' : 'bg-slate-200 text-slate-650'
+                  step > 1 ? 'bg-emerald-600 text-white font-mono' : step === 1 ? 'bg-[#f25a24] text-white font-mono' : 'bg-slate-200 text-slate-650'
                 }`}>
                   {step > 1 ? '✓' : '1'}
                 </span>
-                <div className={`h-1.5 flex-1 mx-2 rounded-full ${step > 1 ? 'bg-indigo-600' : 'bg-slate-200'}`} />
+                <div className={`h-1.5 flex-1 mx-2 rounded-full ${step > 1 ? 'bg-emerald-600' : 'bg-slate-200'}`} />
               </div>
-              <span className={`mt-1 tracking-tight text-center ${step === 1 ? 'text-indigo-650' : 'text-slate-400'}`}>Admin Details</span>
+              <span className={`mt-1 tracking-tight text-center ${step === 1 ? 'text-[#f25a24] font-bold' : step > 1 ? 'text-emerald-700 font-bold' : 'text-slate-400'}`}>Admin Details</span>
             </div>
 
             <div className="flex flex-col items-center flex-1">
               <div className="flex items-center w-full justify-center">
                 <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
-                  step >= 2 ? 'bg-indigo-600 text-white font-mono' : 'bg-slate-200 text-slate-650'
+                  step > 2 ? 'bg-emerald-600 text-white font-mono' : step === 2 ? 'bg-[#f25a24] text-white font-mono' : 'bg-slate-200 text-slate-650'
                 }`}>
                   {step > 2 ? '✓' : '2'}
                 </span>
-                <div className={`h-1.5 flex-1 mx-2 rounded-full ${step > 2 ? 'bg-indigo-600' : 'bg-slate-200'}`} />
+                <div className={`h-1.5 flex-1 mx-2 rounded-full ${step > 2 ? 'bg-emerald-600' : 'bg-slate-200'}`} />
               </div>
-              <span className={`mt-1 tracking-tight text-center ${step === 2 ? 'text-indigo-650' : 'text-slate-400'}`}>Location</span>
+              <span className={`mt-1 tracking-tight text-center ${step === 2 ? 'text-[#f25a24] font-bold' : step > 2 ? 'text-emerald-700 font-bold' : 'text-slate-400'}`}>Location</span>
             </div>
 
             <div className="flex flex-col items-center flex-1">
               <div className="flex items-center w-full justify-center">
                 <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
-                  step >= 3 ? 'bg-indigo-600 text-white font-mono' : 'bg-slate-200 text-slate-650'
+                  step > 3 ? 'bg-emerald-600 text-white font-mono' : step === 3 ? 'bg-[#f25a24] text-white font-mono' : 'bg-slate-200 text-slate-650'
                 }`}>
                   {step > 3 ? '✓' : '3'}
                 </span>
-                <div className={`h-1.5 flex-1 mx-2 rounded-full ${step > 3 ? 'bg-indigo-600' : 'bg-slate-200'}`} />
+                <div className={`h-1.5 flex-1 mx-2 rounded-full ${step > 3 ? 'bg-emerald-600' : 'bg-slate-200'}`} />
               </div>
-              <span className={`mt-1 tracking-tight text-center ${step === 3 ? 'text-indigo-650' : 'text-slate-400'}`}>Rooms</span>
+              <span className={`mt-1 tracking-tight text-center ${step === 3 ? 'text-[#f25a24] font-bold' : step > 3 ? 'text-emerald-700 font-bold' : 'text-slate-400'}`}>Rooms</span>
             </div>
 
             <div className="flex flex-col items-center">
               <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${
-                step === 4 ? 'bg-indigo-600 text-white font-mono animate-pulse' : 'bg-slate-200 text-slate-650'
+                step === 4 ? 'bg-[#f25a24] text-white font-mono animate-pulse' : 'bg-slate-200 text-slate-650'
               }`}>
                 4
               </span>
-              <span className={`mt-1 tracking-tight ${step === 4 ? 'text-indigo-650' : 'text-slate-400'}`}>Review</span>
+              <span className={`mt-1 tracking-tight ${step === 4 ? 'text-[#f25a24] font-bold' : 'text-slate-400'}`}>Review</span>
             </div>
           </div>
         )}
@@ -1020,7 +1027,7 @@ export default function AdminSignupWizard({ onClose, onSignupSuccess }: AdminSig
                   <div className="pt-4 border-t border-slate-200 flex justify-end">
                     <button
                       type="submit"
-                      className="bg-indigo-650 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl text-xs transition inline-flex items-center space-x-1 font-display uppercase tracking-wider shadow-sm"
+                      className="curved-orange-border-btn py-2.5 px-6 text-xs transition inline-flex items-center space-x-1 uppercase tracking-wider shadow-sm"
                     >
                       <span>Next: Location Details</span>
                       <ChevronRight className="w-4 h-4" />
@@ -1200,48 +1207,73 @@ export default function AdminSignupWizard({ onClose, onSignupSuccess }: AdminSig
                       </div>
                     </div>
 
-                    {/* Property Image Uploader */}
-                    <div className="space-y-1 sm:col-span-2">
-                      <label className="text-[10px] uppercase font-mono font-bold text-slate-400 tracking-wider block">Property Photo Banner (Upload Image) *</label>
-                      <div className="flex flex-col sm:flex-row items-center gap-3 bg-white border border-slate-200 rounded-xl p-2.5 shadow-xs">
-                        {propertyImgUrl ? (
-                          <img 
-                            src={propertyImgUrl} 
-                            alt="Property Preview" 
-                            className="w-20 h-14 rounded-lg border object-cover bg-white shrink-0" 
-                          />
-                        ) : (
-                          <div className="w-20 h-14 rounded-lg border bg-slate-100 flex items-center justify-center shrink-0">
-                            <ImageIcon className="w-5 h-5 text-slate-400" />
-                          </div>
-                        )}
-                        <div className="flex-1 w-full text-center sm:text-left">
-                          <input 
-                            type="file" 
-                            accept="image/*"
-                            id="wizard-property-image-uploader"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onloadend = () => {
-                                  if (typeof reader.result === 'string') {
-                                    setPropertyImgUrl(reader.result);
-                                  }
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                            className="hidden"
-                          />
-                          <label 
-                            htmlFor="wizard-property-image-uploader"
-                            className="inline-block bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-extrabold py-1.5 px-3 rounded-lg text-[10px] cursor-pointer shadow-5xs text-center transition select-none uppercase tracking-wide"
+                    {/* Property Image Uploader (At least 4 required) */}
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <label className="text-[10px] uppercase font-mono font-bold text-slate-400 tracking-wider block">
+                        Property Photos (Minimum 4 images required) *
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {[0, 1, 2, 3].map((index) => (
+                          <div 
+                            key={index} 
+                            className="flex flex-col items-center bg-white border border-slate-200 rounded-2xl p-3 shadow-xs hover:shadow-md transition relative"
                           >
-                            Upload Photo
-                          </label>
-                          <span className="block text-[8px] text-slate-450 mt-1">JPEG, PNG formats supported. Max 2MB.</span>
-                        </div>
+                            {propertyImages[index] ? (
+                              <div className="relative w-full h-20 rounded-xl overflow-hidden border border-slate-100">
+                                <img 
+                                  src={propertyImages[index]} 
+                                  alt={`Preview ${index + 1}`} 
+                                  className="w-full h-full object-cover bg-white" 
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const nextImgs = [...propertyImages];
+                                    nextImgs[index] = '';
+                                    setPropertyImages(nextImgs);
+                                  }}
+                                  className="absolute top-1 right-1 bg-rose-650 hover:bg-rose-700 text-white rounded-full p-1 cursor-pointer transition z-10"
+                                  title="Remove image"
+                                >
+                                  <X className="w-2.5 h-2.5 text-white" />
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="w-full h-20 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 flex flex-col items-center justify-center text-slate-400">
+                                <ImageIcon className="w-5 h-5 text-slate-350 mb-1" />
+                                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wide">Empty Slot</span>
+                              </div>
+                            )}
+                            <div className="mt-2 w-full">
+                              <input 
+                                type="file" 
+                                accept="image/*"
+                                id={`wizard-property-image-uploader-${index}`}
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                      if (typeof reader.result === 'string') {
+                                        const nextImgs = [...propertyImages];
+                                        nextImgs[index] = reader.result;
+                                        setPropertyImages(nextImgs);
+                                      }
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }
+                                }}
+                                className="hidden"
+                              />
+                              <label 
+                                htmlFor={`wizard-property-image-uploader-${index}`}
+                                className="block w-full bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-700 font-extrabold py-1 rounded-lg text-[9px] cursor-pointer text-center transition select-none uppercase tracking-wider"
+                              >
+                                {propertyImages[index] ? 'Change' : `Upload ${index + 1}`}
+                              </label>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
 
@@ -1275,7 +1307,7 @@ export default function AdminSignupWizard({ onClose, onSignupSuccess }: AdminSig
 
                     <button
                       type="submit"
-                      className="bg-indigo-650 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-xl text-xs transition inline-flex items-center space-x-1 uppercase tracking-wider font-display shadow-xs"
+                      className="curved-orange-border-btn py-2.5 px-5 text-xs transition inline-flex items-center space-x-1 uppercase tracking-wider shadow-xs"
                     >
                       <span>Rooms Configuration</span>
                       <ChevronRight className="w-4 h-4" />
@@ -1299,7 +1331,7 @@ export default function AdminSignupWizard({ onClose, onSignupSuccess }: AdminSig
                     <button
                       type="button"
                       onClick={handleAddFloorLevel}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-3.5 rounded-full text-[10px] transition uppercase tracking-wider shadow-xs"
+                      className="curved-orange-border-btn py-1.5 px-3.5 text-[10px] transition uppercase tracking-wider shadow-xs"
                     >
                       + Floor
                     </button>
@@ -1436,7 +1468,7 @@ export default function AdminSignupWizard({ onClose, onSignupSuccess }: AdminSig
                     <button
                       type="button"
                       onClick={handleNextStep3}
-                      className="bg-indigo-650 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl text-xs transition inline-flex items-center space-x-1 uppercase tracking-wider font-display shadow-xs animate-pulse"
+                      className="curved-orange-border-btn py-2.5 px-6 text-xs transition inline-flex items-center space-x-1 uppercase tracking-wider shadow-xs"
                     >
                       <span>Final Summary Review</span>
                       <ChevronRight className="w-4 h-4" />
@@ -1509,10 +1541,19 @@ export default function AdminSignupWizard({ onClose, onSignupSuccess }: AdminSig
                           </a>
                         </div>
                       )}
-                      {propertyImgUrl && (
+                      {propertyImages.some(Boolean) && (
                         <div className="col-span-2">
-                          <span className="text-[10px] text-slate-410 uppercase font-bold block">Property Banner Image</span>
-                          <img src={propertyImgUrl} alt="Banner Preview" className="mt-1.5 w-full h-24 object-cover border border-slate-200 rounded-xl" />
+                          <span className="text-[10px] text-slate-410 uppercase font-bold block mb-1">Uploaded Property Images ({propertyImages.filter(Boolean).length}/4)</span>
+                          <div className="grid grid-cols-4 gap-2">
+                            {propertyImages.filter(Boolean).map((img, idx) => (
+                              <img 
+                                key={idx} 
+                                src={img} 
+                                alt={`Uploaded Preview ${idx + 1}`} 
+                                className="w-full h-16 object-cover border border-slate-200 rounded-lg shadow-2xs" 
+                              />
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1571,7 +1612,7 @@ export default function AdminSignupWizard({ onClose, onSignupSuccess }: AdminSig
                     <button
                       type="button"
                       onClick={handleFinalizeAndCreate}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 px-6 rounded-xl text-xs transition inline-flex items-center space-x-1.5 uppercase font-display shadow-md active:scale-98 animate-pulse"
+                      className="curved-orange-border-btn py-2.5 px-6 text-xs transition inline-flex items-center space-x-1.5 uppercase font-display shadow-md active:scale-98"
                     >
                       <Check className="w-4 h-4" />
                       <span>Deploy Setup Profile</span>
@@ -1861,7 +1902,7 @@ export default function AdminSignupWizard({ onClose, onSignupSuccess }: AdminSig
               <button 
                 type="button"
                 onClick={handleSaveModalRoom}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-5 rounded-xl text-xs font-extrabold transition shadow-sm active:scale-98 cursor-pointer"
+                className="curved-orange-border-btn py-2 px-5 text-xs transition shadow-sm active:scale-98 cursor-pointer"
               >
                 Save Room Asset
               </button>

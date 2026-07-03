@@ -234,7 +234,7 @@ export default function App() {
     <IonApp>
       <IonPage>
         <IonContent 
-          scrollY={activePortal === null} 
+          scrollY={activePortal !== 'customer'} 
           style={activePortal === 'superadmin' && !superAdminSession ? { '--background': 'transparent' } as React.CSSProperties : undefined}
         >
           <div className={`min-h-screen ${
@@ -349,6 +349,10 @@ export default function App() {
                     }
 
                     if (matchedProp) {
+                      if (matchedProp.status === 'Deleted') {
+                        setAdminLoginError('This administrator account has been permanently terminated. Please contact Stay Cool authority.');
+                        return;
+                      }
                       const deactivatedPropIds = getLocalStorageData<string[]>('deactivated_properties', []);
                       const isSuspended = deactivatedPropIds.includes(matchedProp.id) || matchedProp.status === 'Suspended';
                       if (isSuspended) {

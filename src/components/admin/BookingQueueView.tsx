@@ -500,7 +500,7 @@ export default function BookingQueueView({
                             <div className="flex items-center gap-1.5 text-[10px] text-slate-450 font-mono">
                               <span>{bk.customerEmail} | {bk.customerPhone}</span>
                               <a 
-                                href={`tel:${bk.customerPhone.replace(/\s+/g, '')}`}
+                                href={`tel:${(bk.customerPhone || '').replace(/\s+/g, '')}`}
                                 className="p-0.5 hover:bg-slate-200 border border-slate-200 rounded transition inline-flex items-center justify-center shrink-0"
                                 title={`Call ${bk.customerName}`}
                               >
@@ -590,7 +590,7 @@ export default function BookingQueueView({
                           <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono">
                             <span>{t.phone}</span>
                             <a 
-                              href={`tel:${t.phone.replace(/\s+/g, '')}`}
+                              href={`tel:${(t.phone || '').replace(/\s+/g, '')}`}
                               className="p-0.5 hover:bg-indigo-50 border border-indigo-100/50 rounded transition inline-flex items-center justify-center shrink-0"
                               title={`Call ${t.name}`}
                             >
@@ -617,7 +617,7 @@ export default function BookingQueueView({
                             <div className="flex items-center gap-1.5 text-slate-450 font-mono">
                               <span>{t.emergencyContactPhone}</span>
                               <a 
-                                href={`tel:${t.emergencyContactPhone.replace(/\s+/g, '')}`}
+                                href={`tel:${(t.emergencyContactPhone || '').replace(/\s+/g, '')}`}
                                 className="p-0.5 hover:bg-rose-50 border border-rose-100/50 rounded transition inline-flex items-center justify-center shrink-0"
                                 title={`Call Parent ${t.emergencyContactName}`}
                               >

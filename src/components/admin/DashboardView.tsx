@@ -122,7 +122,7 @@ export default function DashboardView({
   const handleSendReminderWhatsAppSubmit = () => {
     if (!whatsAppReminderInvoice) return;
     const resident = tenants.find(t => t.id === whatsAppReminderInvoice.tenantId);
-    const phone = resident ? resident.phone : '';
+    const phone = (resident && resident.phone) ? resident.phone : '';
     const cleanedPhone = phone.replace(/[^0-9]/g, '');
     const url = `https://api.whatsapp.com/send?phone=${cleanedPhone}&text=${encodeURIComponent(whatsAppReminderText)}`;
     mobileOpen(url);
@@ -424,6 +424,17 @@ export default function DashboardView({
     onAddAuditLog(`Approved booking ${bk.id} and checked in ${bk.customerName} (Room ${availableRm.roomNumber})`, 'Tenants');
   };
 
+  const handleRejectBookingDirect = (bk: Booking) => {
+    if (!window.confirm(`Are you sure you want to reject the booking request from ${bk.customerName}?`)) return;
+
+    const updatedBookings = bookings.map(b => b.id === bk.id ? { ...b, status: 'Rejected' as const } : b);
+
+    setBookings(updatedBookings);
+    localStorage.setItem('hotel_pg_bookings', JSON.stringify(updatedBookings));
+
+    onAddAuditLog(`Rejected booking request ${bk.id} from ${bk.customerName}`, 'Bookings');
+  };
+
   return (
     <div className="space-y-4 animate-fadeIn text-slate-800 text-xs font-sans">
       
@@ -722,10 +733,16 @@ export default function DashboardView({
                   </div>
 
                   {/* Actions footer block */}
-                  <div className="flex justify-end pt-1 bg-slate-200/30 -mx-5 -mb-5 p-3 rounded-b-2xl border-t border-slate-200/55">
+                  <div className="flex justify-end gap-2 pt-1 bg-slate-200/30 -mx-5 -mb-5 p-3 rounded-b-2xl border-t border-slate-200/55">
+                    <button 
+                      onClick={() => handleRejectBookingDirect(bk)}
+                      className="bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 font-extrabold p-2 px-4 rounded-xl text-[10px] uppercase tracking-wider transition inline-flex items-center space-x-1.5 shadow-xs"
+                    >
+                      <span>Reject Request</span>
+                    </button>
                     <button 
                       onClick={() => handleApproveBookingDirect(bk)}
-                      className="bg-indigo-650 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold p-2 px-5 rounded-xl text-[10px] uppercase tracking-wider transition inline-flex items-center space-x-1.5 shadow-xs"
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold p-2 px-5 rounded-xl text-[10px] uppercase tracking-wider transition inline-flex items-center space-x-1.5 shadow-xs"
                     >
                       <span>Approve Room & Welcome Guest</span>
                       <ArrowRight className="w-3.5 h-3.5" />

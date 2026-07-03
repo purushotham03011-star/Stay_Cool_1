@@ -100,11 +100,14 @@ def create_property(prop: schemas.PropertyCreate, db: Session = Depends(get_db))
         db_prop.admin_email = prop.admin_email
         db_prop.admin_phone = prop.admin_phone
         db_prop.admin_password = prop.admin_password
+        db_prop.admin_id = prop.admin_id
         db_prop.location_link = prop.location_link
         db_prop.image_url = prop.image_url
         db_prop.amenities = prop.amenities
         db_prop.rules = prop.rules
         db_prop.locks = prop.locks
+        db_prop.images = prop.images
+        db_prop.status = prop.status
     else:
         db_prop = models.Property(
             id=prop.id,
@@ -118,11 +121,14 @@ def create_property(prop: schemas.PropertyCreate, db: Session = Depends(get_db))
             admin_email=prop.admin_email,
             admin_phone=prop.admin_phone,
             admin_password=prop.admin_password,
+            admin_id=prop.admin_id,
             location_link=prop.location_link,
             image_url=prop.image_url,
             amenities=prop.amenities,
             rules=prop.rules,
-            locks=prop.locks
+            locks=prop.locks,
+            images=prop.images,
+            status=prop.status
         )
 
         db.add(db_prop)

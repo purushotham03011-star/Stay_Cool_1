@@ -782,17 +782,22 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
   const handleDeleteProperty = (id: string, name: string) => {
 
-    if (!confirm(`Are you sure you want to completely delete "${name}"? This action cannot be undone.`)) return;
+    if (!window.confirm(`Are you sure you want to permanently terminate property "${name}" and its administrator account? This action will mark it as deleted.`)) return;
 
-    const updated = properties.filter(p => p.id !== id);
+    const updated = properties.map(p => {
+      if (p.id === id) {
+        return { ...p, status: 'Deleted' as any };
+      }
+      return p;
+    });
 
     setProperties(updated);
 
     setLocalStorageData('properties', updated);
 
-    onAddAuditLog(`Completely deleted property asset "${name}"`, 'SuperAdmin');
+    onAddAuditLog(`Permanently terminated property and admin for: ${name} (ID: ${id})`, 'SuperAdmin');
 
-    alert(`Property "${name}" deleted.`);
+    alert(`Property "${name}" terminated.`);
 
   };
 
@@ -961,6 +966,10 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
     onAddAuditLog(`Toggled lock on field "${fieldKey}" for property "${propertyName}"`, 'SuperAdmin');
 
   };
+
+
+
+
 
 
 
@@ -1146,15 +1155,23 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
   useEffect(() => {
 
-    syncAllFromBackend().then(() => {
-
+    const reloadSuperAdminData = () => {
       setOrganizations(getLocalStorageData<Organization[]>('organizations', []));
-
       setProperties(getLocalStorageData<Property[]>('properties', []));
-
       setTenants(getLocalStorageData<Tenant[]>('tenants', []));
+    };
 
-    });
+    syncAllFromBackend().then(reloadSuperAdminData);
+
+    // Reactively reload whenever any portal writes new data
+    const handleDataUpdate = (e: Event) => {
+      const { key } = (e as CustomEvent).detail || {};
+      if (['properties', 'organizations', 'tenants', 'deactivated_properties'].includes(key)) {
+        reloadSuperAdminData();
+      }
+    };
+    window.addEventListener('stayhub-data-updated', handleDataUpdate);
+    return () => window.removeEventListener('stayhub-data-updated', handleDataUpdate);
 
   }, []);
 
@@ -1338,15 +1355,15 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
       (p.city && p.city.toLowerCase().includes(query));
 
-    return matchesFilter && matchesSearch;
+    return matchesFilter && matchesSearch && p.status !== 'Deleted';
 
   });
 
 
 
-  const hotelCount = properties.filter(p => p.type === 'Hotel').length;
+  const hotelCount = properties.filter(p => p.type === 'Hotel' && p.status !== 'Deleted').length;
 
-  const pgCount = properties.filter(p => p.type === 'PG').length;
+  const pgCount = properties.filter(p => p.type === 'PG' && p.status !== 'Deleted').length;
 
   const suspendedCount = deactivatedPropIds.length;
 
@@ -1668,11 +1685,11 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
         return (
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 border-b border-slate-800 last:border-0 text-[11px] gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between py-2 border-b border-slate-150 last:border-0 text-[11px] gap-2">
 
             <div className="flex items-center gap-1.5 shrink-0 min-w-[140px]">
 
-              <span className="text-slate-400 font-bold uppercase tracking-wider">{label}</span>
+              <span className="text-slate-450 font-bold uppercase tracking-wider">{label}</span>
 
               <button
 
@@ -1680,7 +1697,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                 onClick={() => handleToggleFieldLock(fieldKey, selectedPropObj.id, selectedPropObj.name)}
 
-                className={`p-1 transition rounded hover:bg-slate-850 ${isLocked ? "text-rose-500" : "text-slate-500 hover:text-slate-350"}`}
+                className={`p-1 transition rounded hover:bg-slate-100 ${isLocked ? "text-rose-500" : "text-slate-400 hover:text-slate-600"}`}
 
                 title={isLocked ? "Field locked for Admin" : "Field unlocked for Admin"}
 
@@ -1706,7 +1723,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                     onChange={e => setFieldInputValue(e.target.value)}
 
-                    className="bg-[#0b0f19] border border-[#1f293d] rounded px-2 py-1 text-xs w-full font-semibold text-white outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs w-full font-semibold text-slate-800 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
 
                     autoFocus
 
@@ -1720,7 +1737,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                       onClick={() => setFieldShowPasswords({ ...fieldShowPasswords, [fieldKey]: !showPassword })}
 
-                      className="text-slate-400 p-1 hover:text-white"
+                      className="text-slate-400 p-1 hover:text-slate-600"
 
                     >
 
@@ -1750,7 +1767,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                     onClick={() => setEditingField(null)}
 
-                    className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-2 py-1 rounded text-[10px] transition active:scale-95"
+                    className="bg-slate-200 hover:bg-slate-350 text-slate-700 font-bold px-2 py-1 rounded text-[10px] transition active:scale-95"
 
                   >
 
@@ -1764,7 +1781,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                 <div className="flex items-center justify-between w-full gap-2">
 
-                  <span className="text-slate-200 font-black truncate max-w-[280px]">
+                  <span className="text-slate-800 font-extrabold truncate max-w-[280px]">
 
                     {isPassword && !showPassword ? "••••••••" : value || "N/A"}
 
@@ -1780,7 +1797,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                         onClick={() => setFieldShowPasswords({ ...fieldShowPasswords, [fieldKey]: !showPassword })}
 
-                        className="text-slate-500 p-1 hover:text-white"
+                        className="text-slate-400 p-1 hover:text-slate-650"
 
                       >
 
@@ -1796,7 +1813,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                       onClick={() => handleStartFieldEdit(fieldKey, value || "")}
 
-                      className="text-slate-500 hover:text-indigo-400 p-1 rounded hover:bg-slate-800"
+                      className="text-slate-400 hover:text-indigo-650 p-1 rounded hover:bg-slate-100"
 
                     >
 
@@ -1822,13 +1839,13 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
       return (
 
-        <div id="hq-property-console" className="min-h-screen bg-[#090d16] text-slate-100 p-6 flex flex-col space-y-6 w-full animate-fadeIn">
+        <div id="hq-property-console" className="min-h-screen bg-slate-50 text-slate-900 p-6 flex flex-col space-y-6 w-full animate-fadeIn">
 
           
 
           {/* Header Section */}
 
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#1f293d] pb-4 gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200 pb-4 gap-4">
 
             <div>
 
@@ -1934,9 +1951,9 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
               {/* Card 1: Admin Profile Credentials */}
 
-              <div className="bg-[#111827] border border-[#1f293d] p-5 rounded-2xl space-y-4 shadow-lg">
+              <div className="bg-white border border-slate-200 p-5 rounded-2xl space-y-4 shadow-sm">
 
-                <h4 className="font-black text-xs text-indigo-400 uppercase tracking-widest border-b border-[#1f293d] pb-2 flex items-center gap-1.5">
+                <h4 className="font-black text-xs text-indigo-650 uppercase tracking-widest border-b border-slate-150 pb-2 flex items-center gap-1.5">
 
                   <span>👤 ADMIN PROFILE CREDENTIALS</span>
 
@@ -1960,9 +1977,9 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
               {/* Card 2: Property Specs & Address */}
 
-              <div className="bg-[#111827] border border-[#1f293d] p-5 rounded-2xl space-y-4 shadow-lg">
+              <div className="bg-white border border-slate-200 p-5 rounded-2xl space-y-4 shadow-sm">
 
-                <h4 className="font-black text-xs text-indigo-400 uppercase tracking-widest border-b border-[#1f293d] pb-2 flex items-center gap-1.5">
+                <h4 className="font-black text-xs text-indigo-650 uppercase tracking-widest border-b border-slate-150 pb-2 flex items-center gap-1.5">
 
                   <span>🏠 PROPERTY SPECS & ADDRESS</span>
 
@@ -2008,9 +2025,9 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
               {/* Card 1: Floor-by-Floor Inventory Rates */}
 
-              <div className="bg-[#111827] border border-[#1f293d] p-5 rounded-2xl space-y-4 shadow-lg">
+              <div className="bg-white border border-slate-200 p-5 rounded-2xl space-y-4 shadow-sm">
 
-                <h4 className="font-black text-xs text-indigo-400 uppercase tracking-widest border-b border-[#1f293d] pb-2 flex justify-between items-center">
+                <h4 className="font-black text-xs text-indigo-650 uppercase tracking-widest border-b border-slate-150 pb-2 flex justify-between items-center">
 
                   <span>🗄️ FLOOR-BY-FLOOR INVENTORY RATES</span>
 
@@ -2028,9 +2045,9 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                     {sortedFloors.map(flNum => (
 
-                      <div key={flNum} className="space-y-2 border border-[#1f293d] bg-[#131b2e]/50 p-4 rounded-xl">
+                      <div key={flNum} className="space-y-2 border border-slate-150 bg-slate-50/30 p-4 rounded-xl">
 
-                        <span className="text-[10px] font-black text-white bg-slate-800 px-2 py-0.5 rounded font-mono">Floor {flNum}</span>
+                        <span className="text-[10px] font-black text-slate-700 bg-slate-200 px-2 py-0.5 rounded font-mono">Floor {flNum}</span>
 
                         <div className="space-y-2 pt-1.5">
 
@@ -2040,13 +2057,13 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                             return (
 
-                              <div key={rm.id} className="border border-[#1f293d] bg-[#111827] p-3 rounded-xl flex flex-col sm:flex-row justify-between sm:items-center text-[10.5px] gap-3 hover:border-slate-700 transition">
+                              <div key={rm.id} className="border border-slate-150 bg-white p-3 rounded-xl flex flex-col sm:flex-row justify-between sm:items-center text-[10.5px] gap-3 hover:border-indigo-400 transition">
 
                                 <div className="shrink-0">
 
-                                  <strong className="text-white font-mono text-xs block">Room {rm.roomNumber}</strong>
+                                  <strong className="text-slate-800 font-mono text-xs block">Room {rm.roomNumber}</strong>
 
-                                  <span className="text-[9px] text-slate-400 uppercase font-bold block">{rm.type} ({rm.occupancyStatus || rm.status || 'Available'})</span>
+                                  <span className="text-[9px] text-slate-500 uppercase font-bold block">{rm.type} ({rm.occupancyStatus || rm.status || 'Available'})</span>
 
                                 </div>
 
@@ -2066,7 +2083,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                                         onChange={e => setEditDailyPrice(Number(e.target.value) || 0)}
 
-                                        className="w-full bg-[#0b0f19] border border-[#1f293d] text-white p-1 font-mono font-bold rounded"
+                                        className="w-full bg-slate-50 border border-slate-200 text-slate-800 p-1 font-mono font-bold rounded"
 
                                       />
 
@@ -2084,7 +2101,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                                         onChange={e => setEditWeeklyPrice(Number(e.target.value) || 0)}
 
-                                        className="w-full bg-[#0b0f19] border border-[#1f293d] text-white p-1 font-mono font-bold rounded"
+                                        className="w-full bg-slate-50 border border-slate-200 text-slate-800 p-1 font-mono font-bold rounded"
 
                                       />
 
@@ -2102,7 +2119,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                                         onChange={e => setEditMonthlyPrice(Number(e.target.value) || 0)}
 
-                                        className="w-full bg-[#0b0f19] border border-[#1f293d] text-white p-1 font-mono font-bold rounded"
+                                        className="w-full bg-slate-50 border border-slate-200 text-slate-800 p-1 font-mono font-bold rounded"
 
                                       />
 
@@ -2120,7 +2137,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                                         onChange={e => setEditSeasonalPrice(Number(e.target.value) || 0)}
 
-                                        className="w-full bg-[#0b0f19] border border-[#1f293d] text-white p-1 font-mono font-bold rounded"
+                                        className="w-full bg-slate-50 border border-slate-200 text-slate-800 p-1 font-mono font-bold rounded"
 
                                       />
 
@@ -2170,7 +2187,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                                         <span className="text-[8px] text-slate-450 block uppercase font-sans">Day</span>
 
-                                        <span className="font-bold text-slate-200">₹{rm.pricePerDay || rm.price || 0}</span>
+                                        <span className="font-bold text-slate-800">₹{rm.pricePerDay || rm.price || 0}</span>
 
                                       </div>
 
@@ -2178,7 +2195,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                                         <span className="text-[8px] text-slate-455 block uppercase font-sans">Week</span>
 
-                                        <span className="font-bold text-slate-200">₹{rm.priceWeekly || (rm.pricePerDay || rm.price || 0) * 7}</span>
+                                        <span className="font-bold text-slate-800">₹{rm.priceWeekly || (rm.pricePerDay || rm.price || 0) * 7}</span>
 
                                       </div>
 
@@ -2186,7 +2203,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                                         <span className="text-[8px] text-slate-450 block uppercase font-sans">Month</span>
 
-                                        <span className="font-bold text-slate-200">₹{rm.pricePerMonth || (rm.pricePerDay || rm.price || 0) * 22}</span>
+                                        <span className="font-bold text-slate-800">₹{rm.pricePerMonth || (rm.pricePerDay || rm.price || 0) * 22}</span>
 
                                       </div>
 
@@ -2194,7 +2211,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                                         <span className="text-[8px] text-slate-450 block uppercase font-sans">Season</span>
 
-                                        <span className="font-bold text-slate-200">₹{rm.priceSeasonal || (rm.pricePerMonth || 0) * 1.2 || (rm.pricePerDay || rm.price || 0) * 26}</span>
+                                        <span className="font-bold text-slate-800">₹{rm.priceSeasonal || (rm.pricePerMonth || 0) * 1.2 || (rm.pricePerDay || rm.price || 0) * 26}</span>
 
                                       </div>
 
@@ -2206,7 +2223,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                                       onClick={() => handleStartRoomRatesEdit(rm)}
 
-                                      className="text-slate-500 hover:text-indigo-400 p-1.5 border border-[#1f293d] hover:border-indigo-500/30 rounded-lg flex items-center justify-center shrink-0 transition"
+                                      className="text-slate-400 hover:text-indigo-650 p-1.5 border border-slate-200 hover:border-indigo-500/30 rounded-lg flex items-center justify-center shrink-0 transition"
 
                                       title="Edit room rates"
 
@@ -2242,9 +2259,9 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
               {/* Card 2: Resident Tenants Log */}
 
-              <div className="bg-[#111827] border border-[#1f293d] p-5 rounded-2xl space-y-4 shadow-lg">
+              <div className="bg-white border border-slate-200 p-5 rounded-2xl space-y-4 shadow-sm">
 
-                <h4 className="font-black text-xs text-indigo-400 uppercase tracking-widest border-b border-[#1f293d] pb-2 flex justify-between">
+                <h4 className="font-black text-xs text-indigo-650 uppercase tracking-widest border-b border-slate-150 pb-2 flex justify-between">
 
                   <span>RESIDENT TENANTS LOG</span>
 
@@ -2262,13 +2279,13 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                     {filteredTenants.map(t => (
 
-                      <div key={t.id} className="p-3 bg-[#131b2e]/50 border border-[#1f293d] rounded-xl flex justify-between items-center text-[10.5px]">
+                      <div key={t.id} className="p-3 bg-slate-50/50 border border-slate-150 rounded-xl flex justify-between items-center text-[10.5px]">
 
                         <div>
 
-                          <strong className="text-white block">{t.name}</strong>
+                          <strong className="text-slate-800 block">{t.name}</strong>
 
-                          <span className="text-[9.5px] text-slate-400 block font-mono">Room Number » Room {t.roomNumber}</span>
+                          <span className="text-[9.5px] text-slate-500 block font-mono">Room Number » Room {t.roomNumber}</span>
 
                         </div>
 
@@ -3485,8 +3502,13 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
                             <span className="bg-indigo-50 text-indigo-705 border border-indigo-100 rounded text-[6px] sm:text-[7.5px] px-0.5 sm:px-1 py-0.5 font-black uppercase w-max">
                               {prop.type === 'Hotel' ? '🏨 Hotel' : '🏘️ PG'}
                             </span>
-                            <div className="flex items-center space-x-1">
-                              <span className="text-[6px] sm:text-[9px] font-mono font-bold text-slate-400">ID: {prop.id}</span>
+                            <div className="flex items-center gap-2">
+                              <div className="flex flex-col items-end">
+                                <span className="text-[6px] sm:text-[9px] font-mono font-bold text-slate-400">Prop ID: {prop.id}</span>
+                                {prop.adminId && (
+                                  <span className="text-[6px] sm:text-[8px] font-mono font-black text-orange-650">Admin ID: {prop.adminId}</span>
+                                )}
+                              </div>
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -3508,10 +3530,20 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
                                   setEditingPropertyId(prop.id);
                                   setShowPropertyModal(true);
                                 }}
-                                className="p-1 hover:bg-slate-100 rounded-md text-slate-500 hover:text-indigo-600 transition flex items-center justify-center cursor-pointer border border-slate-200/50"
+                                className="p-1 hover:bg-slate-100 rounded-md text-slate-500 hover:text-indigo-650 transition flex items-center justify-center cursor-pointer border border-slate-200/50"
                                 title="Edit Property"
                               >
                                 <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteProperty(prop.id, prop.name);
+                                }}
+                                className="p-1 hover:bg-rose-50 rounded-md text-slate-400 hover:text-rose-600 transition flex items-center justify-center cursor-pointer border border-slate-200/50"
+                                title="Permanently Delete Property & Admin"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </div>
@@ -3531,9 +3563,9 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
                         </div>
 
                         <div className="flex items-center gap-0.5 sm:gap-1">
-                          <span className={`w-1 h-1 sm:w-2 sm:h-2 rounded-full ${isDeactivated ? 'bg-rose-500' : 'bg-emerald-500'}`} />
-                          <span className="text-[6.5px] sm:text-[8.5px] font-black uppercase text-slate-400">
-                            {isDeactivated ? 'DEACTIVE' : 'ACTIVE'}
+                          <span className={`w-1 h-1 sm:w-2 sm:h-2 rounded-full ${prop.status === 'Deleted' ? 'bg-red-600' : isDeactivated ? 'bg-rose-500' : 'bg-emerald-500'}`} />
+                          <span className={`text-[6.5px] sm:text-[8.5px] font-black uppercase ${prop.status === 'Deleted' ? 'text-red-600 font-extrabold' : 'text-slate-400'}`}>
+                            {prop.status === 'Deleted' ? 'DELETED' : isDeactivated ? 'DEACTIVE' : 'ACTIVE'}
                           </span>
                         </div>
                       </div>
@@ -3714,9 +3746,8 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
                       <div className="space-y-0.5 sm:space-y-1">
 
                         <h4 className="font-extrabold text-slate-900 text-[10px] sm:text-xs truncate">{tenant.name}</h4>
-
                         <div className="text-[8px] sm:text-[10px] text-slate-500 font-mono font-bold truncate">{tenant.phone || 'No Mobile'}</div>
-
+                        <div className="text-[7.5px] sm:text-[9px] text-orange-650 font-mono font-black truncate">Cust ID: {tenant.id}</div>
                       </div>
 
 
