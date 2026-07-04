@@ -244,7 +244,7 @@ export default function LandingPromo({
                 <button 
                   className="btn"
                   onClick={() => {
-                    onSelectPortal('customer');
+                    onSelectPortal('customer', 'login');
                   }}
                 >
                   <span className="frame">
@@ -344,7 +344,7 @@ export default function LandingPromo({
               <div className="win-card-content">
                 <h3>Daily Stays</h3>
                 <p>Spontaneous plans? Choose a better way to travel with our affordable nightly hotel rates for all your short weekend trips.</p>
-                <button className="view-project-btn cursor-pointer font-bold" onClick={() => onSelectPortal('customer')}>Go to Customer Sign In</button>
+                <button className="view-project-btn cursor-pointer font-bold" onClick={() => onSelectPortal('customer', 'login')}>Go to Customer Sign In</button>
               </div>
             </div>
 
@@ -356,7 +356,7 @@ export default function LandingPromo({
               <div className="win-card-content">
                 <h3>Weekly Stays</h3>
                 <p>On an extended business trip? Get better discounts and comfortable amenities when you choose our weekly accommodation plans.</p>
-                <button className="view-project-btn cursor-pointer font-bold" onClick={() => onSelectPortal('customer')}>Go to Customer Sign In</button>
+                <button className="view-project-btn cursor-pointer font-bold" onClick={() => onSelectPortal('customer', 'login')}>Go to Customer Sign In</button>
               </div>
             </div>
 
@@ -368,7 +368,7 @@ export default function LandingPromo({
               <div className="win-card-content">
                 <h3>Monthly Stays</h3>
                 <p>Settling down for a while? Lock in an affordable PG stay with transparent monthly billing and seamless digital rent management.</p>
-                <button className="view-project-btn cursor-pointer font-bold" onClick={() => onSelectPortal('customer')}>Go to Customer Sign In</button>
+                <button className="view-project-btn cursor-pointer font-bold" onClick={() => onSelectPortal('customer', 'login')}>Go to Customer Sign In</button>
               </div>
             </div>
           </div>
@@ -471,7 +471,7 @@ export default function LandingPromo({
           <div className="grid-three-cols" style={{ width: '100%', gap: '24px' }}>
             {/* Card 1: Customer Portal */}
             <div 
-              onClick={() => onSelectPortal('customer')}
+              onClick={() => onSelectPortal('customer', 'login')}
               className="win-card cursor-pointer transform hover:-translate-y-1 transition duration-300 scroll-reveal"
               style={{ border: '3px solid var(--dark-brown)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderRadius: '32px' }}
             >
