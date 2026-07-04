@@ -416,6 +416,32 @@ export async function syncAllFromBackend() {
       }
     }
 
+    const resBookings = await fetch('http://localhost:8000/api/bookings');
+    let dbBookings: any[] = [];
+    if (resBookings.ok) {
+      dbBookings = await resBookings.json();
+      if (dbBookings.length > 0) {
+        const mapped = dbBookings.map((b: any) => ({
+          id: b.id,
+          propertyId: b.property_id,
+          propertyName: b.property?.name || 'StayHub Property',
+          roomId: b.room_id,
+          roomNumber: b.room?.room_number || b.room?.roomNumber || '101',
+          bedId: b.bed_id,
+          bedNumber: b.bed?.bed_number || 'A',
+          customerName: b.tenant?.name || b.customer_name || 'Guest',
+          customerEmail: b.tenant?.email || b.customer_email || b.tenant_id,
+          customerPhone: b.tenant?.phone || b.customer_phone || '+91 99999 88888',
+          checkInDate: b.check_in_date,
+          checkOutDate: b.check_out_date,
+          status: b.status === 'Active' ? 'Confirmed' : b.status,
+          totalAmount: b.total_amount,
+          requestedRoomType: b.room?.type || 'Double'
+        }));
+        localStorage.setItem('hotel_pg_bookings', JSON.stringify(mapped));
+      }
+    }
+
     const resRooms = await fetch('http://localhost:8000/api/rooms');
     if (resRooms.ok) {
       const rooms = await resRooms.json();
@@ -434,13 +460,17 @@ export async function syncAllFromBackend() {
         }));
         localStorage.setItem('hotel_pg_rooms', JSON.stringify(mappedRooms));
         
-        const allBeds = rooms.flatMap((r: any) => (r.beds || []).map((b: any) => ({
-          id: b.id,
-          roomId: b.room_id,
-          roomNumber: r.room_number,
-          bedNumber: b.bed_number,
-          isOccupied: b.status === 'Occupied'
-        })));
+        const allBeds = rooms.flatMap((r: any) => (r.beds || []).map((b: any) => {
+          const activeBooking = dbBookings.find((bk: any) => bk.bed_id === b.id && bk.status === 'Active');
+          return {
+            id: b.id,
+            roomId: b.room_id,
+            roomNumber: r.room_number,
+            bedNumber: b.bed_number,
+            isOccupied: b.status === 'Occupied' || !!activeBooking,
+            occupantTenantId: activeBooking ? activeBooking.tenant_id : undefined
+          };
+        }));
         if (allBeds.length > 0) {
           localStorage.setItem('hotel_pg_beds', JSON.stringify(allBeds));
         }
@@ -454,6 +484,8 @@ export async function syncAllFromBackend() {
         const existingLocalTenants = JSON.parse(localStorage.getItem('hotel_pg_tenants') || '[]');
         const mapped = data.map((t: any) => {
           const localMatch = existingLocalTenants.find((lt: any) => lt.id === t.id) || SEED_TENANTS.find((st: any) => st.id === t.id) || {};
+          const activeBooking = dbBookings.find((b: any) => b.tenant_id === t.id && b.status === 'Active');
+          
           return {
             ...localMatch,
             id: t.id,
@@ -464,46 +496,22 @@ export async function syncAllFromBackend() {
             emergencyContactPhone: t.emergency_contact || localMatch.emergencyContactPhone || '',
             docUrl: t.id_proof_url || localMatch.docUrl || '',
             docType: localMatch.docType || 'Aadhaar',
-            status: localMatch.status || 'Active',
+            status: activeBooking ? 'Active' : (localMatch.status || 'Active'),
             password: t.password || localMatch.password || 'customer123',
             lastLogin: t.last_login || localMatch.lastLogin || '',
             lastLogout: t.last_logout || localMatch.lastLogout || '',
             gender: localMatch.gender || 'Male',
             bloodGroup: localMatch.bloodGroup || 'O+',
-            roomNumber: localMatch.roomNumber || '',
-            roomId: localMatch.roomId || '',
-            bedNumber: localMatch.bedNumber || '',
-            bedId: localMatch.bedId || '',
-            propertyId: localMatch.propertyId || 'prop-1',
-            propertyName: localMatch.propertyName || 'Silicon Valley Elite PG',
-            joinedDate: localMatch.joinedDate || '2025-02-10'
+            roomNumber: activeBooking ? (activeBooking.room?.room_number || '') : (localMatch.roomNumber || ''),
+            roomId: activeBooking ? (activeBooking.room_id || '') : (localMatch.roomId || ''),
+            bedNumber: activeBooking ? (activeBooking.bed?.bed_number || '') : (localMatch.bedNumber || ''),
+            bedId: activeBooking ? (activeBooking.bed_id || '') : (localMatch.bedId || ''),
+            propertyId: activeBooking ? (activeBooking.property_id || '') : (localMatch.propertyId || 'prop-1'),
+            propertyName: activeBooking ? (activeBooking.property?.name || '') : (localMatch.propertyName || 'Silicon Valley Elite PG'),
+            joinedDate: activeBooking ? activeBooking.check_in_date : (localMatch.joinedDate || '2025-02-10')
           };
         });
         localStorage.setItem('hotel_pg_tenants', JSON.stringify(mapped));
-      }
-    }
-
-    const resBookings = await fetch('http://localhost:8000/api/bookings');
-    if (resBookings.ok) {
-      const data = await resBookings.json();
-      if (data.length > 0) {
-        const mapped = data.map((b: any) => ({
-          id: b.id,
-          propertyId: b.property_id,
-          propertyName: b.property?.name || 'StayHub Property',
-          roomId: b.room_id,
-          roomNumber: b.room?.room_number || b.room?.roomNumber || '101',
-          bedId: b.bed_id,
-          customerName: b.tenant?.name || 'Aarav Mehta',
-          customerEmail: b.tenant?.email || b.tenant_id,
-          customerPhone: b.tenant?.phone || '+91 99999 88888',
-          checkInDate: b.check_in_date,
-          checkOutDate: b.check_out_date,
-          status: b.status === 'Active' ? 'Confirmed' : b.status,
-          totalAmount: b.total_amount,
-          requestedRoomType: b.room?.type || 'Double'
-        }));
-        localStorage.setItem('hotel_pg_bookings', JSON.stringify(mapped));
       }
     }
 

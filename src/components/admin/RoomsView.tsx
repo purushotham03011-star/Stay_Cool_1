@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { syncAllFromBackend } from '../../mockData';
 import { 
   Property, 
   Room, 
@@ -56,6 +57,44 @@ export default function RoomsView({
   const propertyHousekeeping = housekeeping.filter(h => h.propertyId === selectedPropertyId);
 
   const [selectedViewTenantBillId, setSelectedViewTenantBillId] = useState<string | null>(null);
+
+  const handleRemoveOccupant = async (bedId: string) => {
+    const targetBed = beds.find(b => b.id === bedId);
+    if (!targetBed || !targetBed.isOccupied) return;
+
+    const targetBooking = bookings?.find(b => b.bedId === bedId && (b.status === 'Active' || b.status === 'Confirmed'));
+    if (!targetBooking) {
+      alert("No active booking database reference found for this occupant.");
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to checkout/remove this occupant and release Bed Position ${targetBed.bedNumber}?`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:8000/api/bookings/${targetBooking.id}/checkout`, {
+        method: 'POST'
+      });
+      if (res.ok) {
+        await syncAllFromBackend();
+        
+        const localRooms = JSON.parse(localStorage.getItem('hotel_pg_rooms') || '[]');
+        const localBeds = JSON.parse(localStorage.getItem('hotel_pg_beds') || '[]');
+        const localTenants = JSON.parse(localStorage.getItem('hotel_pg_tenants') || '[]');
+        
+        syncRoomsAndBeds(localRooms, localBeds);
+        syncTenants(localTenants);
+
+        onAddAuditLog(`Removed/checked-out tenant from Bed ${targetBed.bedNumber} in Room Unit ${targetBed.roomNumber}`, 'Rooms');
+      } else {
+        alert("Failed to process checkout on backend server.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error connecting to server.");
+    }
+  };
 
   // Layout selection: 'grid' | 'table'
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
@@ -867,28 +906,60 @@ export default function RoomsView({
                 <div className="space-y-2.5">
                   {roomBeds.map(bd => {
                     const resident = tenants.find(t => t.id === bd.occupantTenantId && t.propertyId === selectedPropertyId && t.status === 'Active');
+                    const activeBooking = resident && bookings ? bookings.find(b => (b.tenantId === resident.id || b.customerEmail?.toLowerCase() === resident.email?.toLowerCase()) && (b.status === 'Confirmed' || b.status === 'Active')) : null;
                     return (
                       <div 
                         key={bd.id} 
-                        className={`p-3 border rounded-xl flex items-center justify-between ${
+                        className={`p-3 border rounded-xl flex flex-col gap-2 ${
                           bd.isOccupied ? 'bg-indigo-50/20 border-indigo-100' : 'bg-emerald-50/10 border-emerald-100 border-dashed'
                         }`}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2.5 rounded-lg ${bd.isOccupied ? 'bg-indigo-100 text-indigo-650' : 'bg-emerald-100 text-emerald-650'}`}>
-                            <BedIcon className="w-4 h-4" />
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2.5 rounded-lg ${bd.isOccupied ? 'bg-indigo-100 text-indigo-650' : 'bg-emerald-100 text-emerald-650'}`}>
+                              <BedIcon className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <span className="font-bold text-slate-900 font-mono text-[11px]">Bed Position {bd.bedNumber}</span>
+                              <span className="text-[10px] block text-slate-500 font-medium">
+                                {bd.isOccupied && resident ? `Tenant occupant: ${resident.name}` : 'Vacant Accommodation'}
+                              </span>
+                            </div>
                           </div>
-                          <div>
-                            <span className="font-bold text-slate-900 font-mono text-[11px]">Bed Position {bd.bedNumber}</span>
-                            <span className="text-[10px] block text-slate-500 font-medium">
-                              {bd.isOccupied && resident ? `Tenant occupant: ${resident.name}` : 'Vacant Accommodation'}
-                            </span>
+                          <div className="flex items-center gap-2">
+                            {bd.isOccupied && resident ? (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveOccupant(bd.id);
+                                  }}
+                                  className="bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-[8px] font-black px-2 py-1 rounded uppercase transition active:scale-95 cursor-pointer"
+                                >
+                                  Remove
+                                </button>
+                                <span className="bg-indigo-50 border border-indigo-200 text-indigo-700 text-[8px] font-bold px-1.5 py-0.5 rounded uppercase">Occupied</span>
+                              </>
+                            ) : (
+                              <span className="bg-emerald-50 text-emerald-700 text-[8px] font-bold px-1.5 py-0.5 rounded uppercase">Vacant</span>
+                            )}
                           </div>
                         </div>
-                        {bd.isOccupied && resident ? (
-                          <span className="bg-indigo-50 border border-indigo-200 text-indigo-700 text-[8px] font-bold px-1.5 py-0.5 rounded uppercase">Occupied</span>
-                        ) : (
-                          <span className="bg-emerald-50 text-emerald-700 text-[8px] font-bold px-1.5 py-0.5 rounded uppercase">Vacant</span>
+
+                        {bd.isOccupied && resident && (
+                          <div className="bg-slate-50 border border-slate-100 rounded-lg p-2 text-[9.5px] text-slate-600 flex flex-col gap-0.5">
+                            <div className="flex justify-between">
+                              <span className="font-semibold text-slate-500">Occupant Email:</span>
+                              <span className="font-mono text-slate-800">{resident.email}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="font-semibold text-slate-500">Check-in Duration:</span>
+                              <span className="font-mono text-slate-800">
+                                {activeBooking ? `${activeBooking.checkInDate} to ${activeBooking.checkOutDate}` : `${resident.joinedDate || '2026-06-01'} to 2026-11-30`}
+                              </span>
+                            </div>
+                          </div>
                         )}
                       </div>
                     );

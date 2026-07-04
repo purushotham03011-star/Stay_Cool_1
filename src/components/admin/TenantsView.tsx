@@ -56,7 +56,10 @@ export default function TenantsView({
   selectedPropertyId,
   onAddAuditLog
 }: TenantsViewProps) {
-  const propertyTenants = tenants.filter(t => t.propertyId === selectedPropertyId);
+  const propertyTenants = tenants.filter(t => 
+    t.propertyId === selectedPropertyId || 
+    bookings.some(b => b.propertyId === selectedPropertyId && (b.tenantId === t.id || b.customerEmail?.toLowerCase() === t.email?.toLowerCase()))
+  );
   const propertyInvoices = invoices.filter(i => tenants.some(t => t.id === i.tenantId && t.propertyId === selectedPropertyId));
 
   // Search filter options
