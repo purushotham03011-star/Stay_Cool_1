@@ -413,6 +413,20 @@ export default function CustomerApp({
   const [userComment, setUserComment] = useState<string>('');
   const [reviewStatus, setReviewStatus] = useState<string>('');
 
+  const getTaxRates = () => {
+    let cgstRate = 9;
+    let sgstRate = 9;
+    try {
+      const savedTax = localStorage.getItem('hotel_pg_settings_tax');
+      if (savedTax) {
+        const parsed = JSON.parse(savedTax);
+        cgstRate = typeof parsed.cgstRate === 'number' ? parsed.cgstRate : 9;
+        sgstRate = typeof parsed.sgstRate === 'number' ? parsed.sgstRate : 9;
+      }
+    } catch (e) {}
+    return { cgstRate, sgstRate, totalRate: cgstRate + sgstRate };
+  };
+
   // Booking form fields
   const [checkInDate, setCheckInDate] = useState('2026-06-01');
   const [checkOutDate, setCheckOutDate] = useState('2026-06-15');
@@ -885,7 +899,20 @@ export default function CustomerApp({
     }
 
     const priceAfterReduct = Math.max(0, baseCombine - discount);
-    const tax = Math.round(priceAfterReduct * 0.18);
+    
+    let cgstRate = 9;
+    let sgstRate = 9;
+    try {
+      const savedTax = localStorage.getItem('hotel_pg_settings_tax');
+      if (savedTax) {
+        const parsed = JSON.parse(savedTax);
+        cgstRate = typeof parsed.cgstRate === 'number' ? parsed.cgstRate : 9;
+        sgstRate = typeof parsed.sgstRate === 'number' ? parsed.sgstRate : 9;
+      }
+    } catch (e) {}
+
+    const totalTaxRate = (cgstRate + sgstRate) / 100;
+    const tax = Math.round(priceAfterReduct * totalTaxRate);
     const final = priceAfterReduct + tax;
 
     return { 
@@ -2239,8 +2266,8 @@ export default function CustomerApp({
                         const diffTime = Math.max(0, end.getTime() - start.getTime());
                         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
                         
-                        const total = bk.totalAmount || 0;
-                        const baseOriginal = Math.round(total / 1.18);
+                        const taxRates = getTaxRates();
+                        const baseOriginal = Math.round(total / (1 + taxRates.totalRate / 100));
                         const calculatedDayCost = Math.round(baseOriginal / diffDays);
                         const gst = total - baseOriginal;
 
@@ -2256,7 +2283,7 @@ export default function CustomerApp({
                               <span className="text-slate-800 font-semibold font-mono">₹{calculatedDayCost.toLocaleString('en-IN')} * {diffDays} = ₹{baseOriginal.toLocaleString('en-IN')}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-slate-550">GST Tax (18%):</span>
+                              <span className="text-slate-550">GST Tax ({taxRates.totalRate}%):</span>
                               <span className="text-slate-700 font-mono">₹{gst.toLocaleString('en-IN')}</span>
                             </div>
                             <div className="flex justify-between border-t border-slate-200/85 pt-1 font-bold text-slate-905">
@@ -3199,7 +3226,7 @@ export default function CustomerApp({
                                   </div>
                                 )}
                                 <div className="flex justify-between text-slate-500 font-medium">
-                                  <span>GST Tax (18%):</span>
+                                  <span>GST Tax ({getTaxRates().totalRate}%):</span>
                                   <span className="font-mono text-slate-700 font-bold">₹{costBreakdown.tax.toLocaleString('en-IN')}</span>
                                 </div>
                                 <div className="border-t border-slate-200/80 pt-2 flex justify-between font-black text-slate-900 text-sm">
@@ -3436,7 +3463,7 @@ export default function CustomerApp({
                     </div>
                   )}
                   <div className="flex justify-between text-[9px] text-slate-400">
-                    <span>Government GST tax rate (18%):</span>
+                    <span>Government GST tax rate ({getTaxRates().totalRate}%):</span>
                     <span>₹{costBreakdown.tax.toLocaleString('en-IN')}</span>
                   </div>
                   <hr className="border-slate-200 my-1" />
@@ -3851,8 +3878,8 @@ export default function CustomerApp({
                   const diffTime = Math.max(0, end.getTime() - start.getTime());
                   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
                   
-                  const total = selectedViewBooking.totalAmount || 0;
-                  const baseOriginal = Math.round(total / 1.18);
+                  const taxRates = getTaxRates();
+                  const baseOriginal = Math.round(total / (1 + taxRates.totalRate / 100));
                   const calculatedDayCost = Math.round(baseOriginal / diffDays);
                   const gst = total - baseOriginal;
 
@@ -3864,7 +3891,7 @@ export default function CustomerApp({
                         <span className="text-slate-800 font-semibold font-mono">₹{calculatedDayCost.toLocaleString('en-IN')} * {diffDays} = ₹{baseOriginal.toLocaleString('en-IN')}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-550">GST Tax (18%):</span>
+                        <span className="text-slate-550">GST Tax ({taxRates.totalRate}%):</span>
                         <span className="text-slate-705 font-mono">₹{gst.toLocaleString('en-IN')}</span>
                       </div>
                       <div className="flex justify-between border-t pt-1.5 font-bold text-slate-900 text-xs">

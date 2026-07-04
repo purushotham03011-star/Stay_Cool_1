@@ -271,7 +271,7 @@ export default function RoomsView({
   };
 
   // Apply Add / Edit Room
-  const handleSaveRoomForm = (e: React.FormEvent) => {
+  const handleSaveRoomForm = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formRoomNum) return;
 
@@ -310,11 +310,51 @@ export default function RoomsView({
         });
       }
 
-      const updatedRooms = [...rooms, newRoom];
-      const updatedBeds = [...beds, ...newBeds];
-      syncRoomsAndBeds(updatedRooms, updatedBeds);
+      try {
+        const resRoom = await fetch('http://localhost:8000/api/rooms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: newRoom.id,
+            property_id: selectedPropertyId,
+            room_number: newRoom.roomNumber,
+            floor: newRoom.floor,
+            category: newRoom.type,
+            sharing_type: newRoom.type,
+            price_daily: newRoom.pricePerDay,
+            price_weekly: newRoom.priceWeekly,
+            price_seasonal: newRoom.priceSeasonal,
+            price_monthly: newRoom.pricePerMonth,
+            status: 'Available'
+          })
+        });
 
-      onAddAuditLog(`Registered new Room Unit ${newRoom.roomNumber} with co-living capacity mapping`, 'Rooms');
+        if (resRoom.ok) {
+          for (const b of newBeds) {
+            await fetch('http://localhost:8000/api/beds', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: b.id,
+                room_id: b.roomId,
+                bed_number: b.bedNumber,
+                status: 'Available'
+              })
+            });
+          }
+          await syncAllFromBackend();
+          
+          const localRooms = JSON.parse(localStorage.getItem('hotel_pg_rooms') || '[]');
+          const localBeds = JSON.parse(localStorage.getItem('hotel_pg_beds') || '[]');
+          syncRoomsAndBeds(localRooms, localBeds);
+          onAddAuditLog(`Registered new Room Unit ${newRoom.roomNumber} with co-living capacity mapping`, 'Rooms');
+        } else {
+          setRoomAlertMessage('Failed to save housing unit to backend database.');
+        }
+      } catch (err) {
+        console.error(err);
+        setRoomAlertMessage('Connection error. Failed to save housing unit to backend.');
+      }
     } else if (viewState === 'edit') {
       // Find room in global states
       const updatedRooms = rooms.map(r => {

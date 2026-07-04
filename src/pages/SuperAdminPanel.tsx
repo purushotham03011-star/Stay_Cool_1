@@ -45,7 +45,9 @@ import {
   MessageSquare,
   Send,
   Sun,
-  Moon
+  Moon,
+  Percent,
+  Save
 } from 'lucide-react';
 
 
@@ -398,6 +400,40 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
     alert('Corporate Details updated successfully into browser cache ledger.');
 
+  };
+
+  const [taxSettings, setTaxSettings] = useState(() => {
+    try {
+      const saved = localStorage.getItem('hotel_pg_settings_tax');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          gstin: parsed.gstin || '29AAACH1234F1Z5',
+          cgstRate: typeof parsed.cgstRate === 'number' ? parsed.cgstRate : 9,
+          sgstRate: typeof parsed.sgstRate === 'number' ? parsed.sgstRate : 9,
+          branchCode: parsed.branchCode || 'BLR-HSR-02',
+          branchManager: parsed.branchManager || 'Priya Narayanan',
+          supportHotline: parsed.supportHotline || '+91 97700 45678'
+        };
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return {
+      gstin: '29AAACH1234F1Z5',
+      cgstRate: 9,
+      sgstRate: 9,
+      branchCode: 'BLR-HSR-02',
+      branchManager: 'Priya Narayanan',
+      supportHotline: '+91 97700 45678'
+    };
+  });
+
+  const handleSaveTaxSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    localStorage.setItem('hotel_pg_settings_tax', JSON.stringify(taxSettings));
+    onAddAuditLog('Updated Taxation and Active Branch settings', 'SuperAdmin');
+    alert('Taxation policies and active branch settings updated successfully.');
   };
 
 
@@ -1387,13 +1423,13 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
       return (
 
-        <div className="bg-[#0f111a] text-[#8c9ab8] min-h-screen p-6 font-sans flex flex-col justify-between">
+        <div className={`min-h-screen p-6 font-sans flex flex-col justify-between transition-colors duration-200 ${isDarkMode ? 'bg-[#0f111a] text-[#8c9ab8]' : 'bg-slate-50 text-slate-700'}`}>
 
-          <div className="max-w-4xl mx-auto w-full bg-slate-900/50 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-2xl relative overflow-hidden">
+          <div className={`max-w-4xl mx-auto w-full border rounded-3xl p-6 space-y-6 shadow-2xl relative overflow-hidden transition-colors duration-200 ${isDarkMode ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200'}`}>
 
             {/* Background elements */}
 
-            <div className="absolute -right-10 -top-10 opacity-5 pointer-events-none">
+            <div className={`absolute -right-10 -top-10 opacity-5 pointer-events-none ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
 
               <UserCheck className="w-56 h-56" />
 
@@ -1403,13 +1439,17 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
             {/* Header / Back Action */}
 
-            <div className="flex justify-between items-center pb-4 border-b border-slate-800">
+            <div className={`flex justify-between items-center pb-4 border-b ${isDarkMode ? 'border-slate-800' : 'border-slate-200'}`}>
 
               <div 
 
                 onClick={() => setSelectedCustomerDetailId(null)}
 
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl transition text-[10px] font-extrabold cursor-pointer no-uiverse"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition text-[10px] font-extrabold cursor-pointer no-uiverse ${
+                  isDarkMode 
+                    ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700' 
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200'
+                }`}
 
               >
 
@@ -1421,9 +1461,9 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
               <div>
 
-                <span className="text-[9px] uppercase font-bold tracking-widest text-indigo-400 block font-mono text-right">stayhub enterprise</span>
+                <span className="text-[9px] uppercase font-bold tracking-widest text-indigo-500 block font-mono text-right">stayhub enterprise</span>
 
-                <h2 className="text-sm font-black uppercase text-white tracking-wider mt-0.5">Customer Profile details</h2>
+                <h2 className={`text-sm font-black uppercase tracking-wider mt-0.5 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>Customer Profile details</h2>
 
               </div>
 
@@ -1441,7 +1481,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                 {selectedTenant.docUrl ? (
 
-                  <div className="w-full aspect-square rounded-2xl overflow-hidden bg-slate-800 border border-slate-700">
+                  <div className={`w-full aspect-square rounded-2xl overflow-hidden border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-200'}`}>
 
                     <img 
 
@@ -1457,7 +1497,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                 ) : (
 
-                  <div className="w-full aspect-square rounded-2xl flex flex-col items-center justify-center bg-slate-950 border border-dashed border-slate-800 text-slate-500">
+                  <div className={`w-full aspect-square rounded-2xl flex flex-col items-center justify-center border border-dashed text-slate-500 ${isDarkMode ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-300'}`}>
 
                     <Image className="w-8 h-8 mb-2" />
 
@@ -1469,13 +1509,13 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                 
 
-                <div className="p-4 bg-slate-950/40 border border-slate-800 rounded-2xl space-y-3">
+                <div className={`p-4 border rounded-2xl space-y-3 ${isDarkMode ? 'bg-slate-950/40 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
 
                   <div className="flex justify-between items-center text-[11px]">
 
                     <span className="text-slate-450 uppercase font-extrabold tracking-wider font-mono">Current Status:</span>
 
-                    <span className={`px-2 py-0.5 rounded-full font-bold text-[9px] uppercase ${isStaying ? 'bg-emerald-500/10 text-emerald-455 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>
+                    <span className={`px-2 py-0.5 rounded-full font-bold text-[9px] uppercase ${isStaying ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-600 border border-rose-500/20'}`}>
 
                       {isStaying ? 'Staying' : 'Not Staying'}
 
@@ -1485,21 +1525,21 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                   {isStaying && (
 
-                    <div className="space-y-1.5 pt-2 border-t border-slate-850">
+                    <div className={`space-y-1.5 pt-2 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-200'}`}>
 
                       <div>
 
-                        <span className="text-[9px] text-slate-500 uppercase block font-mono">Stayed Property:</span>
+                        <span className="text-[9px] text-slate-550 uppercase block font-mono">Stayed Property:</span>
 
-                        <span className="text-xs font-black text-white">{selectedTenant.propertyName}</span>
+                        <span className={`text-xs font-black ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{selectedTenant.propertyName}</span>
 
                       </div>
 
                       <div>
 
-                        <span className="text-[9px] text-slate-500 block font-mono">Room/Bed:</span>
+                        <span className="text-[9px] text-slate-550 block font-mono">Room/Bed:</span>
 
-                        <span className="text-xs font-bold text-slate-300">Room {selectedTenant.roomNumber || 'N/A'}, Bed {selectedTenant.bedNumber || 'N/A'}</span>
+                        <span className={`text-xs font-bold ${isDarkMode ? 'text-slate-305' : 'text-slate-700'}`}>Room {selectedTenant.roomNumber || 'N/A'}, Bed {selectedTenant.bedNumber || 'N/A'}</span>
 
                       </div>
 
@@ -1517,57 +1557,57 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
               <div className="md:col-span-2 space-y-4">
 
-                <div className="bg-slate-950/40 border border-slate-850 p-5 rounded-2xl space-y-4">
+                <div className={`p-5 border rounded-2xl space-y-4 ${isDarkMode ? 'bg-slate-955/40 border-slate-800' : 'bg-slate-50/50 border-slate-200'}`}>
 
-                  <h3 className="text-xs font-black uppercase text-white tracking-wider border-b border-slate-850 pb-2">Identification & Contact Info</h3>
+                  <h3 className={`text-xs font-black uppercase tracking-wider border-b pb-2 ${isDarkMode ? 'text-white border-slate-800' : 'text-slate-900 border-slate-200'}`}>Identification & Contact Info</h3>
 
                   <div className="grid grid-cols-2 gap-4 text-xs">
 
                     <div>
 
-                      <span className="text-[9px] text-slate-500 block uppercase font-mono">Full Name:</span>
+                      <span className="text-[9px] text-slate-550 block uppercase font-mono">Full Name:</span>
 
-                      <span className="font-extrabold text-white text-sm">{selectedTenant.name}</span>
-
-                    </div>
-
-                    <div>
-
-                      <span className="text-[9px] text-slate-500 block uppercase font-mono">Mobile Phone:</span>
-
-                      <span className="font-extrabold text-white text-sm">{selectedTenant.phone || 'N/A'}</span>
+                      <span className={`font-extrabold text-sm ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{selectedTenant.name}</span>
 
                     </div>
 
                     <div>
 
-                      <span className="text-[9px] text-slate-500 block uppercase font-mono">Email Address:</span>
+                      <span className="text-[9px] text-slate-555 block uppercase font-mono">Mobile Phone:</span>
 
-                      <span className="font-bold text-slate-300">{selectedTenant.email}</span>
-
-                    </div>
-
-                    <div>
-
-                      <span className="text-[9px] text-slate-500 block uppercase font-mono">Emergency Name:</span>
-
-                      <span className="font-bold text-slate-300">{selectedTenant.emergencyContactName || 'N/A'}</span>
+                      <span className={`font-extrabold text-sm ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{selectedTenant.phone || 'N/A'}</span>
 
                     </div>
 
                     <div>
 
-                      <span className="text-[9px] text-slate-500 block uppercase font-mono">Emergency Phone:</span>
+                      <span className="text-[9px] text-slate-555 block uppercase font-mono">Email Address:</span>
 
-                      <span className="font-bold text-slate-300">{selectedTenant.emergencyContactPhone || 'N/A'}</span>
+                      <span className={`font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-750'}`}>{selectedTenant.email}</span>
 
                     </div>
 
                     <div>
 
-                      <span className="text-[9px] text-slate-500 block uppercase font-mono">Joined Date:</span>
+                      <span className="text-[9px] text-slate-555 block uppercase font-mono">Emergency Name:</span>
 
-                      <span className="font-mono text-slate-400">{selectedTenant.joinedDate || 'N/A'}</span>
+                      <span className={`font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-750'}`}>{selectedTenant.emergencyContactName || 'N/A'}</span>
+
+                    </div>
+
+                    <div>
+
+                      <span className="text-[9px] text-slate-555 block uppercase font-mono">Emergency Phone:</span>
+
+                      <span className={`font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-750'}`}>{selectedTenant.emergencyContactPhone || 'N/A'}</span>
+
+                    </div>
+
+                    <div>
+
+                      <span className="text-[9px] text-slate-555 block uppercase font-mono">Joined Date:</span>
+
+                      <span className={`font-mono ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>{selectedTenant.joinedDate || 'N/A'}</span>
 
                     </div>
 
@@ -1579,13 +1619,13 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                 {/* Session login history */}
 
-                <div className="bg-slate-950/40 border border-slate-850 p-5 rounded-2xl space-y-4">
+                <div className={`p-5 border rounded-2xl space-y-4 ${isDarkMode ? 'bg-slate-955/40 border-slate-800' : 'bg-slate-50/50 border-slate-200'}`}>
 
-                  <h3 className="text-xs font-black uppercase text-white tracking-wider border-b border-slate-850 pb-2">Session Login/Logout Records</h3>
+                  <h3 className={`text-xs font-black uppercase tracking-wider border-b pb-2 ${isDarkMode ? 'text-white border-slate-800' : 'text-slate-900 border-slate-200'}`}>Session Login/Logout Records</h3>
 
                   <div className="space-y-2">
 
-                    <div className="flex items-center justify-between p-2.5 bg-slate-900 border border-slate-850 rounded-xl">
+                    <div className={`flex items-center justify-between p-2.5 border rounded-xl ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
 
                       <div className="flex items-center space-x-2">
 
@@ -1595,11 +1635,11 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                       </div>
 
-                      <span className="text-[11px] font-mono text-emerald-400 font-bold">{selectedTenant.lastLogin || 'No active login session'}</span>
+                      <span className="text-[11px] font-mono text-emerald-500 font-bold">{selectedTenant.lastLogin || 'No active login session'}</span>
 
                     </div>
 
-                    <div className="flex items-center justify-between p-2.5 bg-slate-900 border border-slate-850 rounded-xl">
+                    <div className={`flex items-center justify-between p-2.5 border rounded-xl ${isDarkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
 
                       <div className="flex items-center space-x-2">
 
@@ -1609,7 +1649,7 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                       </div>
 
-                      <span className="text-[11px] font-mono text-rose-400 font-bold">{selectedTenant.lastLogout || 'No active sign-out session'}</span>
+                      <span className="text-[11px] font-mono text-rose-500 font-bold">{selectedTenant.lastLogout || 'No active sign-out session'}</span>
 
                     </div>
 
@@ -2740,7 +2780,9 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
               {/* Company Details */}
 
-              <div className="bg-white border rounded-3xl p-5 shadow-sm space-y-4">
+              {/* Taxation & Active Branch Settings */}
+
+              <div className="bg-white border rounded-3xl p-5 shadow-sm space-y-4 text-slate-800">
 
                 <div className="border-b pb-2 flex justify-between items-center">
 
@@ -2748,95 +2790,35 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                     <h3 className="font-extrabold text-sm text-slate-900 font-display flex items-center gap-1.5">
 
-                      <Briefcase className="w-4 h-4 text-indigo-500" />
+                      <Percent className="w-4 h-4 text-indigo-500" />
 
-                      <span>Company Registry Details</span>
+                      <span>Taxation and Active Branch Settings</span>
 
                     </h3>
 
-                    <p className="text-[10px] text-slate-405">Manage business identification, registration keys, & billing addresses</p>
-
                   </div>
-
-                  <button 
-
-                    onClick={() => setShowOrgModal(true)}
-
-                    className="bg-indigo-50 border border-indigo-200 text-indigo-700 hover:bg-indigo-100 font-bold px-2 py-1 rounded-lg text-[10px] flex items-center space-x-1"
-
-                  >
-
-                    <Plus className="w-3.5 h-3.5" />
-
-                    <span>New Org</span>
-
-                  </button>
 
                 </div>
 
 
 
-                <form onSubmit={handleSaveCompanyDetails} className="space-y-3 pt-1">
+                <form onSubmit={handleSaveTaxSettings} className="space-y-4 pt-1">
 
-                  <div className="grid grid-cols-2 gap-2">
-
-                    <div>
-
-                      <label className="block text-slate-500 text-[10px] mb-1 uppercase font-bold tracking-wider">Incorporation Date</label>
-
-                      <input 
-
-                        type="date"
-
-                        value={editDetailsForm.incorporationDate}
-
-                        onChange={(e) => setEditDetailsForm({ ...editDetailsForm, incorporationDate: e.target.value })}
-
-                        className="w-full border rounded-lg p-2 bg-slate-50/50 hover:bg-slate-50 focus:bg-white"
-
-                      />
-
-                    </div>
+                  <div className="grid grid-cols-3 gap-3">
 
                     <div>
 
-                      <label className="block text-slate-500 text-[10px] mb-1 uppercase font-bold tracking-wider">Headquarters Phone</label>
+                      <label className="block text-slate-500 text-[10px] mb-1 uppercase font-bold tracking-wider">GSTIN Register</label>
 
                       <input 
 
                         type="text"
 
-                        value={editDetailsForm.phone}
+                        required
 
-                        onChange={(e) => setEditDetailsForm({ ...editDetailsForm, phone: e.target.value })}
+                        value={taxSettings.gstin}
 
-                        placeholder="+91 80 4000 0000"
-
-                        className="w-full border rounded-lg p-2 bg-slate-50/20 focus:bg-white font-mono"
-
-                      />
-
-                    </div>
-
-                  </div>
-
-
-
-                  <div className="grid grid-cols-2 gap-2">
-
-                    <div>
-
-                      <label className="block text-slate-500 text-[10px] mb-1 uppercase font-bold tracking-wider">GSTIN Number</label>
-
-                      <input 
-
-                        type="text"
-
-                        value={editDetailsForm.gstin}
-
-                        onChange={(e) => setEditDetailsForm({ ...editDetailsForm, gstin: e.target.value })}
-
-                        placeholder="GSTIN Code"
+                        onChange={(e) => setTaxSettings({ ...taxSettings, gstin: e.target.value })}
 
                         className="w-full border rounded-lg p-2 bg-slate-50/20 focus:bg-white font-mono uppercase font-black"
 
@@ -2846,17 +2828,103 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
                     <div>
 
-                      <label className="block text-slate-500 text-[10px] mb-1 uppercase font-bold tracking-wider">Corporate Reg Number</label>
+                      <label className="block text-slate-500 text-[10px] mb-1 uppercase font-bold tracking-wider">CGST Surcharge (%)</label>
+
+                      <input 
+
+                        type="number"
+
+                        required
+
+                        value={taxSettings.cgstRate}
+
+                        onChange={(e) => setTaxSettings({ ...taxSettings, cgstRate: Number(e.target.value) })}
+
+                        className="w-full border rounded-lg p-2 bg-slate-50/20 focus:bg-white font-mono font-bold"
+
+                      />
+
+                    </div>
+
+                    <div>
+
+                      <label className="block text-slate-500 text-[10px] mb-1 uppercase font-bold tracking-wider">SGST Surcharge (%)</label>
+
+                      <input 
+
+                        type="number"
+
+                        required
+
+                        value={taxSettings.sgstRate}
+
+                        onChange={(e) => setTaxSettings({ ...taxSettings, sgstRate: Number(e.target.value) })}
+
+                        className="w-full border rounded-lg p-2 bg-slate-50/20 focus:bg-white font-mono font-bold"
+
+                      />
+
+                    </div>
+
+                  </div>
+
+
+
+                  <div className="grid grid-cols-3 gap-3">
+
+                    <div>
+
+                      <label className="block text-slate-500 text-[10px] mb-1 uppercase font-bold tracking-wider">Branch Unique ID</label>
 
                       <input 
 
                         type="text"
 
-                        value={editDetailsForm.regNo}
+                        required
 
-                        onChange={(e) => setEditDetailsForm({ ...editDetailsForm, regNo: e.target.value })}
+                        value={taxSettings.branchCode}
 
-                        placeholder="U12500..."
+                        onChange={(e) => setTaxSettings({ ...taxSettings, branchCode: e.target.value })}
+
+                        className="w-full border rounded-lg p-2 bg-slate-50/20 focus:bg-white font-mono font-bold"
+
+                      />
+
+                    </div>
+
+                    <div>
+
+                      <label className="block text-slate-500 text-[10px] mb-1 uppercase font-bold tracking-wider">Branch Supervisor</label>
+
+                      <input 
+
+                        type="text"
+
+                        required
+
+                        value={taxSettings.branchManager}
+
+                        onChange={(e) => setTaxSettings({ ...taxSettings, branchManager: e.target.value })}
+
+                        className="w-full border rounded-lg p-2 bg-slate-50/20 focus:bg-white font-semibold text-slate-700"
+
+                      />
+
+                    </div>
+
+                    <div>
+
+                      <label className="block text-slate-500 text-[10px] mb-1 uppercase font-bold tracking-wider">Help Desk Line</label>
+
+                      <input 
+
+                        type="text"
+
+                        required
+
+                        value={taxSettings.supportHotline}
+
+                        onChange={(e) => setTaxSettings({ ...taxSettings, supportHotline: e.target.value })}
 
                         className="w-full border rounded-lg p-2 bg-slate-50/20 focus:bg-white font-mono"
 
@@ -2868,37 +2936,29 @@ export default function SuperAdminPanel({ auditLogs, onAddAuditLog, onLogout }: 
 
 
 
-                  <div>
+                  <div className="flex justify-between items-center bg-slate-50 p-3 rounded-2xl border border-slate-100 mt-2">
 
-                    <label className="block text-slate-500 text-[10px] mb-1 uppercase font-bold tracking-wider">Registered Corporate Headquarters Address</label>
+                    <span className="text-[10px] text-slate-400 font-medium italic">
 
-                    <textarea 
+                      Standard GST taxation is set at {taxSettings.cgstRate + taxSettings.sgstRate}% overall composite rate.
 
-                      value={editDetailsForm.address}
+                    </span>
 
-                      onChange={(e) => setEditDetailsForm({ ...editDetailsForm, address: e.target.value })}
+                    <button 
 
-                      placeholder="Full administrative address..."
+                      type="submit"
 
-                      className="w-full border rounded-lg p-2 bg-slate-50/20 focus:bg-white h-16 leading-relaxed font-semibold text-slate-700"
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-4 rounded-xl text-xs transition inline-flex items-center space-x-1"
 
-                    />
+                    >
+
+                      <Save className="w-3.5 h-3.5" />
+
+                      <span>Save Tax Policies</span>
+
+                    </button>
 
                   </div>
-
-
-
-                  <button 
-
-                    type="submit"
-
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-2.5 rounded-xl uppercase tracking-wider transition shadow-sm"
-
-                  >
-
-                    Save Corporate Profile Credentials
-
-                  </button>
 
                 </form>
 

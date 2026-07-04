@@ -634,9 +634,9 @@ export default function SettingsView({
                 <label className="text-[10px] text-slate-400 font-mono uppercase font-bold tracking-wider block">GSTIN Register</label>
                 <input 
                   type="text"
+                  disabled
                   value={gstin}
-                  onChange={(e) => setGstin(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-xs focus:ring-1 focus:ring-indigo-600 font-mono font-bold uppercase text-slate-900 focus:bg-white transition"
+                  className="w-full bg-slate-100 border border-slate-200 rounded-xl py-2 px-3 text-xs font-mono font-bold uppercase text-slate-500 cursor-not-allowed transition"
                 />
               </div>
 
@@ -644,9 +644,9 @@ export default function SettingsView({
                 <label className="text-[10px] text-slate-400 font-mono uppercase font-bold tracking-wider block">CGST Surcharge (%)</label>
                 <input 
                   type="number"
+                  disabled
                   value={cgstRate}
-                  onChange={(e) => setCgstRate(Number(e.target.value))}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-xs focus:ring-1 focus:ring-indigo-600 font-mono font-bold text-slate-900 focus:bg-white transition"
+                  className="w-full bg-slate-100 border border-slate-200 rounded-xl py-2 px-3 text-xs font-mono font-bold text-slate-500 cursor-not-allowed transition"
                 />
               </div>
 
@@ -654,9 +654,9 @@ export default function SettingsView({
                 <label className="text-[10px] text-slate-400 font-mono uppercase font-bold tracking-wider block">SGST Surcharge (%)</label>
                 <input 
                   type="number"
+                  disabled
                   value={sgstRate}
-                  onChange={(e) => setSgstRate(Number(e.target.value))}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-xs focus:ring-1 focus:ring-indigo-600 font-mono font-bold text-slate-900 focus:bg-white transition"
+                  className="w-full bg-slate-100 border border-slate-200 rounded-xl py-2 px-3 text-xs font-mono font-bold text-slate-500 cursor-not-allowed transition"
                 />
               </div>
 
@@ -664,9 +664,9 @@ export default function SettingsView({
                 <label className="text-[10px] text-slate-400 font-mono uppercase font-bold tracking-wider block">Branch Unique ID</label>
                 <input 
                   type="text"
+                  disabled
                   value={branchCode}
-                  onChange={(e) => setBranchCode(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-xs focus:ring-1 focus:ring-indigo-600 font-mono font-bold text-slate-900"
+                  className="w-full bg-slate-100 border border-slate-200 rounded-xl py-2 px-3 text-xs font-mono font-bold text-slate-500 cursor-not-allowed"
                 />
               </div>
 
@@ -674,9 +674,9 @@ export default function SettingsView({
                 <label className="text-[10px] text-slate-400 font-mono uppercase font-bold tracking-wider block">Branch Supervisor</label>
                 <input 
                   type="text"
+                  disabled
                   value={branchManager}
-                  onChange={(e) => setBranchManager(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-xs focus:ring-1 focus:ring-indigo-605 text-slate-900"
+                  className="w-full bg-slate-100 border border-slate-200 rounded-xl py-2 px-3 text-xs text-slate-500 cursor-not-allowed"
                 />
               </div>
 
@@ -684,9 +684,9 @@ export default function SettingsView({
                 <label className="text-[10px] text-slate-400 font-mono uppercase font-bold tracking-wider block">Help Desk Line</label>
                 <input 
                   type="text"
+                  disabled
                   value={supportHotline}
-                  onChange={(e) => setSupportHotline(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-xs focus:ring-1 focus:ring-indigo-605 font-mono text-slate-900"
+                  className="w-full bg-slate-100 border border-slate-200 rounded-xl py-2 px-3 text-xs font-mono text-slate-500 cursor-not-allowed"
                 />
               </div>
 
@@ -694,13 +694,10 @@ export default function SettingsView({
 
             <div className="flex justify-between items-center bg-slate-50 p-3 rounded-2xl border border-slate-100">
               <span className="text-[10px] text-slate-400 font-medium italic">Standard GST taxation is set at {(cgstRate + sgstRate)}% overall composite rate.</span>
-              <button 
-                onClick={() => handleSaveSettings('Business & GST')}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition inline-flex items-center space-x-1"
-              >
-                <Save className="w-3.5 h-3.5" />
-                <span>Save Tax Policies</span>
-              </button>
+              <span className="text-[10.5px] text-indigo-705 font-bold uppercase tracking-wider flex items-center gap-1">
+                <Lock className="w-3.5 h-3.5" />
+                <span>Managed by Super Admin</span>
+              </span>
             </div>
           </div>
 

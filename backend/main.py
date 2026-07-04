@@ -278,7 +278,7 @@ def create_booking_request(booking: schemas.BookingCreate, db: Session = Depends
     return db_booking
 
 @app.post("/api/bookings/{id}/approve", response_model=schemas.Booking)
-def approve_booking(id: str, room_id: str, bed_id: str, db: Session = Depends(get_db)):
+def approve_booking(id: str, room_id: str, bed_id: str, cgst_rate: float = 9.0, sgst_rate: float = 9.0, db: Session = Depends(get_db)):
     db_booking = db.query(models.Booking).filter(models.Booking.id == id).first()
     if not db_booking:
         raise HTTPException(status_code=404, detail="Booking request not found")
@@ -308,8 +308,8 @@ def approve_booking(id: str, room_id: str, bed_id: str, db: Session = Depends(ge
 
     # 4. Generate Auto Invoice (Module 6)
     subtotal = db_booking.total_amount
-    cgst = round(subtotal * 0.09, 2)  # 9% CGST
-    sgst = round(subtotal * 0.09, 2)  # 9% SGST
+    cgst = round(subtotal * (cgst_rate / 100.0), 2)  # Dynamic CGST Surcharge
+    sgst = round(subtotal * (sgst_rate / 100.0), 2)  # Dynamic SGST Surcharge
     total_taxed = subtotal + cgst + sgst
 
     db_invoice = models.Invoice(

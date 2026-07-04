@@ -8,6 +8,7 @@ import {
   Booking, 
   Invoice 
 } from '../../types';
+import { syncAllFromBackend } from '../../mockData';
 import { 
   TrendingUp, 
   CheckCircle, 
@@ -228,7 +229,7 @@ export default function DashboardView({
   };
 
   // Handle Quick Modals Submissions
-  const handleAddRoomQuick = (e: React.FormEvent) => {
+  const handleAddRoomQuick = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!roomForm.roomNo) return;
     
@@ -258,10 +259,54 @@ export default function DashboardView({
       });
     }
 
-    syncRoomsAndBeds([...rooms, newRoom], [...beds, ...generatedBeds]);
-    onAddAuditLog(`Added room ${newRoom.roomNumber} (${newRoom.type}) via Dashboard Quick Action`, 'Rooms');
-    setModalType(null);
-    setRoomForm({ roomNo: '', floor: '0', type: 'Double', price: 9000 });
+    try {
+      const resRoom = await fetch('http://localhost:8000/api/rooms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: newRoom.id,
+          property_id: selectedPropertyId,
+          room_number: newRoom.roomNumber,
+          floor: newRoom.floor,
+          category: newRoom.type,
+          sharing_type: newRoom.type,
+          price_daily: newRoom.pricePerDay,
+          price_weekly: Math.round(newRoom.pricePerMonth / 4),
+          price_seasonal: Math.round(newRoom.pricePerMonth * 3),
+          price_monthly: newRoom.pricePerMonth,
+          status: 'Available'
+        })
+      });
+
+      if (resRoom.ok) {
+        for (const b of generatedBeds) {
+          await fetch('http://localhost:8000/api/beds', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: b.id,
+              room_id: b.roomId,
+              bed_number: b.bedNumber,
+              status: 'Available'
+            })
+          });
+        }
+        await syncAllFromBackend();
+        
+        const localRooms = JSON.parse(localStorage.getItem('hotel_pg_rooms') || '[]');
+        const localBeds = JSON.parse(localStorage.getItem('hotel_pg_beds') || '[]');
+        syncRoomsAndBeds(localRooms, localBeds);
+        
+        onAddAuditLog(`Added room ${newRoom.roomNumber} (${newRoom.type}) via Dashboard Quick Action`, 'Rooms');
+        setModalType(null);
+        setRoomForm({ roomNo: '', floor: '0', type: 'Double', price: 9000 });
+      } else {
+        alert('Failed to save room unit to backend database.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error connecting to backend database.');
+    }
   };
 
   const handleAddTenantQuick = (e: React.FormEvent) => {
@@ -411,8 +456,19 @@ export default function DashboardView({
 
     if (!targetRm || !targetBed) return;
 
+    let cgstRate = 9;
+    let sgstRate = 9;
     try {
-      const res = await fetch(`http://localhost:8000/api/bookings/${bk.id}/approve?room_id=${selectedApproveRoomId}&bed_id=${selectedApproveBedId}`, {
+      const savedTax = localStorage.getItem('hotel_pg_settings_tax');
+      if (savedTax) {
+        const parsed = JSON.parse(savedTax);
+        cgstRate = typeof parsed.cgstRate === 'number' ? parsed.cgstRate : 9;
+        sgstRate = typeof parsed.sgstRate === 'number' ? parsed.sgstRate : 9;
+      }
+    } catch (e) {}
+
+    try {
+      const res = await fetch(`http://localhost:8000/api/bookings/${bk.id}/approve?room_id=${selectedApproveRoomId}&bed_id=${selectedApproveBedId}&cgst_rate=${cgstRate}&sgst_rate=${sgstRate}`, {
         method: 'POST'
       });
 
@@ -785,9 +841,6 @@ export default function DashboardView({
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <strong className="text-slate-900 font-extrabold text-sm">{bk.customerName}</strong>
-                        <span className="bg-indigo-600 text-white px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider">
-                          {durationType}
-                        </span>
                       </div>
                       <div className="text-[10px] text-slate-500 space-x-1.5 flex flex-wrap items-center">
                         <span className="font-mono text-slate-605">{bk.customerEmail}</span>
