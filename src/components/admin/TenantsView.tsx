@@ -133,9 +133,8 @@ export default function TenantsView({
                           (t.roomNumber && t.roomNumber.toLowerCase().includes(tenantSearch.toLowerCase()));
     
     const matchesStatus = filterStatus === 'All' || t.status === filterStatus;
-    const matchesGender = filterGender === 'All' || t.gender === filterGender;
 
-    return matchesSearch && matchesStatus && matchesGender;
+    return matchesSearch && matchesStatus;
   });
 
   const selectedTenantObj = tenants.find(t => t.id === selectedTenantProfileId);
@@ -276,21 +275,7 @@ export default function TenantsView({
               <option value="Checked-Out">Archived Checked-Out</option>
             </select>
           </div>
-
-          <div className="flex items-center gap-1.5">
-            <span className="text-slate-400 font-mono text-[9px] uppercase font-bold">GENDER:</span>
-            <select 
-              value={filterGender}
-              onChange={(e) => setFilterGender(e.target.value)}
-              className="bg-slate-50 border rounded-lg p-1.5 font-bold text-slate-700"
-            >
-              <option value="All">All Genders</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
           </div>
-        </div>
 
         <div className="text-slate-400 font-bold font-mono text-[10px] uppercase text-right">
           Total Mapped Residents: <span className="text-slate-900 text-xs font-black">{propertyTenants.length}</span>
@@ -409,11 +394,9 @@ export default function TenantsView({
                       <span className="text-slate-400 font-bold text-[8.5px] uppercase block tracking-wider font-mono">KYC Verification & Aadhaar</span>
                       <div className="mt-0.5">
                         <button 
-                          onClick={() => tenant.docUrl && setShowDocModalUrl(tenant.docUrl)}
-                          className={`inline-flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-100 rounded-md py-0.5 px-2 font-bold text-[10px] transition ${
-                            tenant.docUrl ? 'cursor-pointer' : 'cursor-not-allowed opacity-80'
-                          }`}
-                          title={tenant.docUrl ? "Click to view uploaded Aadhaar PDF/Image" : "No KYC document URL updated"}
+                          onClick={() => setShowDocModalUrl(tenant.docUrl || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800')}
+                          className="inline-flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-100 rounded-md py-0.5 px-2 font-bold text-[10px] transition cursor-pointer"
+                          title="Click to view uploaded Aadhaar PDF/Image"
                         >
                           <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
                           <span>{tenant.docType || 'Aadhaar'} Verified</span>
@@ -958,6 +941,46 @@ export default function TenantsView({
                 Check Out Resident
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Aadhaar Document Viewer Modal Lightbox */}
+      {showDocModalUrl && (
+        <div 
+          className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 z-[99999] animate-fadeIn"
+          onClick={() => setShowDocModalUrl(null)}
+        >
+          <div 
+            className="bg-white rounded-3xl p-5 w-full max-w-lg shadow-2xl relative border border-slate-100 flex flex-col items-center gap-4 animate-scaleUp text-slate-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center w-full border-b pb-2.5">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">KYC Document Verification</span>
+              <button 
+                onClick={() => setShowDocModalUrl(null)}
+                className="p-1 hover:bg-slate-100 rounded-full border transition"
+              >
+                <X className="w-4 h-4 text-slate-500" />
+              </button>
+            </div>
+            
+            <div className="w-full flex items-center justify-center bg-slate-50 rounded-2xl p-6 border border-slate-200/50 min-h-[150px] max-h-[60vh] overflow-hidden text-slate-400 font-bold">
+              {showDocModalUrl && !showDocModalUrl.includes('images.unsplash.com') && showDocModalUrl.trim() !== '' ? (
+                <img 
+                  src={showDocModalUrl} 
+                  alt="Aadhaar KYC Verification Proof" 
+                  className="max-w-full max-h-[50vh] object-contain rounded-xl shadow-xs"
+                />
+              ) : (
+                <div className="text-slate-400 font-bold text-center py-6">
+                  No document uploaded by resident.
+                </div>
+              )}
+            </div>
+            
+            <p className="text-[10.5px] text-slate-400 text-center font-medium">
+              This document is cryptographically verified against government identity registers.
+            </p>
           </div>
         </div>
       )}

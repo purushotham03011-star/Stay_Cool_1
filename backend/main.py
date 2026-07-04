@@ -432,6 +432,58 @@ def cancel_booking(id: str, db: Session = Depends(get_db)):
     db.refresh(db_booking)
     return db_booking
 
+@app.post("/api/bookings/{id}/shift", response_model=schemas.Booking)
+def shift_booking_bed(id: str, room_id: str, bed_id: str, db: Session = Depends(get_db)):
+    db_booking = db.query(models.Booking).filter(models.Booking.id == id).first()
+    if not db_booking:
+        raise HTTPException(status_code=404, detail="Active booking not found")
+
+    old_room_id = db_booking.room_id
+
+    # Release old bed if allocated
+    if db_booking.bed_id:
+        old_bed = db.query(models.Bed).filter(models.Bed.id == db_booking.bed_id).first()
+        if old_bed:
+            old_bed.status = "Available"
+
+    # Verify new bed is available
+    new_bed = db.query(models.Bed).filter(models.Bed.id == bed_id).first()
+    if not new_bed:
+         raise HTTPException(status_code=404, detail="Target bed not found.")
+    new_bed.status = "Occupied"
+
+    # Assign new room and bed
+    db_booking.room_id = room_id
+    db_booking.bed_id = bed_id
+
+    # Update old and new rooms statuses
+    for rid in {room_id, old_room_id}:
+        if rid:
+            db_room = db.query(models.Room).filter(models.Room.id == rid).first()
+            if db_room:
+                total = db.query(models.Bed).filter(models.Bed.room_id == rid).count()
+                occupied = db.query(models.Bed).filter(models.Bed.room_id == rid, models.Bed.status == "Occupied").count()
+                if occupied == 0:
+                    db_room.status = "Available"
+                elif occupied >= total:
+                    db_room.status = "Full"
+                else:
+                    db_room.status = "Available"
+
+    # Add audit log
+    db_log = models.AuditLog(
+        id=make_id("log"),
+        user_email="manager@stayhub.co",
+        role="Admin",
+        action=f"Shifted booking {id} to bed {new_bed.bed_number} in Room Room {room_id}",
+        module="Rooms"
+    )
+    db.add(db_log)
+
+    db.commit()
+    db.refresh(db_booking)
+    return db_booking
+
 
 # --- INVOICES & BILLING ---
 @app.get("/api/invoices", response_model=List[schemas.Invoice])

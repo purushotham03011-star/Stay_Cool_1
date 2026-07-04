@@ -140,7 +140,7 @@ export default function RoomsView({
     }
   }, [selectedRoomForShift, tenants, beds, rooms, selectedPropertyId]);
 
-  const executeShiftResident = (e: React.FormEvent) => {
+  const executeShiftResident = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTenantToShiftId || !shiftTargetBedId) {
       setRoomAlertMessage('Please select both a tenant to shift and a target vacant bed.');
@@ -161,58 +161,48 @@ export default function RoomsView({
       return;
     }
 
-    const originalRoomNumber = tenantToShift.roomNumber || 'Unknown';
-    const originalBedNumber = tenantToShift.bedNumber || 'Unknown';
-    const originalBedId = tenantToShift.bedId;
-
-    // Update beds:
-    const updatedBeds = beds.map(b => {
-      if (originalBedId && b.id === originalBedId) {
-        const { occupantTenantId, ...rest } = b;
-        return { ...rest, isOccupied: false };
-      }
-      if (b.id === targetBed.id) {
-        return { ...b, isOccupied: true, occupantTenantId: tenantToShift.id };
-      }
-      return b;
-    });
-
-    // Update tenants:
-    const updatedTenants = tenants.map(t => {
-      if (t.id === tenantToShift.id) {
-        return {
-          ...t,
-          roomId: targetRoom.id,
-          roomNumber: targetRoom.roomNumber,
-          bedId: targetBed.id,
-          bedNumber: targetBed.bedNumber
-        };
-      }
-      return t;
-    });
-
-    // Update rooms:
-    const updatedRooms = rooms.map(r => {
-      if (r.id === tenantToShift.roomId || r.id === targetRoom.id) {
-        const roomBeds = updatedBeds.filter(b => b.roomId === r.id);
-        const roomFull = roomBeds.every(b => b.isOccupied);
-        return {
-          ...r,
-          occupancyStatus: (roomFull ? 'Full' : 'Available') as any
-        };
-      }
-      return r;
-    });
-
-    syncRoomsAndBeds(updatedRooms, updatedBeds);
-    syncTenants(updatedTenants);
-
-    onAddAuditLog(
-      `Shifted resident ${tenantToShift.name} from Room ${originalRoomNumber} (Bed ${originalBedNumber}) to Room ${targetRoom.roomNumber} (Bed ${targetBed.bedNumber})`,
-      'Rooms'
+    const targetBooking = bookings?.find(b => 
+      (b.tenantId === tenantToShift.id || b.customerEmail?.toLowerCase() === tenantToShift.email?.toLowerCase()) && 
+      (b.status === 'Confirmed' || b.status === 'Active')
     );
 
-    setRoomAlertMessage(`Successfully shifted ${tenantToShift.name} to Room ${targetRoom.roomNumber} - Bed ${targetBed.bedNumber}.`);
+    if (!targetBooking) {
+      setRoomAlertMessage('No active booking reference found in SQLite database for this resident. Bed shifting requires an active stay contract.');
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:8000/api/bookings/${targetBooking.id}/shift?room_id=${targetRoom.id}&bed_id=${targetBed.id}`, {
+        method: 'POST'
+      });
+
+      if (res.ok) {
+        await syncAllFromBackend();
+        
+        const localRooms = JSON.parse(localStorage.getItem('hotel_pg_rooms') || '[]');
+        const localBeds = JSON.parse(localStorage.getItem('hotel_pg_beds') || '[]');
+        const localTenants = JSON.parse(localStorage.getItem('hotel_pg_tenants') || '[]');
+        
+        syncRoomsAndBeds(localRooms, localBeds);
+        syncTenants(localTenants);
+
+        const originalRoomNumber = tenantToShift.roomNumber || 'Unknown';
+        const originalBedNumber = tenantToShift.bedNumber || 'Unknown';
+
+        onAddAuditLog(
+          `Shifted resident ${tenantToShift.name} from Room ${originalRoomNumber} (Bed ${originalBedNumber}) to Room ${targetRoom.roomNumber} (Bed ${targetBed.bedNumber})`,
+          'Rooms'
+        );
+
+        setRoomAlertMessage(`Successfully shifted ${tenantToShift.name} to Room ${targetRoom.roomNumber} - Bed ${targetBed.bedNumber}.`);
+      } else {
+        const errorData = await res.json();
+        setRoomAlertMessage(`Error: ${errorData.detail || 'Failed to persist bed shift on server.'}`);
+      }
+    } catch (err) {
+      console.error(err);
+      setRoomAlertMessage('Connection error. Failed to persist bed shift on SQLite server.');
+    }
     
     setIsShiftModalOpen(false);
     setSelectedRoomForShift(null);

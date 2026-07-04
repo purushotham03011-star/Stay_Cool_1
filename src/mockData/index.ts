@@ -446,34 +446,62 @@ export async function syncAllFromBackend() {
     if (resRooms.ok) {
       const rooms = await resRooms.json();
       if (rooms.length > 0) {
-        const mappedRooms = rooms.map((r: any) => ({
-          id: r.id,
-          propertyId: r.property_id,
-          roomNumber: r.room_number,
-          floor: r.floor,
-          type: r.sharing_type,
-          pricePerMonth: r.price_monthly,
-          pricePerDay: r.price_daily,
-          priceWeekly: r.price_weekly,
-          priceSeasonal: r.price_seasonal,
-          occupancyStatus: r.status
-        }));
-        localStorage.setItem('hotel_pg_rooms', JSON.stringify(mappedRooms));
-        
         const allBeds = rooms.flatMap((r: any) => (r.beds || []).map((b: any) => {
-          const activeBooking = dbBookings.find((bk: any) => bk.bed_id === b.id && bk.status === 'Active');
+          let activeBooking = dbBookings.find((bk: any) => bk.bed_id === b.id && bk.status === 'Active');
+          
+          if (!activeBooking) {
+            const doubleAdultBooking = dbBookings.find((bk: any) => 
+              bk.room_id === b.room_id && 
+              bk.status === 'Active' && 
+              (bk.notes || '').includes('Adults: 2')
+            );
+            if (doubleAdultBooking) {
+              activeBooking = doubleAdultBooking;
+            }
+          }
+
           return {
             id: b.id,
             roomId: b.room_id,
             roomNumber: r.room_number,
             bedNumber: b.bed_number,
-            isOccupied: b.status === 'Occupied' || !!activeBooking,
+            isOccupied: !!activeBooking,
             occupantTenantId: activeBooking ? activeBooking.tenant_id : undefined
           };
         }));
         if (allBeds.length > 0) {
           localStorage.setItem('hotel_pg_beds', JSON.stringify(allBeds));
         }
+
+        const mappedRooms = rooms.map((r: any) => {
+          const roomBeds = allBeds.filter((b: any) => b.roomId === r.id);
+          const occupiedCount = roomBeds.filter((b: any) => b.isOccupied).length;
+          
+          let status = r.status;
+          if (roomBeds.length > 0) {
+            if (occupiedCount === 0) {
+              status = 'Available';
+            } else if (occupiedCount >= roomBeds.length) {
+              status = 'Full';
+            } else {
+              status = 'Available';
+            }
+          }
+
+          return {
+            id: r.id,
+            propertyId: r.property_id,
+            roomNumber: r.room_number,
+            floor: r.floor,
+            type: r.sharing_type,
+            pricePerMonth: r.price_monthly,
+            pricePerDay: r.price_daily,
+            priceWeekly: r.price_weekly,
+            priceSeasonal: r.price_seasonal,
+            occupancyStatus: status
+          };
+        });
+        localStorage.setItem('hotel_pg_rooms', JSON.stringify(mappedRooms));
       }
     }
 

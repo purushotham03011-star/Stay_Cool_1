@@ -952,7 +952,7 @@ export default function CustomerApp({
       status: 'Pending',
       totalAmount: invoiceBill,
       bookingDate: new Date().toISOString().split('T')[0],
-      notes: bookingNotes,
+      notes: bookingNotes ? `${bookingNotes} (Adults: ${bookingAdults})` : `Adults: ${bookingAdults}`,
       paymentMethod,
       requestedRoomType: bookingRoom.type
     };
